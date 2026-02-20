@@ -69,7 +69,7 @@ test.describe('첫 화면 로딩 완료 후 상태 기록', () => {
     
     // 페이지 로드
     const navigationStart = Date.now();
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('', { waitUntil: 'networkidle' });
     
     // COG 소스 준비 완료 대기
     await page.waitForFunction(() => window.cogSource && window.cogSource.getState() === 'ready', { timeout: 30000 });
@@ -291,7 +291,7 @@ test.describe('첫 화면 로딩 완료 후 상태 기록', () => {
   
   test('상태 스냅샷 비교 테스트', async ({ page }) => {
     // 이 테스트는 기준 상태와 비교하여 변경 감지
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('', { waitUntil: 'networkidle' });
     await page.waitForTimeout(3000);
     
     const currentState = await page.evaluate(() => {

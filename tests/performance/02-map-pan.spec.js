@@ -4,7 +4,7 @@ import { measurePan } from './helpers/measure-pan.js';
 test.describe('지도 이동 (Pan) 성능 측정', () => {
   
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    await page.goto('');
     await page.waitForFunction(() => {
       const loadingEl = document.getElementById('loading');
       return loadingEl && !loadingEl.classList.contains('active');

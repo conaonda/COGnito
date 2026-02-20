@@ -16,7 +16,7 @@ test.describe('Umbra SAR GEC 초기 뷰 진단', () => {
 
     // Umbra SAR URL로 페이지 로드
     const encodedUrl = encodeURIComponent(UMBRA_URL);
-    await page.goto(`/?url=${encodedUrl}`, { waitUntil: 'networkidle', timeout: 60000 });
+    await page.goto(`?url=${encodedUrl}`, { waitUntil: 'networkidle', timeout: 60000 });
 
     // COG 소스 준비 완료 대기
     await page.waitForFunction(() => window.cogSource && window.cogSource.getState() === 'ready', { timeout: 60000 });

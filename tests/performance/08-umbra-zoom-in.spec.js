@@ -6,7 +6,7 @@ test.describe('Umbra SAR GEC 줌인 타일 표시 검증', () => {
 
   test('줌인 3회 후 모든 타일이 정상 표시되어야 함', async ({ page }) => {
     const encodedUrl = encodeURIComponent(UMBRA_URL);
-    await page.goto(`/?url=${encodedUrl}`, { waitUntil: 'networkidle', timeout: 60000 });
+    await page.goto(`?url=${encodedUrl}`, { waitUntil: 'networkidle', timeout: 60000 });
 
     await page.waitForFunction(
       () => window.cogSource && window.cogSource.getState() === 'ready',
