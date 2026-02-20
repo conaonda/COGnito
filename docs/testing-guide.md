@@ -12,6 +12,10 @@ Playwright 기반 성능 테스트로 페이지 로딩, 지도 인터랙션, COG
 | `02-map-pan.spec.js` | 방향별 팬 속도, FPS, 일관성 (CV < 0.3) |
 | `03-map-zoom.spec.js` | 줌 인/아웃, 연속/급속 줌, 더블클릭 줌 |
 | `04-detailed-state.spec.js` | HTTP 요청 기록, COG Range 요청, OpenLayers 전체 상태 스냅샷 |
+| `05-tile-count.spec.js` | FHD 뷰포트 타일 개수 검증 |
+| `06-tile-size-compare.spec.js` | 타일 사이즈 256 vs 512 성능 비교 |
+| `07-umbra-sar-diag.spec.js` | Umbra SAR GEC 초기 뷰 진단 |
+| `08-umbra-zoom-in.spec.js` | Umbra SAR GEC 줌인 타일 표시 검증 |
 
 ---
 
