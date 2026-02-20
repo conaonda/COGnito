@@ -101,7 +101,33 @@ const initMap = async () => {
     }
   })
 
-  const loadCOG = async (url) => {
+  const supportsWebGLFloat = () => {
+  try {
+    const canvas = document.createElement('canvas')
+    canvas.width = 1
+    canvas.height = 1
+    const gl = canvas.getContext('webgl2')
+    if (!gl) return false
+
+    // float 텍스처를 프레임버퍼에 attach해서 실제 렌더링 가능 여부 확인
+    const tex = gl.createTexture()
+    gl.bindTexture(gl.TEXTURE_2D, tex)
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.R32F, 1, 1, 0, gl.RED, gl.FLOAT, null)
+    if (gl.getError() !== gl.NO_ERROR) { gl.deleteTexture(tex); return false }
+
+    const fb = gl.createFramebuffer()
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fb)
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0)
+    const status = gl.checkFramebufferStatus(gl.FRAMEBUFFER)
+    gl.deleteTexture(tex)
+    gl.deleteFramebuffer(fb)
+    return status === gl.FRAMEBUFFER_COMPLETE
+  } catch {
+    return false
+  }
+}
+
+const loadCOG = async (url) => {
     showLoading()
     errorEl.classList.remove('active')
 
@@ -111,7 +137,9 @@ const initMap = async () => {
       }
       let cogLayer, cogSource, extent
 
-      if (RENDER_PIPELINE === 'image') {
+      const pipeline = RENDER_PIPELINE === 'tile' && !supportsWebGLFloat() ? 'image' : RENDER_PIPELINE
+
+      if (pipeline === 'image') {
         const result = await createCOGImageLayer({ url, projectionMode: PROJECTION_MODE, viewProjection, opacity: 0.8 })
         cogLayer = result.layer
         cogSource = result.source
