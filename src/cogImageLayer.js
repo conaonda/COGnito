@@ -39,7 +39,7 @@ function fillPixelData(px, rasters, bandInfo, stats, pixelCount) {
   }
 }
 
-export async function createCOGImageLayer({ url, projectionMode = 'reproject', viewProjection, opacity = 1 }) {
+export async function createCOGImageLayer({ url, projectionMode = 'reproject', viewProjection, opacity = 1, resolutionMultiplier = 1 }) {
   const tiff = await tiffFromUrl(url)
 
   const [bandInfo, image] = await Promise.all([
@@ -115,8 +115,8 @@ export async function createCOGImageLayer({ url, projectionMode = 'reproject', v
       const fullH = reqExtent[3] - reqExtent[1]
       const clipW = clipped[2] - clipped[0]
       const clipH = clipped[3] - clipped[1]
-      const resX = fullW / size[0]
-      const resY = fullH / size[1]
+      const resX = (fullW / size[0]) * resolutionMultiplier
+      const resY = (fullH / size[1]) * resolutionMultiplier
 
       const readParams = {
         bbox: [clipped[0], clipped[1], clipped[2], clipped[3]],
