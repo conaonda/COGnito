@@ -5,7 +5,7 @@ test.describe('FHD 뷰포트 타일 개수 검증', () => {
   test.use({ viewport: { width: 1920, height: 1080 } });
 
   test('FHD 뷰포트에서 타일 개수가 이론적 최대값 이내', async ({ page }) => {
-    await page.goto('', { waitUntil: 'networkidle' });
+    await page.goto('', { waitUntil: 'domcontentloaded' });
 
     // COG 소스가 ready 상태가 될 때까지 대기
     await page.waitForFunction(() => {

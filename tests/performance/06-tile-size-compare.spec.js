@@ -15,7 +15,7 @@ test.describe('타일 사이즈 256 vs 512 성능 비교', () => {
       const page = await context.newPage();
 
       // 페이지 로드
-      await page.goto(`?tileSize=${tileSize}`, { waitUntil: 'networkidle' });
+      await page.goto(`?tileSize=${tileSize}`, { waitUntil: 'domcontentloaded' });
       await page.waitForFunction(() => {
         return window.cogSource && window.cogSource.getState() === 'ready';
       }, { timeout: 30000 });
