@@ -144,8 +144,9 @@ const initMap = async () => {
       window.cogSource = cogSource
 
       if (extent) {
+        const pad = window.innerWidth <= 768 ? 20 : 50
         map.getView().fit(extent, {
-          padding: [50, 50, 50, 50],
+          padding: [pad, pad, pad, pad],
           duration: 1000
         })
       }
