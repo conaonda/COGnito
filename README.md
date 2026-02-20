@@ -1,4 +1,4 @@
-# COG Viewer with OpenLayers
+# COGnito
 
 OpenLayers 기반 Cloud Optimized GeoTIFF (COG) 영상 가시화 웹 애플리케이션
 
@@ -7,7 +7,7 @@ OpenLayers 기반 Cloud Optimized GeoTIFF (COG) 영상 가시화 웹 애플리�
 
 ## 📖 개요
 
-이 프로젝트는 Hurricane Harvey 재해 지역의 SkySat 위성 영상을 **Cloud Optimized GeoTIFF (COG)** 형식으로 웹에서 직접 시각화하는 데모 애플리케이션입니다. OpenLayers의 WebGLTile 레이어를 활용하여 대용량 위성 영상을 효율적으로 렌더링합니다.
+임의의 COG URL을 입력하여 웹에서 직접 시각화하는 애플리케이션입니다. OpenLayers WebGLTile/Image 레이어, Affine 변환 기반 좌표 매핑, 밴드 자동 감지 등을 활용하여 회전된 SAR 영상을 포함한 다양한 COG를 효율적으로 렌더링합니다.
 
 ### COG란?
 
@@ -46,9 +46,13 @@ npm run preview
 ## 📋 주요 기능
 
 ### 🗺️ 영상 가시화
-- **COG 직접 로드**: 구글 클라우드 스토리지에서 COG 파일을 직접 스트리밍
+- **임의 COG URL 로드**: URL 입력 필드 또는 `url` 쿼리 파라미터로 임의의 COG 로드
 - **자동 좌표계 인식**: 영상의 원본 좌표계(Projection) 자동 감지
+- **밴드 자동 감지**: RGB/그레이스케일 밴드를 GeoTIFF 메타데이터에서 자동 판별
+- **Affine 변환 모드**: 회전된 SAR 영상 등 비축정렬 GeoTIFF를 Affine 변환으로 정확히 배치
+- **이중 렌더링 파이프라인**: WebGLTile 타일 모드와 뷰포트 단위 이미지 모드 선택 가능
 - **WebGL 가속**: OpenLayers WebGLTile 레이어로 고성능 렌더링
+- **VersaTiles 벡터 배경지도**: OSM 대신 VersaTiles 벡터 타일 배경지도 사용
 
 ### 🎯 사용자 인터랙션
 - **마우스/터치 네비게이션**: 줌, 팬, 회전 지원
@@ -56,6 +60,7 @@ npm run preview
 - **영상 범위 자동 맞춤**: 로드 완료 시 영상 영역으로 자동 이동
 
 ### 🎨 UI/UX
+- **URL 입력 UI**: 헤더의 입력 필드에서 COG URL을 변경하여 즉시 교체
 - **로딩 인디케이터**: 영상 로딩 상태 표시
 - **에러 핸들링**: 로드 실패 시 사용자 친화적 에러 메시지
 - **반응형 디자인**: 다양한 화면 크기 지원
@@ -64,24 +69,41 @@ npm run preview
 
 | 기술 | 버전 | 용도 |
 |------|------|------|
-| OpenLayers | 10.4.0 | 지도 엔진 및 COG 렌더링 |
-| Vite | 6.1.0 | 빌드 도구 및 개발 서버 |
+| OpenLayers | ^10.8.0 | 지도 엔진 및 COG 렌더링 |
+| ol-mapbox-style | ^13.2.1 | VersaTiles 벡터 배경지도 적용 |
+| Vite | ^6.1.0 | 빌드 도구 및 개발 서버 |
+| Playwright | ^1.58.2 | 성능 테스트 (devDependency) |
 
 ## 📁 프로젝트 구조
 
 ```
 ├── src/
-│   └── main.js                # 메인 애플리케이션 로직
+│   ├── main.js                # 메인 애플리케이션 로직 (URL 파라미터 파싱, 지도 초기화)
+│   ├── cogLayer.js            # WebGLTile 기반 COG 타일 렌더링 (affine/reproject)
+│   ├── cogImageLayer.js       # 뷰포트 단위 이미지 렌더링 모드
+│   └── AffineTileLayer.js     # 회전된 영상의 Affine 변환 렌더러 패치
+├── public/
+│   └── style.json             # VersaTiles 벡터 배경지도 스타일
 ├── tests/
 │   └── performance/           # Playwright 성능 테스트
 │       ├── 01-page-load.spec.js
 │       ├── 02-map-pan.spec.js
 │       ├── 03-map-zoom.spec.js
 │       ├── 04-detailed-state.spec.js
+│       ├── 05-tile-count.spec.js
+│       ├── 06-tile-size-compare.spec.js
+│       ├── 07-umbra-sar-diag.spec.js
+│       ├── 08-umbra-zoom-in.spec.js
 │       └── helpers/
-│           └── metrics-collector.js
+│           ├── metrics-collector.js
+│           └── measure-pan.js
 ├── docs/
-│   └── testing-guide.md       # 테스트 가이드 (통합 문서)
+│   ├── testing-guide.md       # 테스트 가이드 (통합 문서)
+│   └── reprojection-analysis.md # 리프로젝션 파이프라인 분석
+├── .github/
+│   └── workflows/
+│       ├── playwright.yml     # Playwright 테스트 자동화
+│       └── deploy.yml         # GitHub Pages 배포
 ├── index.html                 # HTML 템플릿 및 스타일
 ├── playwright.config.js       # Playwright 설정
 ├── vite.config.js             # Vite 설정
@@ -126,18 +148,20 @@ http://localhost:3000/?url=https://example.com/my-image.tif&render=image
 
 ### 옵션 설정
 
+`cogLayer.js`에서 GeoTIFF 소스를 생성합니다. `bands`는 자동 감지되며, `normalize: false`로 원시 픽셀값을 사용합니다.
+
 ```javascript
 const cogSource = new GeoTIFFSource({
   sources: [{
-    url: COG_URL,
-    bands: [1, 2, 3],       // RGB 밴드 선택
-    nodata: 0               // nodata 값 설정
+    url: url,
+    bands: bands,            // 자동 감지: RGB [1,2,3] 또는 그레이스케일 [1]
+    nodata: 0                // nodata 값 설정
   }],
-  normalize: true,           // 픽셀값 정규화
-  convertToRGB: false,       // RGB 변환 여부
-  opaque: false,             // 투명도 지원
+  normalize: false,           // 원시 픽셀값 사용 (min/max 기반 스타일 적용)
+  convertToRGB: false,        // RGB 변환 여부
+  opaque: false,              // 투명도 지원
   sourceOptions: {
-    allowFullFile: false     // 전체 파일 다운로드 방지
+    allowFullFile: false      // 전체 파일 다운로드 방지
   }
 })
 ```
