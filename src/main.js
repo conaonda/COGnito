@@ -150,7 +150,7 @@ const loadCOG = async (url) => {
       }
       let cogLayer, cogSource, extent
 
-      const pipeline = RENDER_PIPELINE === 'tile' && !supportsWebGLFloat() ? 'image' : RENDER_PIPELINE
+      const pipeline = RENDER_PIPELINE === 'tile' && (isMobile() || !supportsWebGLFloat()) ? 'image' : RENDER_PIPELINE
 
       if (pipeline === 'image') {
         const resolutionMultiplier = isMobile() && !mobileHighQuality ? MOBILE_RES_MULTIPLIER : 1
