@@ -5,16 +5,14 @@ on:
     branches: [main]
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 concurrency:
   group: pages
   cancel-in-progress: true
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -48,16 +46,17 @@ jobs:
         env:
           CI: true
 
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: dist
+      - name: Preserve preview deployments
+        run: |
+          if git fetch origin gh-pages --depth=1 2>/dev/null; then
+            git worktree add gh-pages-branch origin/gh-pages
+            if [ -d gh-pages-branch/preview ]; then
+              cp -r gh-pages-branch/preview dist/preview
+            fi
+            git worktree remove gh-pages-branch
+          fi
 
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - uses: actions/deploy-pages@v4
-        id: deployment
+      - uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
