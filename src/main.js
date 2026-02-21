@@ -15,6 +15,12 @@ const PROJECTION_MODE = urlParams.get('mode') || 'affine'    // 'affine' | 'repr
 const RENDER_PIPELINE = urlParams.get('render') || 'tile'    // 'tile' | 'image'
 const TARGET_TILE_SIZE = parseInt(urlParams.get('tileSize'), 10) || 256
 
+const MOBILE_MAX_ZOOM = 16
+const DEFAULT_MAX_ZOOM = 20
+const MOBILE_RES_MULTIPLIER = 4
+const isMobile = () => window.innerWidth <= 768
+let mobileHighQuality = false
+
 const loadingEl = document.getElementById('loading')
 const errorEl = document.getElementById('error')
 
@@ -41,7 +47,7 @@ const initMap = async () => {
     projection: viewProjection,
     center: [0, 0],
     zoom: 2,
-    maxZoom: 20
+    maxZoom: isMobile() ? MOBILE_MAX_ZOOM : DEFAULT_MAX_ZOOM
   })
 
   const map = new Map({
@@ -143,7 +149,8 @@ const loadCOG = async (url) => {
       const pipeline = RENDER_PIPELINE === 'tile' && !supportsWebGLFloat() ? 'image' : RENDER_PIPELINE
 
       if (pipeline === 'image') {
-        const result = await createCOGImageLayer({ url, projectionMode: PROJECTION_MODE, viewProjection, opacity: 0.8 })
+        const resolutionMultiplier = isMobile() && !mobileHighQuality ? MOBILE_RES_MULTIPLIER : 1
+        const result = await createCOGImageLayer({ url, projectionMode: PROJECTION_MODE, viewProjection, opacity: 0.8, resolutionMultiplier })
         cogLayer = result.layer
         cogSource = result.source
         extent = result.extent
@@ -200,6 +207,37 @@ const loadCOG = async (url) => {
       const url = urlInput.value.trim()
       if (url) loadCOG(url)
     }
+  })
+
+  // 모바일 화질 토글
+  const qualityToggle = document.getElementById('mobile-quality-toggle')
+  const qualityLabel = document.getElementById('quality-label')
+  const qualityDot = document.getElementById('quality-dot')
+  const warningModal = document.getElementById('quality-warning-modal')
+
+  qualityToggle.addEventListener('click', () => {
+    if (mobileHighQuality) {
+      mobileHighQuality = false
+      qualityLabel.textContent = '저해상도'
+      qualityDot.classList.remove('high')
+      view.setMaxZoom(MOBILE_MAX_ZOOM)
+      loadCOG(urlInput.value.trim() || COG_URL)
+    } else {
+      warningModal.classList.add('active')
+    }
+  })
+
+  document.getElementById('quality-cancel').addEventListener('click', () => {
+    warningModal.classList.remove('active')
+  })
+
+  document.getElementById('quality-confirm').addEventListener('click', () => {
+    warningModal.classList.remove('active')
+    mobileHighQuality = true
+    qualityLabel.textContent = '고해상도'
+    qualityDot.classList.add('high')
+    view.setMaxZoom(DEFAULT_MAX_ZOOM)
+    loadCOG(urlInput.value.trim() || COG_URL)
   })
 
   console.log('Map initialized successfully')

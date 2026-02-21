@@ -25,6 +25,7 @@
       height: 100%;
       display: flex;
       flex-direction: column;
+      position: relative;
     }
     
     .header {
@@ -228,6 +229,107 @@
       #coordinate-display {
         display: none !important;
       }
+
+    }
+
+    .mobile-quality-toggle {
+      display: none;
+      position: absolute;
+      bottom: 1rem;
+      right: 1rem;
+      background: rgba(0, 0, 0, 0.75);
+      color: white;
+      padding: 0.5rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      z-index: 10;
+      cursor: pointer;
+      align-items: center;
+      gap: 0.4rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .quality-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #f59e0b;
+      flex-shrink: 0;
+    }
+
+    .quality-dot.high {
+      background: #22c55e;
+    }
+
+    .quality-warning-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .quality-warning-modal.active {
+      display: flex;
+    }
+
+    .quality-warning-content {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 1rem;
+      max-width: 320px;
+      text-align: center;
+    }
+
+    .quality-warning-content h3 {
+      font-size: 1rem;
+      margin-bottom: 0.75rem;
+      color: #333;
+    }
+
+    .quality-warning-content p {
+      font-size: 0.85rem;
+      color: #666;
+      line-height: 1.5;
+      margin-bottom: 1.25rem;
+    }
+
+    .quality-warning-actions {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+    }
+
+    .quality-warning-actions button {
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      border: none;
+    }
+
+    #quality-cancel {
+      background: #e5e7eb;
+      color: #333;
+    }
+
+    #quality-confirm {
+      background: #667eea;
+      color: white;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-quality-toggle {
+        display: flex;
+      }
     }
   </style>
 </head>
@@ -258,6 +360,20 @@
       <p>SkySat_20170831T195552Z_RGB.tif<br>
       Hurricane Harvey 재해 지역<br>
       2017년 8월 31일 촬영</p>
+    </div>
+    <div id="mobile-quality-toggle" class="mobile-quality-toggle">
+      <span id="quality-dot" class="quality-dot"></span>
+      <span id="quality-label">저해상도</span>
+    </div>
+    <div id="quality-warning-modal" class="quality-warning-modal">
+      <div class="quality-warning-content">
+        <h3>고해상도 영상 로드</h3>
+        <p>고해상도 영상은 모바일 데이터 사용량이 크게 증가할 수 있습니다. Wi-Fi 환경에서 사용을 권장합니다.</p>
+        <div class="quality-warning-actions">
+          <button id="quality-cancel">취소</button>
+          <button id="quality-confirm">고해상도로 보기</button>
+        </div>
+      </div>
     </div>
   </div>
   <script type="module" src="/src/main.js"></script>
