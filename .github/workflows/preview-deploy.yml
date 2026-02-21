@@ -29,6 +29,22 @@ jobs:
       - name: Build for preview
         run: npx vite build --base /COGnito/preview/pr-${{ github.event.pull_request.number }}/
 
+      - name: Verify build output
+        run: |
+          PR_NUM="${{ github.event.pull_request.number }}"
+          BASE="/COGnito/preview/pr-${PR_NUM}/"
+
+          # 필수 파일 존재 확인
+          test -f dist/index.html || { echo "ERROR: dist/index.html not found"; exit 1; }
+          test -f dist/style.json || { echo "ERROR: dist/style.json not found"; exit 1; }
+          test -f dist/sw.js || { echo "ERROR: dist/sw.js not found"; exit 1; }
+          test -d dist/assets || { echo "ERROR: dist/assets not found"; exit 1; }
+
+          # HTML 내 에셋 경로가 preview base path를 사용하는지 확인
+          grep -q "${BASE}assets/" dist/index.html || { echo "ERROR: asset paths do not use preview base path"; exit 1; }
+
+          echo "Build verification passed: all files present, base path correct (${BASE})"
+
       - uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
