@@ -7,6 +7,10 @@ import { createCOGLayer } from './cogLayer.js'
 import { createCOGImageLayer } from './cogImageLayer.js'
 import 'ol/ol.css'
 
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register(import.meta.env.BASE_URL + 'sw.js')
+}
+
 const DEFAULT_COG_URL = 'https://storage.googleapis.com/pdd-stac/disasters/hurricane-harvey/0831/SkySat_20170831T195552Z_RGB.tif'
 
 const urlParams = new URLSearchParams(window.location.search)

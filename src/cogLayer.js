@@ -296,7 +296,7 @@ function patchTileGridForAffine(tileGrid, pixelToView, sourceTileSizes, overview
 }
 
 export async function createCOGLayer({ url, bands, projectionMode, viewProjection, targetTileSize = 256, opacity = 1 }) {
-  const tiff = await tiffFromUrl(url)
+  const tiff = await tiffFromUrl(url, { blockSize: 524288, cacheSize: 500 })
 
   const bandInfo = bands
     ? { type: 'rgb', bands }

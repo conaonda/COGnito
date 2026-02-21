@@ -5,7 +5,7 @@ import { intersects, getIntersection } from 'ol/extent'
 import { fromUrl as tiffFromUrl, Pool } from 'geotiff'
 import { detectBands, getMinMaxFromOverview } from './cogLayer.js'
 
-const pool = new Pool()
+const pool = new Pool(4)
 
 function fillPixelData(px, rasters, bandInfo, stats, pixelCount) {
   if (bandInfo.type === 'rgb') {
@@ -40,7 +40,7 @@ function fillPixelData(px, rasters, bandInfo, stats, pixelCount) {
 }
 
 export async function createCOGImageLayer({ url, projectionMode = 'reproject', viewProjection, opacity = 1, resolutionMultiplier = 1 }) {
-  const tiff = await tiffFromUrl(url)
+  const tiff = await tiffFromUrl(url, { blockSize: 524288, cacheSize: 500 })
 
   const [bandInfo, image] = await Promise.all([
     detectBands(tiff),
