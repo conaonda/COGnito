@@ -23,7 +23,7 @@ test.describe('첫 화면 로딩 성능 측정', () => {
     
     const navigationStart = Date.now();
     
-    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await page.goto('', { waitUntil: 'domcontentloaded' });
     
     const pageLoadTime = Date.now() - navigationStart;
     
@@ -137,7 +137,7 @@ test.describe('첫 화면 로딩 성능 측정', () => {
       window.stateChanges = [];
     });
     
-    const loadPromise = page.goto('/');
+    const loadPromise = page.goto('');
     
     await page.waitForFunction(() => {
       const loadingEl = document.getElementById('loading');

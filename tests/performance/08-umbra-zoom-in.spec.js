@@ -6,7 +6,7 @@ test.describe('Umbra SAR GEC 줌인 타일 표시 검증', () => {
 
   test('줌인 3회 후 모든 타일이 정상 표시되어야 함', async ({ page }) => {
     const encodedUrl = encodeURIComponent(UMBRA_URL);
-    await page.goto(`/?url=${encodedUrl}`, { waitUntil: 'networkidle', timeout: 60000 });
+    await page.goto(`?url=${encodedUrl}`, { waitUntil: 'domcontentloaded', timeout: 60000 });
 
     await page.waitForFunction(
       () => window.cogSource && window.cogSource.getState() === 'ready',
@@ -66,19 +66,22 @@ test.describe('Umbra SAR GEC 줌인 타일 표시 검증', () => {
 
 async function readCenterPixels(page) {
   return page.evaluate(() => {
+    if (window.map) window.map.renderSync();
     const canvases = document.querySelectorAll('canvas');
     for (const canvas of canvases) {
       const w = canvas.width, h = canvas.height;
       if (w === 0 || h === 0) continue;
-      let gl = canvas.getContext('webgl2', { preserveDrawingBuffer: true });
-      if (!gl) gl = canvas.getContext('webgl', { preserveDrawingBuffer: true });
+      const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
       if (!gl) continue;
 
       const readW = 100, readH = 100;
       const startX = Math.floor((w - readW) / 2);
       const startY = Math.floor((h - readH) / 2);
-      const pixels = new Uint8Array(readW * readH * 4);
-      gl.readPixels(startX, startY, readW, readH, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+      const tmp = document.createElement('canvas');
+      tmp.width = readW; tmp.height = readH;
+      const ctx2d = tmp.getContext('2d');
+      ctx2d.drawImage(canvas, startX, startY, readW, readH, 0, 0, readW, readH);
+      const pixels = ctx2d.getImageData(0, 0, readW, readH).data;
 
       let nonZeroAlpha = 0, nonBlackRGB = 0;
       const total = readW * readH;

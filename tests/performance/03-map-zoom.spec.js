@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('지도 확대/축소 (Zoom) 성능 측정', () => {
   
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    await page.goto('');
     await page.waitForFunction(() => {
       const loadingEl = document.getElementById('loading');
       return loadingEl && !loadingEl.classList.contains('active');
@@ -82,7 +82,7 @@ test.describe('지도 확대/축소 (Zoom) 성능 측정', () => {
     await page.mouse.dblclick(centerX, centerY);
 
     // 더블클릭 줌 애니메이션 완료 대기
-    await page.waitForFunction(() => !window.map.getView().getAnimating(), { timeout: 5000 });
+    await page.waitForFunction(() => window.map && !window.map.getView().getAnimating(), { timeout: 5000 });
     const zoomCompleteTime = await page.evaluate(() => performance.now());
 
     // 줌 후 타일 로드 대기 (rendercomplete 이벤트 기반, fallback 5초)

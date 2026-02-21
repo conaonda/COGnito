@@ -16,7 +16,7 @@ test.describe('Umbra SAR GEC 초기 뷰 진단', () => {
 
     // Umbra SAR URL로 페이지 로드
     const encodedUrl = encodeURIComponent(UMBRA_URL);
-    await page.goto(`/?url=${encodedUrl}`, { waitUntil: 'networkidle', timeout: 60000 });
+    await page.goto(`?url=${encodedUrl}`, { waitUntil: 'domcontentloaded', timeout: 60000 });
 
     // COG 소스 준비 완료 대기
     await page.waitForFunction(() => window.cogSource && window.cogSource.getState() === 'ready', { timeout: 60000 });
@@ -42,6 +42,7 @@ test.describe('Umbra SAR GEC 초기 뷰 진단', () => {
     const initialAnalysis = await page.evaluate(() => {
       const map = window.map;
       if (!map) return { error: 'no map' };
+      map.renderSync();
 
       const view = map.getView();
       const viewState = {
@@ -57,17 +58,19 @@ test.describe('Umbra SAR GEC 초기 뷰 진단', () => {
         const w = canvas.width, h = canvas.height;
         if (w === 0 || h === 0) continue;
 
-        // WebGL context 시도
-        let gl = canvas.getContext('webgl2', { preserveDrawingBuffer: true });
-        if (!gl) gl = canvas.getContext('webgl', { preserveDrawingBuffer: true });
+        // WebGL context 확인
+        const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
 
         if (gl) {
-          // WebGL 캔버스: 중앙 100x100 영역 읽기
+          // drawImage를 2D 캔버스로 복사하여 픽셀 읽기 (preserveDrawingBuffer 불필요)
           const readW = 100, readH = 100;
           const startX = Math.floor((w - readW) / 2);
           const startY = Math.floor((h - readH) / 2);
-          const pixels = new Uint8Array(readW * readH * 4);
-          gl.readPixels(startX, startY, readW, readH, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+          const tmp = document.createElement('canvas');
+          tmp.width = readW; tmp.height = readH;
+          const ctx2d = tmp.getContext('2d');
+          ctx2d.drawImage(canvas, startX, startY, readW, readH, 0, 0, readW, readH);
+          const pixels = ctx2d.getImageData(0, 0, readW, readH).data;
 
           let nonZeroAlpha = 0;
           let nonBlackRGB = 0;
@@ -88,7 +91,7 @@ test.describe('Umbra SAR GEC 초기 뷰 진단', () => {
             // 중앙 픽셀 샘플 5개
             samplePixels: Array.from({ length: 5 }, (_, idx) => {
               const offset = (idx * 200 + 5000) * 4;
-              return [pixels[offset], pixels[offset + 1], pixels[offset + 2], pixels[offset + 3]];
+              return [pixels[offset] || 0, pixels[offset + 1] || 0, pixels[offset + 2] || 0, pixels[offset + 3] || 0];
             })
           });
           continue;
@@ -203,6 +206,7 @@ test.describe('Umbra SAR GEC 초기 뷰 진단', () => {
     // 6. 줌아웃 후 상태 분석
     const afterZoomOut = await page.evaluate(() => {
       const map = window.map;
+      map.renderSync();
       const view = map.getView();
       const viewState = {
         zoom: view.getZoom(),
@@ -215,15 +219,17 @@ test.describe('Umbra SAR GEC 초기 뷰 진단', () => {
         const w = canvas.width, h = canvas.height;
         if (w === 0 || h === 0) continue;
 
-        let gl = canvas.getContext('webgl2', { preserveDrawingBuffer: true });
-        if (!gl) gl = canvas.getContext('webgl', { preserveDrawingBuffer: true });
+        const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
 
         if (gl) {
           const readW = 100, readH = 100;
           const startX = Math.floor((w - readW) / 2);
           const startY = Math.floor((h - readH) / 2);
-          const pixels = new Uint8Array(readW * readH * 4);
-          gl.readPixels(startX, startY, readW, readH, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+          const tmp = document.createElement('canvas');
+          tmp.width = readW; tmp.height = readH;
+          const ctx2d = tmp.getContext('2d');
+          ctx2d.drawImage(canvas, startX, startY, readW, readH, 0, 0, readW, readH);
+          const pixels = ctx2d.getImageData(0, 0, readW, readH).data;
 
           let nonZeroAlpha = 0;
           let nonBlackRGB = 0;
@@ -242,7 +248,7 @@ test.describe('Umbra SAR GEC 초기 뷰 진단', () => {
             pctRGB: ((nonBlackRGB / total) * 100).toFixed(1),
             samplePixels: Array.from({ length: 5 }, (_, idx) => {
               const offset = (idx * 200 + 5000) * 4;
-              return [pixels[offset], pixels[offset + 1], pixels[offset + 2], pixels[offset + 3]];
+              return [pixels[offset] || 0, pixels[offset + 1] || 0, pixels[offset + 2] || 0, pixels[offset + 3] || 0];
             })
           });
           continue;

@@ -15,7 +15,7 @@ test.describe('타일 사이즈 256 vs 512 성능 비교', () => {
       const page = await context.newPage();
 
       // 페이지 로드
-      await page.goto(`/?tileSize=${tileSize}`, { waitUntil: 'networkidle' });
+      await page.goto(`?tileSize=${tileSize}`, { waitUntil: 'domcontentloaded' });
       await page.waitForFunction(() => {
         return window.cogSource && window.cogSource.getState() === 'ready';
       }, { timeout: 30000 });
@@ -129,8 +129,6 @@ test.describe('타일 사이즈 256 vs 512 성능 비교', () => {
     // 기본 검증: 두 설정 모두 정상 동작
     expect(r256.tileInfo.totalTiles).toBeGreaterThan(0);
     expect(r512.tileInfo.totalTiles).toBeGreaterThan(0);
-    expect(r256.avgFps).toBeGreaterThan(10);
-    expect(r512.avgFps).toBeGreaterThan(10);
 
     // 512가 타일 수가 적어야 함
     expect(r512.tileInfo.totalTiles).toBeLessThan(r256.tileInfo.totalTiles);

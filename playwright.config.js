@@ -18,7 +18,7 @@ export default defineConfig({
   ],
   
   use: {
-    baseURL: 'http://localhost:4173',
+    baseURL: 'http://localhost:4173/COGnito/',
     
     trace: 'on-first-retry',
     
