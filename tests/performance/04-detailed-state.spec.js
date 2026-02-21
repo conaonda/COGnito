@@ -147,7 +147,7 @@ test.describe('첫 화면 로딩 완료 후 상태 기록', () => {
           };
           
           // 소스 정보 추가
-          const source = layer.getSource();
+          const source = typeof layer.getSource === 'function' ? layer.getSource() : null;
           if (source) {
             layerInfo.sourceType = source.constructor.name;
             layerInfo.sourceState = source.getState ? source.getState() : 'unknown';
@@ -292,7 +292,7 @@ test.describe('첫 화면 로딩 완료 후 상태 기록', () => {
   test('상태 스냅샷 비교 테스트', async ({ page }) => {
     // 이 테스트는 기준 상태와 비교하여 변경 감지
     await page.goto('', { waitUntil: 'domcontentloaded' });
-    await page.waitForFunction(() => window.map && !document.getElementById('loading').classList.contains('active'), { timeout: 30000 });
+    await page.waitForFunction(() => window.map && window.map.getView().getZoom() > 5, { timeout: 30000 });
     
     const currentState = await page.evaluate(() => {
       const map = window.map;
