@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { expectPerf, THRESHOLDS } from './helpers/perf-thresholds.js';
 
 test.describe('지도 확대/축소 (Zoom) 성능 측정', () => {
   
@@ -20,8 +21,8 @@ test.describe('지도 확대/축소 (Zoom) 성능 측정', () => {
     console.log(`렌더링 소요: ${metrics.renderDuration.toFixed(2)}ms`);
     console.log(`총 소요 시간: ${metrics.totalDuration.toFixed(2)}ms`);
     
-    expect(metrics.totalDuration).toBeLessThan(20000);
-    expect(metrics.tileLoadTime).toBeLessThan(15000);
+    expectPerf(metrics.totalDuration, THRESHOLDS.zoomIn.warn, THRESHOLDS.zoomIn.fail, 'Zoom In');
+    expectPerf(metrics.tileLoadTime, THRESHOLDS.tileLoad.warn, THRESHOLDS.tileLoad.fail, 'Tile Load');
   });
 
   test('줌 아웃 (Zoom Out) 성능 측정', async ({ page }) => {
@@ -35,7 +36,7 @@ test.describe('지도 확대/축소 (Zoom) 성능 측정', () => {
     console.log(`타일 로딩 소요: ${metrics.tileLoadTime.toFixed(2)}ms`);
     console.log(`총 소요 시간: ${metrics.totalDuration.toFixed(2)}ms`);
     
-    expect(metrics.totalDuration).toBeLessThan(8000);
+    expectPerf(metrics.totalDuration, THRESHOLDS.zoomOut.warn, THRESHOLDS.zoomOut.fail, 'Zoom Out');
   });
   
   test('연속 줌 성능 측정', async ({ page }) => {
@@ -58,7 +59,7 @@ test.describe('지도 확대/축소 (Zoom) 성능 측정', () => {
       console.log(`  ${i + 1}회차: ${r.totalDuration.toFixed(0)}ms`);
     });
     
-    expect(avgDuration).toBeLessThan(15000);
+    expectPerf(avgDuration, THRESHOLDS.zoomMulti.warn, THRESHOLDS.zoomMulti.fail, '연속 줌 평균');
   });
   
   test('급격한 줌 변화 성능 측정', async ({ page }) => {
@@ -69,7 +70,7 @@ test.describe('지도 확대/축소 (Zoom) 성능 측정', () => {
     console.log(`타일 로딩 소요: ${metrics.tileLoadTime.toFixed(2)}ms`);
     console.log(`총 소요 시간: ${metrics.totalDuration.toFixed(2)}ms`);
     
-    expect(metrics.totalDuration).toBeLessThan(30000);
+    expectPerf(metrics.totalDuration, THRESHOLDS.zoomIn.warn, THRESHOLDS.zoomIn.fail, '급격한 줌');
   });
   
   test('더블클릭 줌 성능 측정', async ({ page }) => {
@@ -103,7 +104,7 @@ test.describe('지도 확대/축소 (Zoom) 성능 측정', () => {
     console.log(`타일 로딩 소요: ${(tileLoadTime - zoomCompleteTime).toFixed(2)}ms`);
     console.log(`총 소요 시간: ${(tileLoadTime - startTime).toFixed(2)}ms`);
 
-    expect(tileLoadTime - startTime).toBeLessThan(10000);
+    expectPerf(tileLoadTime - startTime, THRESHOLDS.zoomIn.warn, THRESHOLDS.zoomIn.fail, '더블클릭 줌');
   });
 });
 

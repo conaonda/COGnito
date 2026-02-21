@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { measurePan } from './helpers/measure-pan.js';
+import { expectPerf, THRESHOLDS } from './helpers/perf-thresholds.js';
 
 test.describe('지도 이동 (Pan) 성능 측정', () => {
   
@@ -24,7 +25,7 @@ test.describe('지도 이동 (Pan) 성능 측정', () => {
     console.log(`최소 FPS: ${metrics.fps.min}`);
     console.log(`최대 FPS: ${metrics.fps.max}`);
     
-    expect(metrics.totalDuration).toBeLessThan(10000);
+    expectPerf(metrics.totalDuration, THRESHOLDS.pan.warn, THRESHOLDS.pan.fail, 'Pan');
   });
 
   test('수평 이동 (Pan Left) 성능 측정', async ({ page }) => {
@@ -37,7 +38,7 @@ test.describe('지도 이동 (Pan) 성능 측정', () => {
     console.log(`총 소요 시간: ${metrics.totalDuration.toFixed(2)}ms`);
     console.log(`평균 FPS: ${metrics.fps.avg}`);
 
-    expect(metrics.totalDuration).toBeLessThan(10000);
+    expectPerf(metrics.totalDuration, THRESHOLDS.pan.warn, THRESHOLDS.pan.fail, 'Pan');
   });
 
   test('수직 이동 (Pan Down) 성능 측정', async ({ page }) => {
@@ -47,7 +48,7 @@ test.describe('지도 이동 (Pan) 성능 측정', () => {
     console.log(`총 소요 시간: ${metrics.totalDuration.toFixed(2)}ms`);
     console.log(`평균 FPS: ${metrics.fps.avg}`);
 
-    expect(metrics.totalDuration).toBeLessThan(10000);
+    expectPerf(metrics.totalDuration, THRESHOLDS.pan.warn, THRESHOLDS.pan.fail, 'Pan');
   });
 
   test('수직 이동 (Pan Up) 성능 측정', async ({ page }) => {
@@ -60,7 +61,7 @@ test.describe('지도 이동 (Pan) 성능 측정', () => {
     console.log(`총 소요 시간: ${metrics.totalDuration.toFixed(2)}ms`);
     console.log(`평균 FPS: ${metrics.fps.avg}`);
 
-    expect(metrics.totalDuration).toBeLessThan(10000);
+    expectPerf(metrics.totalDuration, THRESHOLDS.pan.warn, THRESHOLDS.pan.fail, 'Pan');
   });
 
   test('대각선 이동 성능 측정', async ({ page }) => {
@@ -70,7 +71,7 @@ test.describe('지도 이동 (Pan) 성능 측정', () => {
     console.log(`총 소요 시간: ${metrics.totalDuration.toFixed(2)}ms`);
     console.log(`평균 FPS: ${metrics.fps.avg}`);
 
-    expect(metrics.totalDuration).toBeLessThan(6000);
+    expectPerf(metrics.totalDuration, THRESHOLDS.pan.warn, THRESHOLDS.pan.fail, 'Pan 대각선');
   });
   
   test('이동 성능 일관성 테스트 (10회 반복)', async ({ page }) => {

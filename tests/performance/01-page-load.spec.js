@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { expectPerf, THRESHOLDS } from './helpers/perf-thresholds.js';
 
 test.describe('첫 화면 로딩 성능 측정', () => {
   
@@ -124,11 +125,11 @@ test.describe('첫 화면 로딩 성능 측정', () => {
     console.log(`Total Load Time: ${navMetrics?.totalLoadTime?.toFixed(2)}ms`);
     
     expect(olMetrics.cogReadyTime).toBeTruthy();
-    expect(olMetrics.cogReadyTime).toBeLessThan(30000);
     expect(olMetrics.timeout).toBeFalsy();
-    
+    expectPerf(olMetrics.cogReadyTime, THRESHOLDS.cogReady.warn, THRESHOLDS.cogReady.fail, 'COG Ready');
+
     if (navMetrics) {
-      expect(navMetrics.totalLoadTime).toBeLessThan(15000);
+      expectPerf(navMetrics.totalLoadTime, 5000, 15000, 'Total Load');
     }
   });
   
@@ -160,6 +161,6 @@ test.describe('첫 화면 로딩 성능 측정', () => {
     console.log(`로딩 표시 종료: ${loadingHidden.toFixed(2)}ms`);
     console.log(`로딩 표시 지속: ${(loadingHidden - loadingShown).toFixed(2)}ms`);
     
-    expect(loadingHidden - loadingShown).toBeLessThan(30000);
+    expectPerf(loadingHidden - loadingShown, THRESHOLDS.loadingDuration.warn, THRESHOLDS.loadingDuration.fail, '로딩 지속');
   });
 });
