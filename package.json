@@ -11,9 +11,11 @@
     "test:performance:ui": "npx playwright test --ui",
     "test:performance:headed": "npx playwright test --headed",
     "test:state": "npx playwright test tests/performance/04-detailed-state.spec.js",
-    "test:state:headed": "npx playwright test tests/performance/04-detailed-state.spec.js --headed"
+    "test:state:headed": "npx playwright test tests/performance/04-detailed-state.spec.js --headed",
+    "setup": "bash scripts/setup-supabase.sh"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.97.0",
     "ol": "^10.8.0",
     "ol-mapbox-style": "^13.2.1"
   },

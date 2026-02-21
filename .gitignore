@@ -5,6 +5,11 @@
 playwright-report/
 test-results/
 
+# Environment variables
+.env
+.env.local
+.env.*.local
+
 # System files
 .sisyphus/
 tmp/
