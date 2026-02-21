@@ -24,6 +24,40 @@ jobs:
 
       - run: npm ci
 
+      - run: npm run build
+
+      - name: Verify build output
+        run: |
+          test -f dist/index.html || { echo "ERROR: dist/index.html not found"; exit 1; }
+          test -d dist/assets || { echo "ERROR: dist/assets not found"; exit 1; }
+
+      - name: Preserve preview deployments
+        run: |
+          if git fetch origin gh-pages --depth=1 2>/dev/null; then
+            git worktree add gh-pages-branch origin/gh-pages
+            if [ -d gh-pages-branch/preview ]; then
+              cp -r gh-pages-branch/preview dist/preview
+            fi
+            git worktree remove gh-pages-branch
+          fi
+
+      - uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
       - name: Cache Playwright browsers
         id: playwright-cache
         uses: actions/cache@v4
@@ -45,18 +79,3 @@ jobs:
         run: npx playwright test
         env:
           CI: true
-
-      - name: Preserve preview deployments
-        run: |
-          if git fetch origin gh-pages --depth=1 2>/dev/null; then
-            git worktree add gh-pages-branch origin/gh-pages
-            if [ -d gh-pages-branch/preview ]; then
-              cp -r gh-pages-branch/preview dist/preview
-            fi
-            git worktree remove gh-pages-branch
-          fi
-
-      - uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
