@@ -109,6 +109,9 @@ const initMap = async () => {
     const gl = canvas.getContext('webgl2')
     if (!gl) return false
 
+    // R32F를 framebuffer에 attach하려면 EXT_color_buffer_float 확장이 필요
+    gl.getExtension('EXT_color_buffer_float')
+
     // float 텍스처를 프레임버퍼에 attach해서 실제 렌더링 가능 여부 확인
     const tex = gl.createTexture()
     gl.bindTexture(gl.TEXTURE_2D, tex)
