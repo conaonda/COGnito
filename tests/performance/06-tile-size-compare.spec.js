@@ -23,7 +23,7 @@ test.describe('타일 사이즈 256 vs 512 성능 비교', () => {
 
       // 타일 정보 수집
       const tileInfo = await page.evaluate(() => {
-        const map = window.map;
+        const map = window.olMap;
         const view = map.getView();
         const mapSize = map.getSize();
         const extent = view.calculateExtent(mapSize);
@@ -65,15 +65,15 @@ test.describe('타일 사이즈 256 vs 512 성능 비교', () => {
       // 줌 인 성능 측정
       const zoomStart = await page.evaluate(() => performance.now());
       await page.evaluate(() => {
-        const view = window.map.getView();
+        const view = window.olMap.getView();
         view.animate({ zoom: view.getZoom() + 2, duration: 500 });
       });
       // 줌 애니메이션 완료 대기
-      await page.waitForFunction(() => !window.map.getView().getAnimating(), { timeout: 5000 });
+      await page.waitForFunction(() => !window.olMap.getView().getAnimating(), { timeout: 5000 });
       // 타일 로딩 대기 (rendercomplete 이벤트 기반, fallback 10초)
       await page.waitForFunction(() => {
         return new Promise(resolve => {
-          const map = window.map;
+          const map = window.olMap;
           if (!map) { resolve(true); return; }
           map.once('rendercomplete', () => resolve(true));
           map.renderSync();

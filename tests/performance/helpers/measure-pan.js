@@ -70,7 +70,7 @@ export async function measurePan(page, direction, distance, distanceY = 0) {
   // 팬 후 타일 로드 대기 (rendercomplete 이벤트 기반, 5초 fallback)
   await page.waitForFunction(() => {
     return new Promise(resolve => {
-      const map = window.map;
+      const map = window.olMap;
       if (!map) { resolve(true); return; }
       map.once('rendercomplete', () => resolve(true));
       map.renderSync();

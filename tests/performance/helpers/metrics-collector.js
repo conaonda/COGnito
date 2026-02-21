@@ -67,7 +67,7 @@ class PerformanceMetricsCollector {
   async getOpenLayersMetrics() {
     return await this.page.evaluate(() => {
       let cogSource = window.cogSource;
-      let map = window.map;
+      let map = window.olMap;
       
       if (!cogSource && map) {
         const layers = map.getLayers().getArray();

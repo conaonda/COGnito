@@ -13,15 +13,12 @@ test.describe('Umbra SAR GEC 줌인 타일 표시 검증', () => {
       { timeout: 60000 }
     );
 
-    // 초기 렌더링 완료 대기
-    await page.waitForFunction(() => {
-      return new Promise(resolve => {
-        const map = window.map;
-        map.once('rendercomplete', () => resolve(true));
-        map.renderSync();
-        setTimeout(() => resolve(true), 10000);
-      });
-    }, { timeout: 15000 });
+    // 로딩 인디케이터 사라질 때까지 대기 (view.fit 및 타일 로딩 완료 보장)
+    await page.waitForFunction(
+      () => !document.getElementById('loading').classList.contains('active'),
+      { timeout: 30000 }
+    );
+    await page.waitForTimeout(1000);
 
     // 초기 상태 확인
     const initialPixels = await readCenterPixels(page);
@@ -31,11 +28,11 @@ test.describe('Umbra SAR GEC 줌인 타일 표시 검증', () => {
     // 줌인 3회
     for (let i = 0; i < 3; i++) {
       await page.evaluate(() => {
-        const view = window.map.getView();
+        const view = window.olMap.getView();
         view.animate({ zoom: view.getZoom() + 1, duration: 300 });
       });
       await page.waitForFunction(
-        () => !window.map.getView().getAnimating(),
+        () => !window.olMap.getView().getAnimating(),
         { timeout: 5000 }
       );
     }
@@ -43,7 +40,7 @@ test.describe('Umbra SAR GEC 줌인 타일 표시 검증', () => {
     // 타일 로딩 + 렌더링 완료 대기
     await page.waitForFunction(() => {
       return new Promise(resolve => {
-        const map = window.map;
+        const map = window.olMap;
         map.once('rendercomplete', () => resolve(true));
         map.renderSync();
         setTimeout(() => resolve(true), 15000);
@@ -66,7 +63,7 @@ test.describe('Umbra SAR GEC 줌인 타일 표시 검증', () => {
 
 async function readCenterPixels(page) {
   return page.evaluate(() => {
-    if (window.map) window.map.renderSync();
+    if (window.olMap) window.olMap.renderSync();
     const canvases = document.querySelectorAll('canvas');
     for (const canvas of canvases) {
       const w = canvas.width, h = canvas.height;

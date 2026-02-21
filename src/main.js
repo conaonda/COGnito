@@ -245,7 +245,7 @@ const loadCOG = async (url) => {
   })
 
   console.log('Map initialized successfully')
-  window.map = map
+  window.olMap = map
 }
 
 document.addEventListener('DOMContentLoaded', initMap)

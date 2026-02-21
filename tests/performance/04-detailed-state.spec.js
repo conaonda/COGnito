@@ -108,7 +108,7 @@ test.describe('첫 화면 로딩 완료 후 상태 기록', () => {
         };
         
         // Map 인스턴스 확인
-        const map = window.map;
+        const map = window.olMap;
         if (!map) {
           resolve({ error: 'Map not initialized', state });
           return;
@@ -292,10 +292,10 @@ test.describe('첫 화면 로딩 완료 후 상태 기록', () => {
   test('상태 스냅샷 비교 테스트', async ({ page }) => {
     // 이 테스트는 기준 상태와 비교하여 변경 감지
     await page.goto('', { waitUntil: 'domcontentloaded' });
-    await page.waitForFunction(() => window.map && window.map.getView().getZoom() > 5, { timeout: 30000 });
+    await page.waitForFunction(() => window.olMap && window.olMap.getView().getZoom() > 5, { timeout: 30000 });
     
     const currentState = await page.evaluate(() => {
-      const map = window.map;
+      const map = window.olMap;
       if (!map) return null;
       
       const view = map.getView();

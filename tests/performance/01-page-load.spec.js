@@ -42,8 +42,8 @@ test.describe('첫 화면 로딩 성능 측정', () => {
           checkCount++;
           
           let cogSource = window.cogSource;
-          if (!cogSource && window.map) {
-            const layers = window.map.getLayers().getArray();
+          if (!cogSource && window.olMap) {
+            const layers = window.olMap.getLayers().getArray();
             for (const layer of layers) {
               if (layer.getSource && layer.getSource().getState) {
                 cogSource = layer.getSource();
@@ -56,16 +56,16 @@ test.describe('첫 화면 로딩 성능 측정', () => {
             metrics.cogReadyTime = performance.now() - startTime;
           }
           
-          if (window.map && !metrics.firstTileRenderedTime && !window.__renderCompleteListening) {
+          if (window.olMap && !metrics.firstTileRenderedTime && !window.__renderCompleteListening) {
             window.__renderCompleteListening = true;
-            window.map.once('rendercomplete', () => {
+            window.olMap.once('rendercomplete', () => {
               metrics.firstTileRenderedTime = performance.now() - startTime;
             });
-            window.map.renderSync();
+            window.olMap.renderSync();
           }
           
-          if (window.map && !metrics.mapInitializedTime) {
-            const view = window.map.getView();
+          if (window.olMap && !metrics.mapInitializedTime) {
+            const view = window.olMap.getView();
             const center = view.getCenter();
             if (center && center[0] !== 0 && center[1] !== 0) {
               metrics.mapInitializedTime = performance.now() - startTime;

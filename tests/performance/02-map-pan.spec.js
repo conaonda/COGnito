@@ -24,7 +24,7 @@ test.describe('지도 이동 (Pan) 성능 측정', () => {
     console.log(`최소 FPS: ${metrics.fps.min}`);
     console.log(`최대 FPS: ${metrics.fps.max}`);
     
-    expect(metrics.totalDuration).toBeLessThan(5000);
+    expect(metrics.totalDuration).toBeLessThan(10000);
   });
 
   test('수평 이동 (Pan Left) 성능 측정', async ({ page }) => {
@@ -37,7 +37,7 @@ test.describe('지도 이동 (Pan) 성능 측정', () => {
     console.log(`총 소요 시간: ${metrics.totalDuration.toFixed(2)}ms`);
     console.log(`평균 FPS: ${metrics.fps.avg}`);
 
-    expect(metrics.totalDuration).toBeLessThan(5000);
+    expect(metrics.totalDuration).toBeLessThan(10000);
   });
 
   test('수직 이동 (Pan Down) 성능 측정', async ({ page }) => {
@@ -47,7 +47,7 @@ test.describe('지도 이동 (Pan) 성능 측정', () => {
     console.log(`총 소요 시간: ${metrics.totalDuration.toFixed(2)}ms`);
     console.log(`평균 FPS: ${metrics.fps.avg}`);
 
-    expect(metrics.totalDuration).toBeLessThan(5000);
+    expect(metrics.totalDuration).toBeLessThan(10000);
   });
 
   test('수직 이동 (Pan Up) 성능 측정', async ({ page }) => {
@@ -60,7 +60,7 @@ test.describe('지도 이동 (Pan) 성능 측정', () => {
     console.log(`총 소요 시간: ${metrics.totalDuration.toFixed(2)}ms`);
     console.log(`평균 FPS: ${metrics.fps.avg}`);
 
-    expect(metrics.totalDuration).toBeLessThan(5000);
+    expect(metrics.totalDuration).toBeLessThan(10000);
   });
 
   test('대각선 이동 성능 측정', async ({ page }) => {

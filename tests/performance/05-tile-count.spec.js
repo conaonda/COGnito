@@ -16,7 +16,7 @@ test.describe('FHD 뷰포트 타일 개수 검증', () => {
     await page.waitForTimeout(2000);
 
     const tileInfo = await page.evaluate(() => {
-      const map = window.map;
+      const map = window.olMap;
       const view = map.getView();
       const z = Math.round(view.getZoom());
       const mapSize = map.getSize();

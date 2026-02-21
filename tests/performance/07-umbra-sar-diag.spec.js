@@ -23,7 +23,7 @@ test.describe('Umbra SAR GEC 초기 뷰 진단', () => {
     // 타일 렌더링 완료 대기
     await page.waitForFunction(() => {
       return new Promise(resolve => {
-        const map = window.map;
+        const map = window.olMap;
         if (!map) { resolve(true); return; }
         map.once('rendercomplete', () => resolve(true));
         map.renderSync();
@@ -40,7 +40,7 @@ test.describe('Umbra SAR GEC 초기 뷰 진단', () => {
 
     // 3. 페이지 내부에서 WebGL readPixels로 직접 확인
     const initialAnalysis = await page.evaluate(() => {
-      const map = window.map;
+      const map = window.olMap;
       if (!map) return { error: 'no map' };
       map.renderSync();
 
@@ -184,17 +184,17 @@ test.describe('Umbra SAR GEC 초기 뷰 진단', () => {
     // 5. 줌아웃 3회
     for (let i = 0; i < 3; i++) {
       await page.evaluate(() => {
-        const map = window.map;
+        const map = window.olMap;
         const view = map.getView();
         const currentZoom = view.getZoom();
         view.animate({ zoom: currentZoom - 1, duration: 300 });
       });
       // 줌 애니메이션 완료 대기
-      await page.waitForFunction(() => !window.map.getView().getAnimating(), { timeout: 5000 });
+      await page.waitForFunction(() => !window.olMap.getView().getAnimating(), { timeout: 5000 });
       // 타일 렌더링 완료 대기
       await page.waitForFunction(() => {
         return new Promise(resolve => {
-          const map = window.map;
+          const map = window.olMap;
           if (!map) { resolve(true); return; }
           map.once('rendercomplete', () => resolve(true));
           map.renderSync();
@@ -205,7 +205,7 @@ test.describe('Umbra SAR GEC 초기 뷰 진단', () => {
 
     // 6. 줌아웃 후 상태 분석
     const afterZoomOut = await page.evaluate(() => {
-      const map = window.map;
+      const map = window.olMap;
       map.renderSync();
       const view = map.getView();
       const viewState = {
