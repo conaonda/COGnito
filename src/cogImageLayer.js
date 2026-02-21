@@ -5,7 +5,8 @@ import { intersects, getIntersection } from 'ol/extent'
 import { fromUrl as tiffFromUrl, Pool } from 'geotiff'
 import { detectBands, getMinMaxFromOverview } from './cogLayer.js'
 
-const pool = new Pool(4)
+let pool
+try { pool = new Pool(4) } catch { /* worker unavailable – decode on main thread */ }
 
 function fillPixelData(px, rasters, bandInfo, stats, pixelCount) {
   if (bandInfo.type === 'rgb') {
