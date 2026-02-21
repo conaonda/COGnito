@@ -331,6 +331,86 @@
         display: flex;
       }
     }
+
+    /* Auth UI */
+    .auth-container {
+      display: flex;
+      align-items: center;
+    }
+
+    .auth-login {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .auth-login-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 6px;
+      background: rgba(255,255,255,0.15);
+      color: white;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .auth-login-btn:hover {
+      background: rgba(255,255,255,0.3);
+    }
+
+    .auth-user {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .auth-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.4);
+    }
+
+    .auth-name {
+      font-size: 0.8rem;
+      opacity: 0.9;
+      max-width: 120px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .auth-logout-btn {
+      padding: 0.25rem 0.5rem;
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 4px;
+      background: rgba(255,255,255,0.1);
+      color: white;
+      font-size: 0.7rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .auth-logout-btn:hover {
+      background: rgba(255,255,255,0.25);
+    }
+
+    @media (max-width: 768px) {
+      .auth-name {
+        display: none;
+      }
+      .auth-avatar {
+        width: 24px;
+        height: 24px;
+      }
+      .auth-logout-btn {
+        font-size: 0.65rem;
+        padding: 0.2rem 0.4rem;
+      }
+    }
   </style>
 </head>
 <body>

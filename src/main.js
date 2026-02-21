@@ -5,6 +5,7 @@ import { defaults as defaultControls } from 'ol/control'
 import { transform } from 'ol/proj'
 import { createCOGLayer } from './cogLayer.js'
 import { createCOGImageLayer } from './cogImageLayer.js'
+import { initAuthUI } from './authUI.js'
 import 'ol/ol.css'
 
 document.getElementById('app-version').textContent = 'v' + __APP_VERSION__
@@ -40,6 +41,7 @@ const showError = (message) => {
 }
 
 const initMap = async () => {
+  initAuthUI()
   const viewProjection = 'EPSG:3857'
   let currentCogLayer = null
 
