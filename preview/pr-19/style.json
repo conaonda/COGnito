@@ -14512,7 +14512,7 @@
         "symbol-placement": "point",
         "icon-optional": true,
         "text-font": [
-          "noto_sans_regular"
+          "Noto Sans Regular"
         ],
         "icon-image": [
           "match",
@@ -14681,7 +14681,7 @@
         "symbol-placement": "point",
         "icon-optional": true,
         "text-font": [
-          "noto_sans_regular"
+          "Noto Sans Regular"
         ],
         "icon-image": [
           "match",
@@ -14766,7 +14766,7 @@
         "symbol-placement": "point",
         "icon-optional": true,
         "text-font": [
-          "noto_sans_regular"
+          "Noto Sans Regular"
         ],
         "icon-image": [
           "match",
@@ -14849,7 +14849,7 @@
         "symbol-placement": "point",
         "icon-optional": true,
         "text-font": [
-          "noto_sans_regular"
+          "Noto Sans Regular"
         ],
         "icon-image": [
           "match",
@@ -14982,7 +14982,7 @@
         "symbol-placement": "point",
         "icon-optional": true,
         "text-font": [
-          "noto_sans_regular"
+          "Noto Sans Regular"
         ],
         "icon-image": [
           "match",
@@ -15065,7 +15065,7 @@
         "symbol-placement": "point",
         "icon-optional": true,
         "text-font": [
-          "noto_sans_regular"
+          "Noto Sans Regular"
         ],
         "icon-image": [
           "match",
@@ -15146,7 +15146,7 @@
         "symbol-placement": "point",
         "icon-optional": true,
         "text-font": [
-          "noto_sans_regular"
+          "Noto Sans Regular"
         ],
         "icon-image": [
           "match",
@@ -15225,7 +15225,7 @@
         "symbol-placement": "point",
         "icon-optional": true,
         "text-font": [
-          "noto_sans_regular"
+          "Noto Sans Regular"
         ]
       },
       "paint": {
@@ -15290,7 +15290,7 @@
         "symbol-placement": "point",
         "icon-optional": true,
         "text-font": [
-          "noto_sans_regular"
+          "Noto Sans Regular"
         ]
       },
       "paint": {
@@ -15650,7 +15650,7 @@
       "layout": {
         "text-field": "{housenumber}",
         "text-font": [
-          "noto_sans_regular"
+          "Noto Sans Regular"
         ],
         "symbol-placement": "point",
         "text-anchor": "center",
@@ -15749,7 +15749,7 @@
           ]
         ],
         "text-font": [
-          "noto_sans_regular"
+          "Noto Sans Regular"
         ],
         "symbol-placement": "line",
         "text-anchor": "center",
@@ -15805,7 +15805,7 @@
           ]
         ],
         "text-font": [
-          "noto_sans_regular"
+          "Noto Sans Regular"
         ],
         "symbol-placement": "line",
         "text-anchor": "center",
@@ -15861,7 +15861,7 @@
           ]
         ],
         "text-font": [
-          "noto_sans_regular"
+          "Noto Sans Regular"
         ],
         "symbol-placement": "line",
         "text-anchor": "center",
@@ -15917,7 +15917,7 @@
           ]
         ],
         "text-font": [
-          "noto_sans_regular"
+          "Noto Sans Regular"
         ],
         "symbol-placement": "line",
         "text-anchor": "center",
@@ -15973,7 +15973,7 @@
           ]
         ],
         "text-font": [
-          "noto_sans_regular"
+          "Noto Sans Regular"
         ],
         "symbol-placement": "line",
         "text-anchor": "center",
@@ -16029,7 +16029,7 @@
           ]
         ],
         "text-font": [
-          "noto_sans_regular"
+          "Noto Sans Regular"
         ],
         "symbol-placement": "line",
         "text-anchor": "center",
@@ -16085,7 +16085,7 @@
           ]
         ],
         "text-font": [
-          "noto_sans_regular"
+          "Noto Sans Regular"
         ],
         "symbol-placement": "line",
         "text-anchor": "center",
@@ -16141,7 +16141,7 @@
           ]
         ],
         "text-font": [
-          "noto_sans_regular"
+          "Noto Sans Regular"
         ],
         "symbol-placement": "line",
         "text-anchor": "center",
@@ -16197,7 +16197,7 @@
           ]
         ],
         "text-font": [
-          "noto_sans_regular"
+          "Noto Sans Regular"
         ],
         "text-size": {
           "stops": [
@@ -16248,7 +16248,7 @@
           ]
         ],
         "text-font": [
-          "noto_sans_regular"
+          "Noto Sans Regular"
         ],
         "text-size": {
           "stops": [
@@ -16299,7 +16299,7 @@
           ]
         ],
         "text-font": [
-          "noto_sans_regular"
+          "Noto Sans Regular"
         ],
         "text-size": {
           "stops": [
@@ -16354,7 +16354,7 @@
           ]
         ],
         "text-font": [
-          "noto_sans_regular"
+          "Noto Sans Regular"
         ],
         "text-size": {
           "stops": [
@@ -16408,7 +16408,7 @@
           ]
         ],
         "text-font": [
-          "noto_sans_regular"
+          "Noto Sans Regular"
         ],
         "text-size": {
           "stops": [
@@ -16462,7 +16462,7 @@
           ]
         ],
         "text-font": [
-          "noto_sans_regular"
+          "Noto Sans Regular"
         ],
         "text-size": {
           "stops": [
@@ -16517,7 +16517,7 @@
           ]
         ],
         "text-font": [
-          "noto_sans_regular"
+          "Noto Sans Regular"
         ],
         "text-transform": "uppercase",
         "text-anchor": "top",
@@ -16579,7 +16579,7 @@
           ]
         ],
         "text-font": [
-          "noto_sans_regular"
+          "Noto Sans Regular"
         ],
         "text-size": {
           "stops": [
@@ -16633,7 +16633,7 @@
           ]
         ],
         "text-font": [
-          "noto_sans_regular"
+          "Noto Sans Regular"
         ],
         "text-size": {
           "stops": [
@@ -16687,7 +16687,7 @@
           ]
         ],
         "text-font": [
-          "noto_sans_regular"
+          "Noto Sans Regular"
         ],
         "text-size": {
           "stops": [
@@ -16750,7 +16750,7 @@
           ]
         ],
         "text-font": [
-          "noto_sans_regular"
+          "Noto Sans Regular"
         ],
         "text-transform": "uppercase",
         "text-anchor": "top",
@@ -16826,7 +16826,7 @@
           ]
         ],
         "text-font": [
-          "noto_sans_regular"
+          "Noto Sans Regular"
         ],
         "text-transform": "uppercase",
         "text-anchor": "top",
@@ -16897,7 +16897,7 @@
           ]
         ],
         "text-font": [
-          "noto_sans_regular"
+          "Noto Sans Regular"
         ],
         "text-transform": "uppercase",
         "text-anchor": "top",
@@ -16962,7 +16962,7 @@
         "symbol-avoid-edges": true,
         "icon-image": "basics:marking-arrow",
         "text-font": [
-          "noto_sans_regular"
+          "Noto Sans Regular"
         ]
       },
       "minzoom": 16,
@@ -17034,7 +17034,7 @@
         "symbol-avoid-edges": true,
         "icon-image": "basics:marking-arrow",
         "text-font": [
-          "noto_sans_regular"
+          "Noto Sans Regular"
         ]
       },
       "minzoom": 16,
@@ -17117,7 +17117,7 @@
         "symbol-placement": "point",
         "icon-keep-upright": true,
         "text-font": [
-          "noto_sans_regular"
+          "Noto Sans Regular"
         ],
         "text-size": 10,
         "icon-anchor": "bottom",
@@ -17178,7 +17178,7 @@
         "symbol-placement": "point",
         "icon-keep-upright": true,
         "text-font": [
-          "noto_sans_regular"
+          "Noto Sans Regular"
         ],
         "text-size": 10,
         "icon-anchor": "bottom",
@@ -17248,7 +17248,7 @@
         "symbol-placement": "point",
         "icon-keep-upright": true,
         "text-font": [
-          "noto_sans_regular"
+          "Noto Sans Regular"
         ],
         "text-size": 10,
         "icon-anchor": "bottom",
@@ -17318,7 +17318,7 @@
         "symbol-placement": "point",
         "icon-keep-upright": true,
         "text-font": [
-          "noto_sans_regular"
+          "Noto Sans Regular"
         ],
         "text-size": 10,
         "icon-anchor": "bottom",
@@ -17389,7 +17389,7 @@
         "symbol-placement": "point",
         "icon-keep-upright": true,
         "text-font": [
-          "noto_sans_regular"
+          "Noto Sans Regular"
         ],
         "text-size": 10,
         "icon-anchor": "bottom",
@@ -17457,7 +17457,7 @@
         "symbol-placement": "point",
         "icon-keep-upright": true,
         "text-font": [
-          "noto_sans_regular"
+          "Noto Sans Regular"
         ],
         "text-size": 10,
         "icon-anchor": "bottom",
@@ -17525,7 +17525,7 @@
         "symbol-placement": "point",
         "icon-keep-upright": true,
         "text-font": [
-          "noto_sans_regular"
+          "Noto Sans Regular"
         ],
         "text-size": 10,
         "icon-anchor": "bottom",
