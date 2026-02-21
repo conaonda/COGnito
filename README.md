@@ -98,14 +98,18 @@ npm run preview
 │       ├── 08-umbra-zoom-in.spec.js
 │       └── helpers/
 │           ├── metrics-collector.js
-│           └── measure-pan.js
+│           ├── measure-pan.js
+│           └── perf-thresholds.js  # 성능 임계값 (경고/실패 2단계)
 ├── docs/
+│   ├── ROADMAP.md             # v1.0 로드맵
 │   ├── testing-guide.md       # 테스트 가이드 (통합 문서)
 │   └── reprojection-analysis.md # 리프로젝션 파이프라인 분석
 ├── .github/
 │   └── workflows/
 │       ├── playwright.yml     # Playwright 테스트 자동화
-│       └── deploy.yml         # GitHub Pages 배포
+│       ├── deploy.yml         # GitHub Pages 배포 (테스트 게이트 포함)
+│       ├── preview-deploy.yml # PR 프리뷰 배포
+│       └── release.yml        # release-please 자동 버저닝
 ├── index.html                 # HTML 템플릿 및 스타일
 ├── playwright.config.js       # Playwright 설정
 ├── vite.config.js             # Vite 설정
