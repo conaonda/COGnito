@@ -6,12 +6,12 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test:performance": "npm run preview -- --port 4173 & sleep 5 && playwright test tests/performance; TEST_EXIT=$?; pkill -f 'vite preview' 2>/dev/null || true; exit $TEST_EXIT",
-    "test:performance:report": "npm run preview -- --port 4173 & sleep 5 && playwright test tests/performance --reporter=html; TEST_EXIT=$?; pkill -f 'vite preview' 2>/dev/null || true; exit $TEST_EXIT",
-    "test:performance:ui": "npm run preview -- --port 4173 & sleep 3 && npx playwright test tests/performance --ui; pkill -f 'vite preview' 2>/dev/null || true",
-    "test:performance:headed": "npm run preview -- --port 4173 & sleep 5 && playwright test tests/performance --headed; TEST_EXIT=$?; pkill -f 'vite preview' 2>/dev/null || true; exit $TEST_EXIT",
-    "test:state": "npm run preview -- --port 4173 & sleep 5 && playwright test tests/performance/04-detailed-state.spec.js; TEST_EXIT=$?; pkill -f 'vite preview' 2>/dev/null || true; exit $TEST_EXIT",
-    "test:state:headed": "npm run preview -- --port 4173 & sleep 5 && playwright test tests/performance/04-detailed-state.spec.js --headed; TEST_EXIT=$?; pkill -f 'vite preview' 2>/dev/null || true; exit $TEST_EXIT"
+    "test:performance": "npx playwright test",
+    "test:performance:report": "npx playwright test --reporter=html",
+    "test:performance:ui": "npx playwright test --ui",
+    "test:performance:headed": "npx playwright test --headed",
+    "test:state": "npx playwright test tests/performance/04-detailed-state.spec.js",
+    "test:state:headed": "npx playwright test tests/performance/04-detailed-state.spec.js --headed"
   },
   "dependencies": {
     "ol": "^10.8.0",
