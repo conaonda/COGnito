@@ -5,6 +5,8 @@ OpenLayers 기반 Cloud Optimized GeoTIFF (COG) 영상 가시화 웹 애플리�
 ![OpenLayers](https://img.shields.io/badge/OpenLayers-10.x-blue)
 ![Vite](https://img.shields.io/badge/Vite-6.x-646CFF)
 
+**라이브 데모:** https://conaonda.github.io/COGnito/
+
 ## 📖 개요
 
 임의의 COG URL을 입력하여 웹에서 직접 시각화하는 애플리케이션입니다. OpenLayers WebGLTile/Image 레이어, Affine 변환 기반 좌표 매핑, 밴드 자동 감지 등을 활용하여 회전된 SAR 영상을 포함한 다양한 COG를 효율적으로 렌더링합니다.
