@@ -7,6 +7,8 @@ import { createCOGLayer } from './cogLayer.js'
 import { createCOGImageLayer } from './cogImageLayer.js'
 import 'ol/ol.css'
 
+document.getElementById('app-version').textContent = 'v' + __APP_VERSION__
+
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register(import.meta.env.BASE_URL + 'sw.js')
 }
