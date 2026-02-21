@@ -87,6 +87,11 @@ jobs:
         env:
           CI: true
 
+      - name: Run auth tests
+        run: npx playwright test --config=playwright.auth.config.js
+        env:
+          CI: true
+
       - uses: actions/upload-artifact@v4
         if: always()
         with:

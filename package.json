@@ -12,6 +12,7 @@
     "test:performance:headed": "npx playwright test --headed",
     "test:state": "npx playwright test tests/performance/04-detailed-state.spec.js",
     "test:state:headed": "npx playwright test tests/performance/04-detailed-state.spec.js --headed",
+    "test:auth": "npx playwright test --config=playwright.auth.config.js",
     "setup": "bash scripts/setup-supabase.sh"
   },
   "dependencies": {
