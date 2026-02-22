@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.0](https://github.com/conaonda/COGnito/compare/COGnito-v0.1.2...COGnito-v0.2.0) (2026-02-22)
+
+
+### Features
+
+* v0.2.0 인증 UI E2E 테스트 및 릴리스 설정 ([#20](https://github.com/conaonda/COGnito/issues/20)) ([90e851d](https://github.com/conaonda/COGnito/commit/90e851d48ea76d7fb5894ca51ee5d37037b14378))
+
 ## [0.1.2](https://github.com/conaonda/COGnito/compare/COGnito-v0.1.1...COGnito-v0.1.2) (2026-02-21)
 
 
