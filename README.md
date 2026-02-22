@@ -2,6 +2,7 @@
 
 OpenLayers 기반 Cloud Optimized GeoTIFF (COG) 영상 가시화 웹 애플리케이션
 
+![Version](https://img.shields.io/github/package-json/v/conaonda/COGnito)
 ![OpenLayers](https://img.shields.io/badge/OpenLayers-10.x-blue)
 ![Vite](https://img.shields.io/badge/Vite-6.x-646CFF)
 
