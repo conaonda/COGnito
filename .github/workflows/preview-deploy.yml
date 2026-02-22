@@ -3,6 +3,10 @@ name: Preview Deployment
 on:
   pull_request:
     types: [opened, synchronize, reopened, closed]
+    paths-ignore:
+      - '**.md'
+      - 'LICENSE'
+      - '.gitignore'
 
 permissions:
   contents: write

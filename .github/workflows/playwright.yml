@@ -3,7 +3,15 @@ name: Playwright Tests
 on:
   push:
     branches-ignore: [main]
+    paths-ignore:
+      - '**.md'
+      - 'LICENSE'
+      - '.gitignore'
   pull_request:
+    paths-ignore:
+      - '**.md'
+      - 'LICENSE'
+      - '.gitignore'
 
 concurrency:
   group: playwright-${{ github.event.pull_request.number || github.ref }}
