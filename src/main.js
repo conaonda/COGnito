@@ -5,7 +5,11 @@ import { defaults as defaultControls } from 'ol/control'
 import { transform } from 'ol/proj'
 import { createCOGLayer } from './cogLayer.js'
 import { createCOGImageLayer } from './cogImageLayer.js'
+import { extractCogMetadata } from './catalog.js'
 import { initAuthUI } from './authUI.js'
+import { initRegisterUI } from './registerUI.js'
+import { initCatalogUI } from './catalogUI.js'
+import { updateViewerMeta } from './viewerMeta.js'
 import 'ol/ol.css'
 
 document.getElementById('app-version').textContent = 'v' + __APP_VERSION__
@@ -144,7 +148,7 @@ const initMap = async () => {
   }
 }
 
-const loadCOG = async (url) => {
+const loadCOG = async (url, catalogMeta = null) => {
     showLoading()
     errorEl.classList.remove('active')
 
@@ -152,7 +156,7 @@ const loadCOG = async (url) => {
       if (currentCogLayer) {
         map.removeLayer(currentCogLayer)
       }
-      let cogLayer, cogSource, extent
+      let cogLayer, cogSource, extent, tiff
 
       const pipeline = RENDER_PIPELINE === 'tile' && (isMobile() || !supportsWebGLFloat()) ? 'image' : RENDER_PIPELINE
 
@@ -162,12 +166,14 @@ const loadCOG = async (url) => {
         cogLayer = result.layer
         cogSource = result.source
         extent = result.extent
+        tiff = result.tiff
         hideLoading()
       } else {
         const result = await createCOGLayer({ url, projectionMode: PROJECTION_MODE, viewProjection, targetTileSize: TARGET_TILE_SIZE, opacity: 0.8 })
         cogLayer = result.layer
         cogSource = result.source
         extent = result.extent
+        tiff = result.tiff
 
         cogSource.on('change', () => {
           if (cogSource.getState() === 'ready') {
@@ -188,6 +194,24 @@ const loadCOG = async (url) => {
       currentCogLayer = cogLayer
       map.addLayer(cogLayer)
       window.cogSource = cogSource
+
+      // 메타데이터 추출 및 저장
+      try {
+        const cogMeta = await extractCogMetadata(tiff)
+        cogMeta.url = url
+        window.currentCogMeta = cogMeta
+        document.dispatchEvent(new CustomEvent('cog-loaded'))
+
+        // 뷰어 메타데이터 업데이트
+        const filename = url.split('/').pop().split('?')[0]
+        const displayMeta = catalogMeta
+          ? { title: catalogMeta.title, description: catalogMeta.description, crs: cogMeta.crs, bands: cogMeta.bands, filename }
+          : { title: null, crs: cogMeta.crs, bands: cogMeta.bands, filename }
+        updateViewerMeta(displayMeta)
+      } catch (metaErr) {
+        console.warn('메타데이터 추출 실패:', metaErr)
+        window.currentCogMeta = null
+      }
 
       if (extent) {
         const pad = window.innerWidth <= 768 ? 20 : 50
@@ -247,6 +271,9 @@ const loadCOG = async (url) => {
     view.setMaxZoom(DEFAULT_MAX_ZOOM)
     loadCOG(urlInput.value.trim() || COG_URL)
   })
+
+  initRegisterUI()
+  initCatalogUI((url, catalogItem) => loadCOG(url, catalogItem))
 
   console.log('Map initialized successfully')
   window.olMap = map
