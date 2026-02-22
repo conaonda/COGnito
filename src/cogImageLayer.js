@@ -199,5 +199,5 @@ export async function createCOGImageLayer({ url, projectionMode = 'reproject', v
     opacity
   })
 
-  return { layer, source, extent: viewExtent, center: [(viewExtent[0] + viewExtent[2]) / 2, (viewExtent[1] + viewExtent[3]) / 2] }
+  return { layer, source, extent: viewExtent, center: [(viewExtent[0] + viewExtent[2]) / 2, (viewExtent[1] + viewExtent[3]) / 2], tiff }
 }

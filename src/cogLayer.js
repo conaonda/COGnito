@@ -355,5 +355,5 @@ export async function createCOGLayer({ url, bands, projectionMode, viewProjectio
     }
   }
 
-  return { layer, source, extent, center, zoom: cogView.zoom }
+  return { layer, source, extent, center, zoom: cogView.zoom, tiff }
 }
