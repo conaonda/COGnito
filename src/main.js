@@ -65,7 +65,7 @@ const initMap = async () => {
     controls: defaultControls({
       zoom: true,
       rotate: true,
-      attribution: true
+      attribution: false
     })
   })
 
