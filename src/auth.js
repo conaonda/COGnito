@@ -37,7 +37,13 @@ export async function signInWithEmail(email, password) {
  */
 export async function signUpWithEmail(email, password) {
   if (!supabase) return { error: { message: 'Supabase 미설정' } }
-  return supabase.auth.signUp({ email, password })
+  return supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      emailRedirectTo: window.location.origin + import.meta.env.BASE_URL
+    }
+  })
 }
 
 /**
