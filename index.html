@@ -348,12 +348,14 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 32px;
+      width: auto;
       height: 32px;
+      padding: 0 0.75rem;
       border: 1px solid rgba(255,255,255,0.3);
       border-radius: 6px;
       background: rgba(255,255,255,0.15);
       color: white;
+      font-size: 0.8rem;
       cursor: pointer;
       transition: background 0.2s;
     }
@@ -397,6 +399,164 @@
 
     .auth-logout-btn:hover {
       background: rgba(255,255,255,0.25);
+    }
+
+    /* Login Modal */
+    .login-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 2000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .login-modal {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      width: 360px;
+      max-width: 90vw;
+      position: relative;
+    }
+
+    .login-modal-close {
+      position: absolute;
+      top: 0.75rem;
+      right: 0.75rem;
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      color: #999;
+      line-height: 1;
+    }
+
+    .login-modal-close:hover {
+      color: #333;
+    }
+
+    .login-modal-title {
+      text-align: center;
+      font-size: 1.25rem;
+      color: #333;
+      margin-bottom: 1.25rem;
+    }
+
+    .login-modal-tabs {
+      display: flex;
+      border-bottom: 1px solid #e5e7eb;
+      margin-bottom: 1.25rem;
+    }
+
+    .login-modal-tab {
+      flex: 1;
+      padding: 0.5rem;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      font-size: 0.9rem;
+      color: #999;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+    }
+
+    .login-modal-tab.active {
+      color: #667eea;
+      border-bottom-color: #667eea;
+    }
+
+    .login-modal-form {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .login-modal-input {
+      padding: 0.6rem 0.75rem;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .login-modal-input:focus {
+      border-color: #667eea;
+    }
+
+    .login-modal-error {
+      font-size: 0.8rem;
+      color: #dc2626;
+      min-height: 1.2em;
+    }
+
+    .login-modal-error.success {
+      color: #16a34a;
+    }
+
+    .login-modal-submit {
+      padding: 0.6rem;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .login-modal-submit:hover {
+      background: #5a6fd6;
+    }
+
+    .login-modal-submit:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .login-modal-separator {
+      display: flex;
+      align-items: center;
+      margin: 1.25rem 0;
+      color: #999;
+      font-size: 0.8rem;
+    }
+
+    .login-modal-separator::before,
+    .login-modal-separator::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #e5e7eb;
+    }
+
+    .login-modal-separator span {
+      padding: 0 0.75rem;
+    }
+
+    .login-modal-google {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      width: 100%;
+      padding: 0.6rem;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      background: white;
+      font-size: 0.9rem;
+      color: #333;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .login-modal-google:hover {
+      background: #f9fafb;
     }
 
     @media (max-width: 768px) {

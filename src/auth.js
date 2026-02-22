@@ -25,6 +25,22 @@ export async function signOut() {
 }
 
 /**
+ * 이메일/비밀번호 로그인
+ */
+export async function signInWithEmail(email, password) {
+  if (!supabase) return { error: { message: 'Supabase 미설정' } }
+  return supabase.auth.signInWithPassword({ email, password })
+}
+
+/**
+ * 이메일/비밀번호 회원가입
+ */
+export async function signUpWithEmail(email, password) {
+  if (!supabase) return { error: { message: 'Supabase 미설정' } }
+  return supabase.auth.signUp({ email, password })
+}
+
+/**
  * 현재 세션 조회
  */
 export async function getSession() {
