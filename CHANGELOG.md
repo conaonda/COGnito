@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.3](https://github.com/conaonda/COGnito/compare/COGnito-v0.2.2...COGnito-v0.2.3) (2026-02-22)
+
+
+### Bug Fixes
+
+* README 뱃지를 shields.io 동적 뱃지로 교체 ([73323b1](https://github.com/conaonda/COGnito/commit/73323b1e7d8e272b59086c2661827398953d8fe3))
+* README 뱃지를 shields.io 동적 뱃지로 교체 ([5737fbf](https://github.com/conaonda/COGnito/commit/5737fbfe0918fdbbd05e51aac1a623e434bd7edd)), closes [#38](https://github.com/conaonda/COGnito/issues/38)
+
 ## [0.2.2](https://github.com/conaonda/COGnito/compare/COGnito-v0.2.1...COGnito-v0.2.2) (2026-02-22)
 
 
