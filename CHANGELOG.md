@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.2.2](https://github.com/conaonda/COGnito/compare/COGnito-v0.2.1...COGnito-v0.2.2) (2026-02-22)
+
+
+### Features
+
+* 로그인 모달 UX 개선 ([4d042e7](https://github.com/conaonda/COGnito/commit/4d042e77c7eceabfd8502bd495108486bb06aba1))
+* 로그인 모달 UX 개선 ([#27](https://github.com/conaonda/COGnito/issues/27)) ([a48eef2](https://github.com/conaonda/COGnito/commit/a48eef2a2175951f854b68009e5d7524777110e7))
+
+
+### Bug Fixes
+
+* 로그인 모달 변경에 맞게 auth UI 테스트 업데이트 ([#34](https://github.com/conaonda/COGnito/issues/34)) ([842e229](https://github.com/conaonda/COGnito/commit/842e229eb52f84f3fb8c0a610f0b509f838d91ec))
+* 로그인 모달 변경에 맞게 auth 테스트 수정 ([2bbc5f4](https://github.com/conaonda/COGnito/commit/2bbc5f4f98f2a7a638f1b70a6b8f5496a0b5817a))
+* 회원가입 인증 메일 리다이렉트 URL에 BASE_URL 추가 ([7775f5f](https://github.com/conaonda/COGnito/commit/7775f5f6d01accc20f55409ad494034e429ea9e0))
+
 ## [0.2.1](https://github.com/conaonda/COGnito/compare/COGnito-v0.2.0...COGnito-v0.2.1) (2026-02-22)
 
 
