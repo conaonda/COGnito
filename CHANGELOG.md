@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/conaonda/COGnito/compare/COGnito-v0.2.0...COGnito-v0.2.1) (2026-02-22)
+
+
+### Bug Fixes
+
+* 로그인 버튼 배치 수정 및 앱 이름 COGnito로 변경 ([#24](https://github.com/conaonda/COGnito/issues/24)) ([09948b7](https://github.com/conaonda/COGnito/commit/09948b7365be04be7dc6a716d73f45a1b87de137))
+
 ## [0.2.0](https://github.com/conaonda/COGnito/compare/COGnito-v0.1.2...COGnito-v0.2.0) (2026-02-22)
 
 
@@ -120,4 +127,3 @@
 * COG HTTP 요청 횟수 감소를 위한 세 가지 전략 적용 ([3eb607c](https://github.com/conaonda/COGnito/commit/3eb607ce1c0b3eea06150d13f5146fcb0b4fd593))
 * COG 헤더 중복 fetch 제거, preconnect 힌트, DOM 캐싱, 벤더 청크 분리 ([5a23586](https://github.com/conaonda/COGnito/commit/5a23586726528ec48d5848c8bc03d748ca73fb35))
 * 아핀 변환 기반 UTM→3857 리프로젝션 우회로 Pan/Zoom FPS 개선 ([65d2bee](https://github.com/conaonda/COGnito/commit/65d2bee8962f664739423514ecab2624e4a62e1e))
-
