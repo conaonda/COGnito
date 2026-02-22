@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.2.0](https://github.com/conaonda/COGnito/compare/COGnito-v0.1.2...COGnito-v0.2.0) (2026-02-22)
+
+
+### Features
+
+* v0.2.0 BaaS 인프라 + 소셜 로그인 구현 ([#19](https://github.com/conaonda/COGnito/issues/19)) ([33ecabc](https://github.com/conaonda/COGnito/commit/33ecabc62f328dd88021e7e3fe74809ee01cf1c8))
+  - Supabase 클라이언트 싱글턴 (환경변수 미설정 시 graceful degradation)
+  - GitHub/Google OAuth 소셜 로그인
+  - 헤더 내 인증 UI (로그인 버튼, 아바타+이름+로그아웃)
+  - DB 스키마 마이그레이션 (profiles, cog\_images, likes, watchlists, watchlist\_items)
+  - Supabase 설정 자동화 스크립트 (npm run setup)
+* v0.2.0 인증 UI E2E 테스트 및 릴리스 설정 ([#20](https://github.com/conaonda/COGnito/issues/20)) ([90e851d](https://github.com/conaonda/COGnito/commit/90e851d48ea76d7fb5894ca51ee5d37037b14378))
+
+
+### Bug Fixes
+
+* style.json 폰트명 수정 (noto\_sans\_regular → Noto Sans Regular, 40곳) ([#19](https://github.com/conaonda/COGnito/issues/19)) ([22b87da](https://github.com/conaonda/COGnito/commit/22b87da))
+
+
 ## [0.1.2](https://github.com/conaonda/COGnito/compare/COGnito-v0.1.1...COGnito-v0.1.2) (2026-02-21)
 
 
@@ -101,3 +120,4 @@
 * COG HTTP 요청 횟수 감소를 위한 세 가지 전략 적용 ([3eb607c](https://github.com/conaonda/COGnito/commit/3eb607ce1c0b3eea06150d13f5146fcb0b4fd593))
 * COG 헤더 중복 fetch 제거, preconnect 힌트, DOM 캐싱, 벤더 청크 분리 ([5a23586](https://github.com/conaonda/COGnito/commit/5a23586726528ec48d5848c8bc03d748ca73fb35))
 * 아핀 변환 기반 UTM→3857 리프로젝션 우회로 Pan/Zoom FPS 개선 ([65d2bee](https://github.com/conaonda/COGnito/commit/65d2bee8962f664739423514ecab2624e4a62e1e))
+
