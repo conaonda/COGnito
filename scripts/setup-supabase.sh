@@ -16,7 +16,7 @@ set -euo pipefail
 #
 # 이 스크립트가 처리하지 않는 것 (웹 UI에서 수동):
 #   - Supabase 프로젝트 생성 (https://supabase.com)
-#   - GitHub/Google OAuth App 생성
+#   - Google OAuth App 생성
 #   - Supabase에서 OAuth Provider 활성화
 
 cd "$(dirname "$0")/.."
@@ -226,14 +226,7 @@ print_oauth_guide() {
   echo "       - https://conaonda.github.io/COGnito/"
   echo "       - http://localhost:5173/COGnito/"
   echo ""
-  echo " [B] GitHub OAuth"
-  echo "     1. github.com → Settings → Developer settings → OAuth Apps → New"
-  echo "        - Homepage URL: https://conaonda.github.io/COGnito/"
-  echo "        - Callback URL: $callback_url"
-  echo "     2. Client ID/Secret 복사"
-  echo "     3. Supabase → Authentication → Providers → GitHub 활성화 → 붙여넣기"
-  echo ""
-  echo " [C] Google OAuth"
+  echo " [B] Google OAuth"
   echo "     1. console.cloud.google.com → APIs & Services → Credentials"
   echo "        - OAuth 2.0 Client → Redirect URI: $callback_url"
   echo "     2. Client ID/Secret 복사"

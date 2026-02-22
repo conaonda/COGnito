@@ -2,7 +2,7 @@ import { supabase } from './supabase.js'
 
 /**
  * OAuth 로그인
- * @param {'github' | 'google'} provider
+ * @param {'google'} provider
  */
 export async function signIn(provider) {
   if (!supabase) return
