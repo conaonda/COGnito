@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.2.4](https://github.com/conaonda/COGnito/compare/COGnito-v0.2.3...COGnito-v0.2.4) (2026-02-22)
+
+
+### Features
+
+* 수동 COG 등록 + 카탈로그 UI + 뷰어 동적 메타데이터 ([ec564bf](https://github.com/conaonda/COGnito/commit/ec564bff4b253fe8cfe134c9fb40ac04ca61a28b))
+* 수동 COG 등록, 카탈로그 UI, 뷰어 동적 메타데이터 ([aff9fc7](https://github.com/conaonda/COGnito/commit/aff9fc786a9f827efdffa8bb4dbcda7dfca310da))
+
+
+### Bug Fixes
+
+* 영상 정보 패널에서 긴 파일명 오버플로우 수정 ([c186028](https://github.com/conaonda/COGnito/commit/c18602803c7533fa99f4acf6068aaf5aa68e4df5))
+
 ## [0.2.3](https://github.com/conaonda/COGnito/compare/COGnito-v0.2.2...COGnito-v0.2.3) (2026-02-22)
 
 
