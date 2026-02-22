@@ -14,8 +14,7 @@ export function initAuthUI() {
   const authContainer = document.createElement('div')
   authContainer.className = 'auth-container'
 
-  const githubLink = headerTop.querySelector('.github-link')
-  headerTop.insertBefore(authContainer, githubLink)
+  headerTop.appendChild(authContainer)
 
   renderLoggedOut(authContainer)
 
