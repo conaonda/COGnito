@@ -50,12 +50,10 @@ test.describe('인증 UI 검증', () => {
     const authContainer = page.locator('.auth-container')
     await expect(authContainer).toBeVisible()
 
-    // Google 로그인 버튼 1개
-    const loginBtns = page.locator('.auth-login-btn')
-    await expect(loginBtns).toHaveCount(1)
-
-    // 버튼의 title 확인
-    await expect(loginBtns.nth(0)).toHaveAttribute('title', 'Google로 로그인')
+    // 로그인 버튼 1개
+    const loginBtn = page.locator('.auth-login-btn')
+    await expect(loginBtn).toHaveCount(1)
+    await expect(loginBtn).toHaveText('로그인')
   })
 
   test('인증 UI가 뷰어 기능을 방해하지 않음', async ({ page }) => {
