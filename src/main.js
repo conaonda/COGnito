@@ -220,13 +220,13 @@ const loadCOG = async (rawUrl, catalogMeta = null) => {
       // 메타데이터 추출 및 저장
       try {
         const cogMeta = await extractCogMetadata(tiff)
-        cogMeta.url = url
+        cogMeta.url = rawUrl
         window.currentCogMeta = cogMeta
         window.currentTiff = tiff
         document.dispatchEvent(new CustomEvent('cog-loaded'))
 
         // 뷰어 메타데이터 업데이트
-        const filename = url.split('/').pop().split('?')[0]
+        const filename = rawUrl.split('/').pop().split('?')[0]
         const displayMeta = catalogMeta
           ? { title: catalogMeta.title, description: catalogMeta.description, crs: cogMeta.crs, bands: cogMeta.bands, filename }
           : { title: null, crs: cogMeta.crs, bands: cogMeta.bands, filename }
