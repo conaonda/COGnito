@@ -67,14 +67,16 @@ export function extractStacItemMeta(item) {
   let cogUrl = null
   let thumbnailUrl = null
 
-  if (assets.visual?.href) {
+  const isHttpUrl = (url) => url && /^https?:\/\//.test(url)
+
+  if (isHttpUrl(assets.visual?.href)) {
     cogUrl = assets.visual.href
-  } else if (assets.B04?.href) {
+  } else if (isHttpUrl(assets.B04?.href)) {
     cogUrl = assets.B04.href
   } else {
     for (const key of Object.keys(assets)) {
       const asset = assets[key]
-      if (asset.type && asset.type.includes('geotiff')) {
+      if (asset.type && asset.type.includes('geotiff') && isHttpUrl(asset.href)) {
         cogUrl = asset.href
         break
       }
@@ -82,7 +84,7 @@ export function extractStacItemMeta(item) {
   }
 
   // 썸네일
-  if (assets.thumbnail?.href) {
+  if (isHttpUrl(assets.thumbnail?.href)) {
     thumbnailUrl = assets.thumbnail.href
   }
 
