@@ -27,8 +27,13 @@ async function cacheFirst(request) {
   if (cached) return cached
 
   const response = await fetch(request)
-  if (response.status === 206 || response.ok) {
-    cache.put(key, response.clone())
+  // Cache API는 206 Partial Response를 지원하지 않으므로 200만 캐시
+  if (response.ok && response.status === 200) {
+    try {
+      cache.put(key, response.clone())
+    } catch (e) {
+      // 캐시 실패는 무시 — 응답은 정상 반환
+    }
   }
   return response
 }
