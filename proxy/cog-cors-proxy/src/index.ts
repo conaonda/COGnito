@@ -7,7 +7,7 @@ const ALLOWED_HOSTS = [
   'sentinel-s2-l2a-cogs.s3.us-west-2.amazonaws.com',
 ]
 
-function isAllowed(url) {
+function isAllowed(url: string): boolean {
   try {
     const { hostname } = new URL(url)
     return ALLOWED_HOSTS.some((h) => hostname === h || hostname.endsWith('.' + h))
@@ -16,7 +16,7 @@ function isAllowed(url) {
   }
 }
 
-const CORS_HEADERS = {
+const CORS_HEADERS: Record<string, string> = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, HEAD, OPTIONS',
   'Access-Control-Allow-Headers': 'Range',
@@ -24,7 +24,7 @@ const CORS_HEADERS = {
 }
 
 export default {
-  async fetch(request) {
+  async fetch(request: Request): Promise<Response> {
     if (request.method === 'OPTIONS') {
       return new Response(null, { status: 204, headers: CORS_HEADERS })
     }
@@ -47,7 +47,7 @@ export default {
     // Forward the request, preserving Range header for COG partial fetches
     const headers = new Headers()
     if (request.headers.has('Range')) {
-      headers.set('Range', request.headers.get('Range'))
+      headers.set('Range', request.headers.get('Range')!)
     }
 
     const resp = await fetch(target, { method: request.method, headers })
