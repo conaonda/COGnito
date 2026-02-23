@@ -29,6 +29,7 @@ jobs:
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_CORS_PROXY_URL: https://cog-cors-proxy.conaonda.workers.dev
 
       - name: Verify build output
         run: |
@@ -81,6 +82,7 @@ jobs:
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_CORS_PROXY_URL: https://cog-cors-proxy.conaonda.workers.dev
 
       - name: Run tests
         run: npx playwright test
