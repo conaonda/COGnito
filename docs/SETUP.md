@@ -101,14 +101,17 @@ npm run dev
 
 ### 8-1. GitHub Secrets 등록
 
-Repository → **Settings → Secrets and variables → Actions**에서 추가:
+`setup-supabase.sh`에서 자동 등록을 시도하지만, Codespaces 등 토큰 권한이 제한된 환경에서는 실패할 수 있습니다. 그 경우 웹 UI에서 직접 등록하세요.
 
-| Secret | 값 |
-|--------|-----|
-| `VITE_SUPABASE_URL` | Supabase Project URL |
-| `VITE_SUPABASE_ANON_KEY` | Supabase Anon Key |
+1. GitHub 저장소 페이지 → **Settings** 탭
+2. 왼쪽 사이드바 → **Secrets and variables → Actions**
+3. **New repository secret** 버튼 클릭
+4. 아래 항목을 각각 등록:
 
-> `setup-supabase.sh` 실행 시 `gh` CLI가 있으면 자동 등록할 수 있습니다.
+| Name | Value |
+|------|-------|
+| `VITE_SUPABASE_URL` | `https://xxx.supabase.co` (Supabase Project URL) |
+| `VITE_SUPABASE_ANON_KEY` | Supabase Dashboard → Settings → API의 `anon` `public` 키 |
 
 ### 8-2. GitHub Pages 활성화
 
