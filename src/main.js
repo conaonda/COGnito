@@ -9,6 +9,8 @@ import { extractCogMetadata } from './catalog.js'
 import { initAuthUI } from './authUI.js'
 import { initRegisterUI } from './registerUI.js'
 import { initCatalogUI } from './catalogUI.js'
+import { initStacUI } from './stacUI.js'
+import { openRegisterModalWithMeta } from './registerUI.js'
 import { updateViewerMeta } from './viewerMeta.js'
 import 'ol/ol.css'
 
@@ -16,6 +18,25 @@ document.getElementById('app-version').textContent = 'v' + __APP_VERSION__
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register(import.meta.env.BASE_URL + 'sw.js')
+}
+
+const CORS_PROXY_URL = import.meta.env.VITE_CORS_PROXY_URL || ''
+
+const PROXY_HOSTS = [
+  'sentinel-cogs.s3.us-west-2.amazonaws.com',
+  'e84-earth-search-sentinel-data.s3.us-west-2.amazonaws.com',
+  'sentinel-s2-l2a-cogs.s3.us-west-2.amazonaws.com',
+]
+
+function proxyCogUrl(url) {
+  if (!CORS_PROXY_URL) return url
+  try {
+    const { hostname } = new URL(url)
+    if (!PROXY_HOSTS.some((h) => hostname === h)) return url
+    return `${CORS_PROXY_URL}?url=${encodeURIComponent(url)}`
+  } catch {
+    return url
+  }
 }
 
 const DEFAULT_COG_URL = 'https://storage.googleapis.com/pdd-stac/disasters/hurricane-harvey/0831/SkySat_20170831T195552Z_RGB.tif'
@@ -148,7 +169,8 @@ const initMap = async () => {
   }
 }
 
-const loadCOG = async (url, catalogMeta = null) => {
+const loadCOG = async (rawUrl, catalogMeta = null) => {
+    const url = proxyCogUrl(rawUrl)
     showLoading()
     errorEl.classList.remove('active')
 
@@ -198,12 +220,13 @@ const loadCOG = async (url, catalogMeta = null) => {
       // 메타데이터 추출 및 저장
       try {
         const cogMeta = await extractCogMetadata(tiff)
-        cogMeta.url = url
+        cogMeta.url = rawUrl
         window.currentCogMeta = cogMeta
+        window.currentTiff = tiff
         document.dispatchEvent(new CustomEvent('cog-loaded'))
 
         // 뷰어 메타데이터 업데이트
-        const filename = url.split('/').pop().split('?')[0]
+        const filename = rawUrl.split('/').pop().split('?')[0]
         const displayMeta = catalogMeta
           ? { title: catalogMeta.title, description: catalogMeta.description, crs: cogMeta.crs, bands: cogMeta.bands, filename }
           : { title: null, crs: cogMeta.crs, bands: cogMeta.bands, filename }
@@ -274,6 +297,24 @@ const loadCOG = async (url, catalogMeta = null) => {
 
   initRegisterUI()
   initCatalogUI((url, catalogItem) => loadCOG(url, catalogItem))
+
+  // STAC UI 초기화
+  initStacUI(
+    (url) => loadCOG(url),
+    (stacMeta) => {
+      if (stacMeta.cogUrl) {
+        loadCOG(stacMeta.cogUrl).then(() => {
+          openRegisterModalWithMeta(stacMeta)
+        })
+      }
+    },
+    () => {
+      const extent = map.getView().calculateExtent(map.getSize())
+      const bl = transform([extent[0], extent[1]], viewProjection, 'EPSG:4326')
+      const tr = transform([extent[2], extent[3]], viewProjection, 'EPSG:4326')
+      return [bl[0], bl[1], tr[0], tr[1]]
+    }
+  )
 
   console.log('Map initialized successfully')
   window.olMap = map

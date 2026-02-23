@@ -24,10 +24,14 @@ export function initAuthUI() {
     }
   })
 
-  onAuthStateChange((_event, session) => {
+  onAuthStateChange((event, session) => {
     if (session?.user) {
       renderLoggedIn(authContainer, session.user)
       closeLoginModal()
+      // OAuth 콜백 해시 파라미터 제거 (stale token 방지)
+      if (event === 'SIGNED_IN' && window.location.hash) {
+        history.replaceState(null, '', window.location.pathname + window.location.search)
+      }
     } else {
       renderLoggedOut(authContainer)
     }

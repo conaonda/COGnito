@@ -20,6 +20,20 @@ export function initCatalogUI(onSelectCog) {
   const nextBtn = panel.querySelector('#catalog-next')
   const pageInfo = panel.querySelector('#catalog-page-info')
 
+  // 필터 컨트롤 삽입 (검색 입력 아래)
+  const filterContainer = document.createElement('div')
+  filterContainer.className = 'catalog-filters'
+  filterContainer.innerHTML = `
+    <input type="text" id="catalog-filter-tag" class="catalog-filter-input" placeholder="태그 필터 (예: flood)">
+    <input type="text" id="catalog-filter-sensor" class="catalog-filter-input" placeholder="센서 필터">
+    <input type="text" id="catalog-filter-region" class="catalog-filter-input" placeholder="지역 필터">
+  `
+  searchInput.parentNode.insertBefore(filterContainer, searchInput.nextSibling)
+
+  const tagFilter = filterContainer.querySelector('#catalog-filter-tag')
+  const sensorFilter = filterContainer.querySelector('#catalog-filter-sensor')
+  const regionFilter = filterContainer.querySelector('#catalog-filter-region')
+
   let currentPage = 0
   let searchTerm = ''
   let debounceTimer = null
@@ -37,14 +51,19 @@ export function initCatalogUI(onSelectCog) {
     closeBtn.addEventListener('click', () => panel.classList.remove('open'))
   }
 
-  searchInput.addEventListener('input', () => {
+  function onFilterChange() {
     clearTimeout(debounceTimer)
     debounceTimer = setTimeout(() => {
       searchTerm = searchInput.value.trim()
       currentPage = 0
       loadPage()
     }, 300)
-  })
+  }
+
+  searchInput.addEventListener('input', onFilterChange)
+  tagFilter.addEventListener('input', onFilterChange)
+  sensorFilter.addEventListener('input', onFilterChange)
+  regionFilter.addEventListener('input', onFilterChange)
 
   prevBtn.addEventListener('click', () => {
     if (currentPage > 0) {
@@ -72,6 +91,9 @@ export function initCatalogUI(onSelectCog) {
     const offset = currentPage * PAGE_SIZE
     const { data, error } = await getCogImages({
       search: searchTerm,
+      tag: tagFilter.value.trim(),
+      sensor: sensorFilter.value.trim(),
+      region: regionFilter.value.trim(),
       limit: PAGE_SIZE,
       offset
     })
@@ -93,10 +115,26 @@ export function initCatalogUI(onSelectCog) {
     data.forEach(item => {
       const card = document.createElement('div')
       card.className = 'catalog-card'
+
+      const thumbHtml = item.thumbnail_url
+        ? `<img src="${escapeHtml(item.thumbnail_url)}" class="catalog-card-thumb" alt="">`
+        : ''
+
+      const tagsHtml = (item.tags && item.tags.length > 0)
+        ? `<div class="catalog-card-tags">${item.tags.map(t => `<span class="catalog-tag">${escapeHtml(t)}</span>`).join('')}</div>`
+        : ''
+
+      const metaParts = [item.crs || '']
+      if (item.sensor) metaParts.push(item.sensor)
+      if (item.region) metaParts.push(item.region)
+      metaParts.push(formatDate(item.created_at))
+
       card.innerHTML = `
+        ${thumbHtml}
         <div class="catalog-card-title">${escapeHtml(item.title || '제목 없음')}</div>
         <div class="catalog-card-desc">${escapeHtml(item.description || '')}</div>
-        <div class="catalog-card-meta">${item.crs || ''} | ${formatDate(item.created_at)}</div>
+        ${tagsHtml}
+        <div class="catalog-card-meta">${metaParts.filter(Boolean).join(' | ')}</div>
       `
       card.addEventListener('click', () => {
         panel.classList.remove('open')
