@@ -728,8 +728,265 @@
         width: 100%;
       }
     }
+
+    /* Catalog filters */
+    .catalog-filters {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      padding: 0 0.75rem 0.5rem;
+    }
+
+    .catalog-filter-input {
+      padding: 0.35rem 0.6rem;
+      border: 1px solid #e5e7eb;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      outline: none;
+    }
+
+    .catalog-filter-input:focus {
+      border-color: #667eea;
+    }
+
+    /* Catalog card thumbnail */
+    .catalog-card-thumb {
+      width: 100%;
+      max-height: 80px;
+      object-fit: cover;
+      border-radius: 4px;
+      margin-bottom: 0.5rem;
+    }
+
+    /* Tag badges */
+    .catalog-card-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.25rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .catalog-tag {
+      display: inline-block;
+      padding: 0.1rem 0.4rem;
+      background: #eef2ff;
+      color: #4f46e5;
+      border-radius: 3px;
+      font-size: 0.65rem;
+    }
+
+    /* STAC Panel */
+    .stac-toggle-btn {
+      position: absolute;
+      top: 50%;
+      right: 0;
+      transform: translateY(-50%);
+      z-index: 20;
+      background: rgba(102,126,234,0.9);
+      color: white;
+      border: none;
+      border-radius: 6px 0 0 6px;
+      padding: 0.75rem 0.5rem;
+      font-size: 0.7rem;
+      cursor: pointer;
+      writing-mode: vertical-rl;
+      letter-spacing: 0.1em;
+    }
+
+    .stac-toggle-btn:hover {
+      background: rgba(102,126,234,1);
+    }
+
+    .stac-panel {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 340px;
+      height: 100%;
+      background: white;
+      z-index: 30;
+      box-shadow: -2px 0 12px rgba(0,0,0,0.15);
+      transform: translateX(100%);
+      transition: transform 0.25s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stac-panel.open {
+      transform: translateX(0);
+    }
+
+    .stac-panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .stac-panel-header h3 {
+      font-size: 1rem;
+      color: #333;
+      margin: 0;
+    }
+
+    .stac-panel-close {
+      background: none;
+      border: none;
+      font-size: 1.1rem;
+      cursor: pointer;
+      color: #999;
+    }
+
+    .stac-panel-close:hover {
+      color: #333;
+    }
+
+    .stac-controls {
+      padding: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .stac-controls select,
+    .stac-controls input {
+      padding: 0.4rem 0.6rem;
+      border: 1px solid #d1d5db;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      outline: none;
+    }
+
+    .stac-controls select:focus,
+    .stac-controls input:focus {
+      border-color: #667eea;
+    }
+
+    .stac-controls label {
+      font-size: 0.75rem;
+      color: #666;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .stac-date-row {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .stac-date-row input {
+      flex: 1;
+    }
+
+    .stac-search-btn {
+      padding: 0.5rem;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+
+    .stac-search-btn:hover {
+      background: #5a6fd6;
+    }
+
+    .stac-search-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .stac-status {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.75rem;
+      color: #666;
+    }
+
+    .stac-results {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0 0.75rem;
+    }
+
+    .stac-result-card {
+      display: flex;
+      gap: 0.5rem;
+      padding: 0.5rem;
+      border: 1px solid #e5e7eb;
+      border-radius: 6px;
+      margin-bottom: 0.5rem;
+    }
+
+    .stac-result-card:hover {
+      border-color: #667eea;
+      background: #f8f9ff;
+    }
+
+    .stac-result-thumb {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+
+    .stac-result-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .stac-result-title {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #333;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .stac-result-meta {
+      font-size: 0.7rem;
+      color: #999;
+      margin: 0.15rem 0;
+    }
+
+    .stac-result-actions {
+      display: flex;
+      gap: 0.3rem;
+    }
+
+    .stac-result-actions button {
+      padding: 0.2rem 0.5rem;
+      border: 1px solid #d1d5db;
+      border-radius: 3px;
+      background: white;
+      font-size: 0.65rem;
+      cursor: pointer;
+    }
+
+    .stac-view-btn:hover {
+      background: #667eea;
+      color: white;
+      border-color: #667eea;
+    }
+
+    .stac-register-btn:hover {
+      background: #16a34a;
+      color: white;
+      border-color: #16a34a;
+    }
+
+    @media (max-width: 768px) {
+      .stac-panel {
+        width: 100%;
+      }
+    }
   </style>
-  <script type="module" crossorigin src="/COGnito/assets/index-XOP0KOd6.js"></script>
+  <script type="module" crossorigin src="/COGnito/assets/index-CfEu61eJ.js"></script>
   <link rel="modulepreload" crossorigin href="/COGnito/assets/vendor-DErJACYp.js">
   <link rel="stylesheet" crossorigin href="/COGnito/assets/index-BtPuoxOl.css">
 </head>
@@ -782,6 +1039,33 @@
         <span id="catalog-page-info"></span>
         <button id="catalog-next">&rarr;</button>
       </div>
+    </div>
+    <button id="stac-toggle-btn" class="stac-toggle-btn" title="STAC 검색">STAC</button>
+    <div id="stac-panel" class="stac-panel">
+      <div class="stac-panel-header">
+        <h3>STAC 검색</h3>
+        <button id="stac-panel-close" class="stac-panel-close">✕</button>
+      </div>
+      <div class="stac-controls">
+        <select id="stac-preset">
+          <option value="">STAC API 선택...</option>
+          <option value="https://earth-search.aws.element84.com/v1">Earth Search (AWS)</option>
+          <option value="https://planetarycomputer.microsoft.com/api/stac/v1">Planetary Computer</option>
+          <option value="custom">커스텀 URL 입력</option>
+        </select>
+        <input type="text" id="stac-custom-url" placeholder="STAC API URL" style="display:none">
+        <select id="stac-collection">
+          <option value="">컬렉션 선택...</option>
+        </select>
+        <label><input type="checkbox" id="stac-use-bbox"> 현재 맵 범위로 검색</label>
+        <div class="stac-date-row">
+          <input type="date" id="stac-date-from" title="시작일">
+          <input type="date" id="stac-date-to" title="종료일">
+        </div>
+        <button id="stac-search-btn" class="stac-search-btn">검색</button>
+      </div>
+      <div id="stac-status" class="stac-status"></div>
+      <div id="stac-results" class="stac-results"></div>
     </div>
   </div>
 </body>

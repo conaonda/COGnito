@@ -10,6 +10,8 @@ self.addEventListener('fetch', (event) => {
 })
 
 function isCOGRequest(request) {
+  // cross-origin 요청은 인터셉트하지 않음 (CORS 모드가 깨질 수 있음)
+  if (new URL(request.url).origin !== self.location.origin) return false
   return request.headers.has('range') &&
     (request.url.includes('.tif') || request.url.includes('.tiff'))
 }
@@ -27,8 +29,13 @@ async function cacheFirst(request) {
   if (cached) return cached
 
   const response = await fetch(request)
-  if (response.status === 206 || response.ok) {
-    cache.put(key, response.clone())
+  // Cache API는 206 Partial Response를 지원하지 않으므로 200만 캐시
+  if (response.ok && response.status === 200) {
+    try {
+      cache.put(key, response.clone())
+    } catch (e) {
+      // 캐시 실패는 무시 — 응답은 정상 반환
+    }
   }
   return response
 }
