@@ -2,6 +2,36 @@ import { supabase } from './supabase.js'
 import { detectBands } from './cogLayer.js'
 
 /**
+ * URL에서 자동 제목 생성
+ * 확장자 제거, _/- → 공백 변환
+ */
+export function generateTitleFromUrl(url) {
+  try {
+    const filename = url.split('/').pop().split('?')[0]
+    return filename
+      .replace(/\.(tif|tiff|cog)$/i, '')
+      .replace(/[_-]/g, ' ')
+      .trim()
+  } catch {
+    return ''
+  }
+}
+
+/**
+ * 메타데이터에서 자동 설명 생성
+ * "3-band RGB, EPSG:32615, 4096×4096" 형태
+ */
+export function generateDescriptionFromMeta(meta) {
+  const parts = []
+  if (meta.bands) {
+    parts.push(`${meta.bands.length}-band ${meta.bandType || ''}`.trim())
+  }
+  if (meta.crs) parts.push(meta.crs)
+  if (meta.width && meta.height) parts.push(`${meta.width}×${meta.height}`)
+  return parts.join(', ')
+}
+
+/**
  * COG 영상을 cog_images 테이블에 등록
  */
 export async function saveCogImage(data) {
@@ -13,12 +43,17 @@ export async function saveCogImage(data) {
       url: data.url,
       title: data.title || null,
       description: data.description || null,
-      source_type: 'manual',
+      source_type: data.source_type || 'manual',
       crs: data.crs || null,
       bands: data.bands || null,
       bbox: data.bbox || null,
       thumbnail_url: data.thumbnail_url || null,
-      metadata_json: data.metadata_json || null
+      metadata_json: data.metadata_json || null,
+      captured_at: data.captured_at || null,
+      region: data.region || null,
+      sensor: data.sensor || null,
+      resolution: data.resolution || null,
+      tags: data.tags || []
     })
     .select()
     .single()
@@ -29,7 +64,7 @@ export async function saveCogImage(data) {
 /**
  * COG 영상 목록 조회
  */
-export async function getCogImages({ search = '', limit = 20, offset = 0 } = {}) {
+export async function getCogImages({ search = '', tag = '', sensor = '', region = '', limit = 20, offset = 0 } = {}) {
   if (!supabase) return { data: [], error: null }
 
   let query = supabase
@@ -40,6 +75,15 @@ export async function getCogImages({ search = '', limit = 20, offset = 0 } = {})
 
   if (search) {
     query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%`)
+  }
+  if (tag) {
+    query = query.contains('tags', [tag])
+  }
+  if (sensor) {
+    query = query.ilike('sensor', `%${sensor}%`)
+  }
+  if (region) {
+    query = query.ilike('region', `%${region}%`)
   }
 
   return query
@@ -94,5 +138,84 @@ export async function extractCogMetadata(tiff) {
     bbox: [bbox[0], bbox[1], bbox[2], bbox[3]],
     width: image.getWidth(),
     height: image.getHeight()
+  }
+}
+
+/**
+ * COG overview를 canvas에 렌더링하여 data URL 썸네일 생성
+ */
+export async function generateThumbnail(tiff) {
+  try {
+    // 가장 작은 overview 이미지 사용
+    const imageCount = await tiff.getImageCount()
+    let image = await tiff.getImage(0)
+
+    // overview가 있으면 가장 작은 것 사용
+    if (imageCount > 1) {
+      image = await tiff.getImage(imageCount - 1)
+    }
+
+    const width = image.getWidth()
+    const height = image.getHeight()
+    const rasters = await image.readRasters()
+    const samplesPerPixel = rasters.length
+
+    // 썸네일 크기 (최대 128px)
+    const maxSize = 128
+    const scale = Math.min(maxSize / width, maxSize / height, 1)
+    const tw = Math.round(width * scale)
+    const th = Math.round(height * scale)
+
+    const canvas = document.createElement('canvas')
+    canvas.width = tw
+    canvas.height = th
+    const ctx = canvas.getContext('2d')
+    const imgData = ctx.createImageData(tw, th)
+
+    // 밴드별 min/max 계산 (2%/98% percentile 근사)
+    const bandStats = []
+    for (let b = 0; b < Math.min(samplesPerPixel, 3); b++) {
+      const band = rasters[b]
+      let min = Infinity, max = -Infinity
+      for (let i = 0; i < band.length; i++) {
+        const v = band[i]
+        if (v < min) min = v
+        if (v > max) max = v
+      }
+      bandStats.push({ min, max })
+    }
+
+    for (let y = 0; y < th; y++) {
+      for (let x = 0; x < tw; x++) {
+        const srcX = Math.floor(x / scale)
+        const srcY = Math.floor(y / scale)
+        const srcIdx = srcY * width + srcX
+        const dstIdx = (y * tw + x) * 4
+
+        if (samplesPerPixel >= 3) {
+          // RGB
+          for (let b = 0; b < 3; b++) {
+            const v = rasters[b][srcIdx]
+            const { min, max } = bandStats[b]
+            imgData.data[dstIdx + b] = max > min ? Math.round(((v - min) / (max - min)) * 255) : 0
+          }
+        } else {
+          // Grayscale
+          const v = rasters[0][srcIdx]
+          const { min, max } = bandStats[0]
+          const normalized = max > min ? Math.round(((v - min) / (max - min)) * 255) : 0
+          imgData.data[dstIdx] = normalized
+          imgData.data[dstIdx + 1] = normalized
+          imgData.data[dstIdx + 2] = normalized
+        }
+        imgData.data[dstIdx + 3] = 255
+      }
+    }
+
+    ctx.putImageData(imgData, 0, 0)
+    return canvas.toDataURL('image/png')
+  } catch (err) {
+    console.warn('썸네일 생성 실패:', err)
+    return null
   }
 }

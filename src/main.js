@@ -9,6 +9,8 @@ import { extractCogMetadata } from './catalog.js'
 import { initAuthUI } from './authUI.js'
 import { initRegisterUI } from './registerUI.js'
 import { initCatalogUI } from './catalogUI.js'
+import { initStacUI } from './stacUI.js'
+import { openRegisterModalWithMeta } from './registerUI.js'
 import { updateViewerMeta } from './viewerMeta.js'
 import 'ol/ol.css'
 
@@ -200,6 +202,7 @@ const loadCOG = async (url, catalogMeta = null) => {
         const cogMeta = await extractCogMetadata(tiff)
         cogMeta.url = url
         window.currentCogMeta = cogMeta
+        window.currentTiff = tiff
         document.dispatchEvent(new CustomEvent('cog-loaded'))
 
         // 뷰어 메타데이터 업데이트
@@ -274,6 +277,24 @@ const loadCOG = async (url, catalogMeta = null) => {
 
   initRegisterUI()
   initCatalogUI((url, catalogItem) => loadCOG(url, catalogItem))
+
+  // STAC UI 초기화
+  initStacUI(
+    (url) => loadCOG(url),
+    (stacMeta) => {
+      if (stacMeta.cogUrl) {
+        loadCOG(stacMeta.cogUrl).then(() => {
+          openRegisterModalWithMeta(stacMeta)
+        })
+      }
+    },
+    () => {
+      const extent = map.getView().calculateExtent(map.getSize())
+      const bl = transform([extent[0], extent[1]], viewProjection, 'EPSG:4326')
+      const tr = transform([extent[2], extent[3]], viewProjection, 'EPSG:4326')
+      return [bl[0], bl[1], tr[0], tr[1]]
+    }
+  )
 
   console.log('Map initialized successfully')
   window.olMap = map
