@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # ============================================
-# COGnito v0.2.0 Supabase 설정 스크립트
+# COGnito v0.3.0 Supabase 설정 스크립트
 # ============================================
 #
 # 사용법: ./scripts/setup-supabase.sh
@@ -117,6 +117,7 @@ create_env_file() {
   cat > "$PROJECT_ROOT/.env" <<EOF
 VITE_SUPABASE_URL=$SUPABASE_URL
 VITE_SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY
+VITE_CORS_PROXY_URL=
 EOF
 
   ok ".env 파일 생성 완료"
@@ -127,11 +128,18 @@ run_migration() {
   echo ""
   info "DB 마이그레이션 실행 여부 확인..."
 
-  local migration_file="$PROJECT_ROOT/supabase/migrations/00001_initial_schema.sql"
-  if [[ ! -f "$migration_file" ]]; then
-    error "마이그레이션 파일을 찾을 수 없습니다: $migration_file"
+  local migration_dir="$PROJECT_ROOT/supabase/migrations"
+  local migration_files=()
+  while IFS= read -r f; do
+    migration_files+=("$f")
+  done < <(find "$migration_dir" -name '*.sql' -type f | sort)
+
+  if [[ ${#migration_files[@]} -eq 0 ]]; then
+    error "마이그레이션 파일을 찾을 수 없습니다: $migration_dir/*.sql"
     exit 1
   fi
+
+  info "${#migration_files[@]}개의 마이그레이션 파일 감지됨"
 
   echo ""
   echo "  마이그레이션 실행 방법을 선택하세요:"
@@ -162,17 +170,25 @@ run_migration() {
       ok "마이그레이션 완료"
       ;;
     2)
+      local combined_sql=""
+      for mf in "${migration_files[@]}"; do
+        combined_sql+="-- ▶ $(basename "$mf")"$'\n'
+        combined_sql+="$(cat "$mf")"$'\n\n'
+      done
+
       if command -v pbcopy &>/dev/null; then
-        cat "$migration_file" | pbcopy
-        ok "SQL이 클립보드에 복사되었습니다."
+        echo "$combined_sql" | pbcopy
+        ok "전체 마이그레이션 SQL이 클립보드에 복사되었습니다. (${#migration_files[@]}개 파일)"
       elif command -v xclip &>/dev/null; then
-        cat "$migration_file" | xclip -selection clipboard
-        ok "SQL이 클립보드에 복사되었습니다."
+        echo "$combined_sql" | xclip -selection clipboard
+        ok "전체 마이그레이션 SQL이 클립보드에 복사되었습니다. (${#migration_files[@]}개 파일)"
       else
         warn "클립보드 복사를 지원하지 않는 환경입니다."
         echo ""
-        echo "  아래 파일의 내용을 Supabase Dashboard → SQL Editor에 붙여넣으세요:"
-        echo "  $migration_file"
+        echo "  아래 파일들의 내용을 순서대로 Supabase Dashboard → SQL Editor에 붙여넣으세요:"
+        for mf in "${migration_files[@]}"; do
+          echo "    - $mf"
+        done
       fi
       echo ""
       echo "  Supabase Dashboard → SQL Editor → New query → 붙여넣기 → Run"
@@ -280,7 +296,7 @@ verify() {
 # ── 메인 실행 ──
 main() {
   echo ""
-  echo "🛰️  COGnito v0.2.0 Supabase 설정"
+  echo "🛰️  COGnito v0.3.0 Supabase 설정"
   echo ""
 
   check_supabase_cli

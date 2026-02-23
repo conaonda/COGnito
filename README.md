@@ -19,22 +19,25 @@ OpenLayers 기반 Cloud Optimized GeoTIFF (COG) 영상 가시화 웹 애플리�
 
 ## 🚀 시작하기
 
+> **처음 설정하시나요?** [docs/SETUP.md](docs/SETUP.md)에서 Supabase 설정부터 배포까지 전체 과정을 안내합니다.
+
 ### 요구사항
 
-- Node.js 18+
+- Node.js 22+
 - npm
 
-### 설치 및 실행
+### 빠른 시작
 
 ```bash
-# 의존성 설치
+git clone https://github.com/conaonda/COGnito.git
+cd COGnito
 npm install
+
+# Supabase 설정 (최초 1회)
+./scripts/setup-supabase.sh
 
 # 개발 서버 실행
 npm run dev
-
-# 브라우저에서 열기
-# http://localhost:3000
 ```
 
 ### 빌드
@@ -103,6 +106,7 @@ npm run preview
 │           ├── measure-pan.js
 │           └── perf-thresholds.js  # 성능 임계값 (경고/실패 2단계)
 ├── docs/
+│   ├── SETUP.md               # 통합 설정 가이드 (clone → 배포)
 │   ├── ROADMAP.md             # v1.0 로드맵
 │   ├── testing-guide.md       # 테스트 가이드 (통합 문서)
 │   └── reprojection-analysis.md # 리프로젝션 파이프라인 분석
