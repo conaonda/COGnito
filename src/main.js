@@ -20,6 +20,20 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register(import.meta.env.BASE_URL + 'sw.js')
 }
 
+const CORS_PROXY_URL = import.meta.env.VITE_CORS_PROXY_URL || ''
+
+function proxyCogUrl(url) {
+  if (!CORS_PROXY_URL) return url
+  try {
+    const u = new URL(url)
+    if (u.origin === window.location.origin) return url
+    if (!url.match(/\.tiff?($|\?)/i)) return url
+    return `${CORS_PROXY_URL}?url=${encodeURIComponent(url)}`
+  } catch {
+    return url
+  }
+}
+
 const DEFAULT_COG_URL = 'https://storage.googleapis.com/pdd-stac/disasters/hurricane-harvey/0831/SkySat_20170831T195552Z_RGB.tif'
 
 const urlParams = new URLSearchParams(window.location.search)
@@ -150,7 +164,8 @@ const initMap = async () => {
   }
 }
 
-const loadCOG = async (url, catalogMeta = null) => {
+const loadCOG = async (rawUrl, catalogMeta = null) => {
+    const url = proxyCogUrl(rawUrl)
     showLoading()
     errorEl.classList.remove('active')
 
