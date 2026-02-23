@@ -10,6 +10,8 @@ self.addEventListener('fetch', (event) => {
 })
 
 function isCOGRequest(request) {
+  // cross-origin 요청은 인터셉트하지 않음 (CORS 모드가 깨질 수 있음)
+  if (new URL(request.url).origin !== self.location.origin) return false
   return request.headers.has('range') &&
     (request.url.includes('.tif') || request.url.includes('.tiff'))
 }
