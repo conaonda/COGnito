@@ -16,8 +16,14 @@ export function initStacUI(onViewCog, onRegisterCog, getMapBbox) {
   const customUrlInput = panel.querySelector('#stac-custom-url')
   const collectionSelect = panel.querySelector('#stac-collection')
   const bboxCheckbox = panel.querySelector('#stac-use-bbox')
+  const spatialFilter = panel.querySelector('#stac-spatial-filter')
   const dateFrom = panel.querySelector('#stac-date-from')
   const dateTo = panel.querySelector('#stac-date-to')
+
+  // bbox 체크 시 공간 필터 드롭다운 표시
+  bboxCheckbox.addEventListener('change', () => {
+    spatialFilter.style.display = bboxCheckbox.checked ? '' : 'none'
+  })
   const searchBtn = panel.querySelector('#stac-search-btn')
   const resultList = panel.querySelector('#stac-results')
   const statusEl = panel.querySelector('#stac-status')
@@ -94,7 +100,17 @@ export function initStacUI(onViewCog, onRegisterCog, getMapBbox) {
       }
 
       const result = await searchStac(params)
-      const features = result.features || []
+      let features = result.features || []
+
+      // 공간 필터: "포함" 모드일 때 맵 범위를 완전히 포함하는 영상만 표시
+      if (bboxCheckbox.checked && spatialFilter.value === 'contains' && params.bbox) {
+        const [mMinLon, mMinLat, mMaxLon, mMaxLat] = params.bbox
+        features = features.filter(item => {
+          const b = item.bbox
+          if (!b || b.length < 4) return false
+          return b[0] <= mMinLon && b[1] <= mMinLat && b[2] >= mMaxLon && b[3] >= mMaxLat
+        })
+      }
 
       statusEl.textContent = `${features.length}개 결과`
 
