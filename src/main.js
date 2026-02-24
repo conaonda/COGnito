@@ -255,9 +255,11 @@ const loadCOG = async (rawUrl, catalogMeta = null) => {
   // 초기 COG 로드
   await loadCOG(COG_URL)
 
-  // 로그인 전 맵 뷰 복원 (COG fit 이후 적용)
+  // 로그인 전 맵 뷰 복원 (COG fit 애니메이션 취소 후 즉시 적용)
   if (preLoginState?.center && preLoginState?.zoom) {
-    view.animate({ center: preLoginState.center, zoom: preLoginState.zoom, duration: 0 })
+    view.cancelAnimations()
+    view.setCenter(preLoginState.center)
+    view.setZoom(preLoginState.zoom)
   }
 
   // UI 이벤트
