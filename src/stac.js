@@ -67,25 +67,31 @@ export function extractStacItemMeta(item) {
   let cogUrl = null
   let thumbnailUrl = null
 
-  const isHttpUrl = (url) => url && /^https?:\/\//.test(url)
+  const isUsableUrl = (url) => url && /^(https?|s3):\/\//.test(url)
+  const toHttpUrl = (url) => {
+    if (!url) return url
+    const s3Match = url.match(/^s3:\/\/([^/]+)\/(.+)$/)
+    if (s3Match) return `https://${s3Match[1]}.s3.amazonaws.com/${s3Match[2]}`
+    return url
+  }
 
-  if (isHttpUrl(assets.visual?.href)) {
-    cogUrl = assets.visual.href
-  } else if (isHttpUrl(assets.B04?.href)) {
-    cogUrl = assets.B04.href
+  if (isUsableUrl(assets.visual?.href)) {
+    cogUrl = toHttpUrl(assets.visual.href)
+  } else if (isUsableUrl(assets.B04?.href)) {
+    cogUrl = toHttpUrl(assets.B04.href)
   } else {
     for (const key of Object.keys(assets)) {
       const asset = assets[key]
-      if (asset.type && asset.type.includes('geotiff') && isHttpUrl(asset.href)) {
-        cogUrl = asset.href
+      if (asset.type && asset.type.includes('geotiff') && isUsableUrl(asset.href)) {
+        cogUrl = toHttpUrl(asset.href)
         break
       }
     }
   }
 
   // 썸네일
-  if (isHttpUrl(assets.thumbnail?.href)) {
-    thumbnailUrl = assets.thumbnail.href
+  if (isUsableUrl(assets.thumbnail?.href)) {
+    thumbnailUrl = toHttpUrl(assets.thumbnail.href)
   }
 
   meta.cogUrl = cogUrl
