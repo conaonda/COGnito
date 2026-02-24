@@ -6,6 +6,8 @@ import { supabase } from './supabase.js'
  */
 export async function signIn(provider) {
   if (!supabase) return
+  // OAuth 리다이렉트 전 앱 상태 저장
+  savePreLoginState()
   const { error } = await supabase.auth.signInWithOAuth({
     provider,
     options: {
@@ -44,6 +46,29 @@ export async function signUpWithEmail(email, password) {
       emailRedirectTo: window.location.origin + import.meta.env.BASE_URL
     }
   })
+}
+
+const STATE_KEY = 'cognito-pre-login-state'
+
+function savePreLoginState() {
+  const state = {}
+  if (window.currentCogMeta?.url) state.cogUrl = window.currentCogMeta.url
+  if (window.olMap) {
+    const view = window.olMap.getView()
+    state.center = view.getCenter()
+    state.zoom = view.getZoom()
+  }
+  sessionStorage.setItem(STATE_KEY, JSON.stringify(state))
+}
+
+/**
+ * 로그인 전 저장된 앱 상태 복원 (1회성)
+ */
+export function consumePreLoginState() {
+  const raw = sessionStorage.getItem(STATE_KEY)
+  if (!raw) return null
+  sessionStorage.removeItem(STATE_KEY)
+  try { return JSON.parse(raw) } catch { return null }
 }
 
 /**
