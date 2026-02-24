@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.2.6](https://github.com/conaonda/COGnito/compare/COGnito-v0.2.5...COGnito-v0.2.6) (2026-02-24)
+
+
+### Features
+
+* s3:// 프로토콜 URL을 HTTPS로 자동 변환 ([#66](https://github.com/conaonda/COGnito/issues/66)) ([73db039](https://github.com/conaonda/COGnito/commit/73db03913c7002e999e9bc03b1637a3bd627e0db)), closes [#51](https://github.com/conaonda/COGnito/issues/51)
+* STAC 공간 검색 조건 상세화 (포함/교차 옵션) ([#67](https://github.com/conaonda/COGnito/issues/67)) ([2374971](https://github.com/conaonda/COGnito/commit/2374971632f341655ddbd5458f8f85380499ef4c)), closes [#54](https://github.com/conaonda/COGnito/issues/54)
+
+
+### Bug Fixes
+
+* Planetary Computer COG 에셋 SAS 토큰 서명 추가 ([#64](https://github.com/conaonda/COGnito/issues/64)) ([c5b503b](https://github.com/conaonda/COGnito/commit/c5b503b63282192da92652b1861f55ac5ba376e1)), closes [#60](https://github.com/conaonda/COGnito/issues/60)
+
 ## [0.2.5](https://github.com/conaonda/COGnito/compare/COGnito-v0.2.4...COGnito-v0.2.5) (2026-02-24)
 
 
