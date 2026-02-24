@@ -1,4 +1,4 @@
-import { STAC_PRESETS, searchStac, getStacCollections, extractStacItemMeta } from './stac.js'
+import { STAC_PRESETS, searchStac, getStacCollections, extractStacItemMeta, signPlanetaryComputerUrl } from './stac.js'
 
 /**
  * STAC 검색 UI 초기화
@@ -127,15 +127,17 @@ export function initStacUI(onViewCog, onRegisterCog, getMapBbox) {
         `
 
         if (meta.cogUrl) {
-          card.querySelector('.stac-view-btn').addEventListener('click', (e) => {
+          card.querySelector('.stac-view-btn').addEventListener('click', async (e) => {
             e.stopPropagation()
             panel.classList.remove('open')
-            onViewCog(meta.cogUrl)
+            const signedUrl = await signPlanetaryComputerUrl(meta.cogUrl, meta.collection)
+            onViewCog(signedUrl)
           })
 
-          card.querySelector('.stac-register-btn').addEventListener('click', (e) => {
+          card.querySelector('.stac-register-btn').addEventListener('click', async (e) => {
             e.stopPropagation()
-            onRegisterCog(meta)
+            const signedUrl = await signPlanetaryComputerUrl(meta.cogUrl, meta.collection)
+            onRegisterCog({ ...meta, cogUrl: signedUrl })
           })
         }
 
