@@ -1,4 +1,4 @@
-import { STAC_PRESETS, searchStac, getStacCollections, extractStacItemMeta, signPlanetaryComputerUrl } from './stac.js'
+import { STAC_PRESETS, searchStac, searchStacNext, getStacCollections, extractStacItemMeta, signPlanetaryComputerUrl } from './stac.js'
 
 /**
  * STAC 검색 UI 초기화
@@ -69,6 +69,94 @@ export function initStacUI(onViewCog, onRegisterCog, getMapBbox) {
     }
   }
 
+  let totalCount = 0
+  let currentBbox = null
+
+  function renderFeatures(features) {
+    features.forEach(item => {
+      const meta = extractStacItemMeta(item)
+      const card = document.createElement('div')
+      card.className = 'stac-result-card'
+
+      const thumbHtml = meta.thumbnail_url
+        ? `<img src="${meta.thumbnail_url}" class="stac-result-thumb" alt="">`
+        : ''
+
+      card.innerHTML = `
+        ${thumbHtml}
+        <div class="stac-result-info">
+          <div class="stac-result-title">${escapeHtml(meta.title)}</div>
+          <div class="stac-result-meta">
+            ${meta.sensor ? escapeHtml(meta.sensor) + ' | ' : ''}${meta.captured_at ? meta.captured_at.slice(0, 10) : ''}
+          </div>
+          <div class="stac-result-actions">
+            ${meta.cogUrl ? '<button class="stac-view-btn">뷰어에서 보기</button>' : '<span style="font-size:0.7rem;color:#999;">COG 없음</span>'}
+            ${meta.cogUrl ? '<button class="stac-register-btn">카탈로그에 등록</button>' : ''}
+          </div>
+        </div>
+      `
+
+      if (meta.cogUrl) {
+        card.querySelector('.stac-view-btn').addEventListener('click', async (e) => {
+          e.stopPropagation()
+          panel.classList.remove('open')
+          const signedUrl = await signPlanetaryComputerUrl(meta.cogUrl, meta.collection)
+          onViewCog(signedUrl)
+        })
+
+        card.querySelector('.stac-register-btn').addEventListener('click', async (e) => {
+          e.stopPropagation()
+          const signedUrl = await signPlanetaryComputerUrl(meta.cogUrl, meta.collection)
+          onRegisterCog({ ...meta, cogUrl: signedUrl })
+        })
+      }
+
+      resultList.appendChild(card)
+    })
+  }
+
+  function filterContains(features) {
+    if (!bboxCheckbox.checked || spatialFilter.value !== 'contains' || !currentBbox) return features
+    const [mMinLon, mMinLat, mMaxLon, mMaxLat] = currentBbox
+    return features.filter(item => {
+      const b = item.bbox
+      if (!b || b.length < 4) return false
+      return b[0] <= mMinLon && b[1] <= mMinLat && b[2] >= mMaxLon && b[3] >= mMaxLat
+    })
+  }
+
+  function getNextLink(result) {
+    return (result.links || []).find(l => l.rel === 'next')
+  }
+
+  function addLoadMoreButton(nextLink) {
+    const existing = resultList.querySelector('.stac-load-more')
+    if (existing) existing.remove()
+
+    if (!nextLink) return
+
+    const btn = document.createElement('button')
+    btn.className = 'stac-search-btn stac-load-more'
+    btn.textContent = '더 보기'
+    btn.addEventListener('click', async () => {
+      btn.disabled = true
+      btn.textContent = '로딩 중...'
+      try {
+        const result = await searchStacNext(nextLink)
+        btn.remove()
+        const features = filterContains(result.features || [])
+        totalCount += features.length
+        statusEl.textContent = `${totalCount}개 결과`
+        renderFeatures(features)
+        addLoadMoreButton(getNextLink(result))
+      } catch (err) {
+        btn.textContent = '더 보기 실패 — 재시도'
+        btn.disabled = false
+      }
+    })
+    resultList.appendChild(btn)
+  }
+
   searchBtn.addEventListener('click', async () => {
     const apiUrl = presetSelect.value === 'custom'
       ? customUrlInput.value.trim()
@@ -82,6 +170,8 @@ export function initStacUI(onViewCog, onRegisterCog, getMapBbox) {
     statusEl.textContent = '검색 중...'
     resultList.innerHTML = ''
     searchBtn.disabled = true
+    totalCount = 0
+    currentBbox = bboxCheckbox.checked ? getMapBbox() : null
 
     try {
       const params = { apiUrl, limit: 10 }
@@ -89,9 +179,7 @@ export function initStacUI(onViewCog, onRegisterCog, getMapBbox) {
       const col = collectionSelect.value
       if (col) params.collections = [col]
 
-      if (bboxCheckbox.checked) {
-        params.bbox = getMapBbox()
-      }
+      if (currentBbox) params.bbox = currentBbox
 
       if (dateFrom.value || dateTo.value) {
         const from = dateFrom.value || '..'
@@ -100,65 +188,18 @@ export function initStacUI(onViewCog, onRegisterCog, getMapBbox) {
       }
 
       const result = await searchStac(params)
-      let features = result.features || []
+      const features = filterContains(result.features || [])
+      totalCount = features.length
 
-      // 공간 필터: "포함" 모드일 때 맵 범위를 완전히 포함하는 영상만 표시
-      if (bboxCheckbox.checked && spatialFilter.value === 'contains' && params.bbox) {
-        const [mMinLon, mMinLat, mMaxLon, mMaxLat] = params.bbox
-        features = features.filter(item => {
-          const b = item.bbox
-          if (!b || b.length < 4) return false
-          return b[0] <= mMinLon && b[1] <= mMinLat && b[2] >= mMaxLon && b[3] >= mMaxLat
-        })
-      }
-
-      statusEl.textContent = `${features.length}개 결과`
+      statusEl.textContent = `${totalCount}개 결과`
 
       if (features.length === 0) {
         resultList.innerHTML = '<div style="text-align:center;padding:1rem;color:#999;">결과 없음</div>'
         return
       }
 
-      features.forEach(item => {
-        const meta = extractStacItemMeta(item)
-        const card = document.createElement('div')
-        card.className = 'stac-result-card'
-
-        const thumbHtml = meta.thumbnail_url
-          ? `<img src="${meta.thumbnail_url}" class="stac-result-thumb" alt="">`
-          : ''
-
-        card.innerHTML = `
-          ${thumbHtml}
-          <div class="stac-result-info">
-            <div class="stac-result-title">${escapeHtml(meta.title)}</div>
-            <div class="stac-result-meta">
-              ${meta.sensor ? escapeHtml(meta.sensor) + ' | ' : ''}${meta.captured_at ? meta.captured_at.slice(0, 10) : ''}
-            </div>
-            <div class="stac-result-actions">
-              ${meta.cogUrl ? '<button class="stac-view-btn">뷰어에서 보기</button>' : '<span style="font-size:0.7rem;color:#999;">COG 없음</span>'}
-              ${meta.cogUrl ? '<button class="stac-register-btn">카탈로그에 등록</button>' : ''}
-            </div>
-          </div>
-        `
-
-        if (meta.cogUrl) {
-          card.querySelector('.stac-view-btn').addEventListener('click', async (e) => {
-            e.stopPropagation()
-            panel.classList.remove('open')
-            const signedUrl = await signPlanetaryComputerUrl(meta.cogUrl, meta.collection)
-            onViewCog(signedUrl)
-          })
-
-          card.querySelector('.stac-register-btn').addEventListener('click', async (e) => {
-            e.stopPropagation()
-            const signedUrl = await signPlanetaryComputerUrl(meta.cogUrl, meta.collection)
-            onRegisterCog({ ...meta, cogUrl: signedUrl })
-          })
-        }
-
-        resultList.appendChild(card)
-      })
+      renderFeatures(features)
+      addLoadMoreButton(getNextLink(result))
     } catch (err) {
       statusEl.textContent = `검색 실패: ${err.message}`
     } finally {
