@@ -91,10 +91,30 @@ export function extractStacItemMeta(item) {
   meta.cogUrl = cogUrl
   meta.thumbnail_url = thumbnailUrl
 
-  // 컬렉션 → 태그
+  // 컬렉션
   if (item.collection) {
+    meta.collection = item.collection
     meta.tags = [item.collection]
   }
 
   return meta
+}
+
+/**
+ * Planetary Computer 에셋 URL에 SAS 토큰 서명
+ * PC가 아닌 URL이거나 토큰 발급 실패 시 원본 URL 반환
+ */
+export async function signPlanetaryComputerUrl(url, collectionId) {
+  if (!url || !url.includes('.blob.core.windows.net')) return url
+  try {
+    const res = await fetch(
+      `https://planetarycomputer.microsoft.com/api/sas/v1/token/${collectionId}`
+    )
+    if (!res.ok) return url
+    const { token } = await res.json()
+    const separator = url.includes('?') ? '&' : '?'
+    return `${url}${separator}${token}`
+  } catch {
+    return url
+  }
 }
