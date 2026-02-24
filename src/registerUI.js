@@ -212,8 +212,14 @@ function openRegisterModal(meta) {
 
 /**
  * STAC 또는 외부에서 메타데이터가 미리 채워진 등록 모달 열기
+ * 로그인 상태를 확인하여 미인증 사용자는 로그인 안내 표시
  */
-export function openRegisterModalWithMeta(meta) {
+export async function openRegisterModalWithMeta(meta) {
+  const session = await getSession()
+  if (!session?.user) {
+    alert('카탈로그에 등록하려면 먼저 로그인해주세요.')
+    return
+  }
   window.currentCogMeta = { ...window.currentCogMeta, ...meta }
   openRegisterModal(window.currentCogMeta)
 }
