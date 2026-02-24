@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.3.0](https://github.com/conaonda/COGnito/compare/COGnito-v0.3.0...COGnito-v0.3.0) (2026-02-24)
+
+
+### Features
+
+* STAC 검색 결과 페이지네이션 지원 ([#77](https://github.com/conaonda/COGnito/issues/77)) ([094a1d4](https://github.com/conaonda/COGnito/commit/094a1d4e9b1588d6f33ebfb6d4a3cebfce6380cb)), closes [#52](https://github.com/conaonda/COGnito/issues/52)
+
+
+### Miscellaneous Chores
+
+* v0.3.0 릴리스 — 로드맵 마일스톤 완료에 따른 버전 범프 ([#75](https://github.com/conaonda/COGnito/issues/75)) ([2854b76](https://github.com/conaonda/COGnito/commit/2854b76f35d47709362528b5b7e6d9268d2c0e64))
+
 ## [0.3.0](https://github.com/conaonda/COGnito/compare/COGnito-v0.2.6...COGnito-v0.3.0) (2026-02-24)
 
 
