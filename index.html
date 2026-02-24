@@ -1055,6 +1055,10 @@
           <option value="">컬렉션 선택...</option>
         </select>
         <label><input type="checkbox" id="stac-use-bbox"> 현재 맵 범위로 검색</label>
+        <select id="stac-spatial-filter" style="display:none">
+          <option value="contains">포함 (영상이 맵 범위를 포함)</option>
+          <option value="intersects">교차 (맵 범위와 겹침)</option>
+        </select>
         <div class="stac-date-row">
           <input type="date" id="stac-date-from" title="시작일">
           <input type="date" id="stac-date-to" title="종료일">
