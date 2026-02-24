@@ -1,5 +1,30 @@
 # Changelog
 
+## [0.2.5](https://github.com/conaonda/COGnito/compare/COGnito-v0.2.4...COGnito-v0.2.5) (2026-02-24)
+
+
+### Features
+
+* CORS 프록시 Worker 및 cross-origin COG URL 변환 추가 ([edc99b1](https://github.com/conaonda/COGnito/commit/edc99b1a8418a75305102db864bd1dc3da33f5bc))
+* v0.3.0 카탈로그 고도화 ([cce8e1c](https://github.com/conaonda/COGnito/commit/cce8e1c42080ee7134d13219575f5f8642d1876a))
+* v0.3.0 카탈로그 고도화 — 메타데이터, 태그, STAC, 필터링, 썸네일 ([f4c027b](https://github.com/conaonda/COGnito/commit/f4c027bab938064ab51da128ea498cf1da5fef66))
+
+
+### Bug Fixes
+
+* cog_images INSERT RLS 정책 수정 (auth.role → auth.uid) ([4e0dc8f](https://github.com/conaonda/COGnito/commit/4e0dc8fc9a89f3bfefe12a0a88a4fc132e2963ca))
+* Navigator LockManager 타임아웃으로 인한 카탈로그 조회 실패 해결 ([77628b5](https://github.com/conaonda/COGnito/commit/77628b56a6bf20488ab92174f593b33a7d53748f))
+* Navigator LockManager 타임아웃으로 인한 카탈로그 조회 실패 해결 ([d1725e5](https://github.com/conaonda/COGnito/commit/d1725e51f3cb331f6da7d1cf1b74ddf789b5bfe0)), closes [#62](https://github.com/conaonda/COGnito/issues/62)
+* OAuth 콜백 후 URL 해시 제거하여 stale session 방지 ([959c6d8](https://github.com/conaonda/COGnito/commit/959c6d8e5ed6fc94f0e0180e72c7e45bab884579)), closes [#57](https://github.com/conaonda/COGnito/issues/57)
+* STAC 에셋에서 s3:// 스킴 URL 필터링 ([3157e0d](https://github.com/conaonda/COGnito/commit/3157e0dbe1b7d8d17c014319065151b6b13ce85d))
+* Supabase auth flowType을 implicit으로 명시 ([14ef6d7](https://github.com/conaonda/COGnito/commit/14ef6d7dbef3894ce9d2bf94a7d7b02071545d35))
+* Supabase auth flowType을 pkce로 변경 ([c952d51](https://github.com/conaonda/COGnito/commit/c952d51da053d9514cbfcdd3f62618d214054d4c))
+* SW에서 cross-origin COG 요청 인터셉트 제외 ([434dbf8](https://github.com/conaonda/COGnito/commit/434dbf8b79561296af9b6c4f6846e9790ba60cd9))
+* SW의 206 partial response 캐시 에러로 인한 COG 로드 실패 수정 ([c89a9b3](https://github.com/conaonda/COGnito/commit/c89a9b37f821886f45a84420816acb7dc1a2219b))
+* Worker에서 정적 assets 설정 제거 ([1fce396](https://github.com/conaonda/COGnito/commit/1fce3967729365c2aae5e731b8b676a01bf76a41))
+* 프록시 경유 시 파일명과 URL이 프록시 주소로 표시되는 문제 수정 ([9ff5de2](https://github.com/conaonda/COGnito/commit/9ff5de2ad09b60a9b3af588c04e03a1504d1e341))
+* 프록시가 필요한 호스트만 경유하도록 수정 및 에러 응답에 CORS 헤더 추가 ([6a87c6e](https://github.com/conaonda/COGnito/commit/6a87c6eeedc9ad546f41bc0136c27aa33f7e065e))
+
 ## [0.2.4](https://github.com/conaonda/COGnito/compare/COGnito-v0.2.3...COGnito-v0.2.4) (2026-02-22)
 
 
