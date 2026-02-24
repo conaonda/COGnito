@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/conaonda/COGnito/compare/COGnito-v0.2.6...COGnito-v0.3.0) (2026-02-24)
+
+
+### Miscellaneous Chores
+
+* v0.3.0 릴리스 — 로드맵 마일스톤 완료에 따른 버전 범프 ([#73](https://github.com/conaonda/COGnito/issues/73)) ([9788115](https://github.com/conaonda/COGnito/commit/97881156e634c1f072cc645ed75a9922f266b641))
+
 ## [0.2.6](https://github.com/conaonda/COGnito/compare/COGnito-v0.2.5...COGnito-v0.2.6) (2026-02-24)
 
 
