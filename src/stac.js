@@ -27,6 +27,28 @@ export async function searchStac({ apiUrl, collections, bbox, datetime, limit = 
 }
 
 /**
+ * STAC 검색 결과에서 다음 페이지 로드
+ */
+export async function searchStacNext(nextLink) {
+  const method = (nextLink.method || 'GET').toUpperCase()
+  const opts = { method, headers: {} }
+
+  if (method === 'POST') {
+    opts.headers['Content-Type'] = 'application/json'
+    if (nextLink.body) opts.body = JSON.stringify(nextLink.body)
+    if (nextLink.merge) {
+      // STAC API는 merge 필드로 기존 body에 병합할 파라미터를 전달
+      const merged = { ...nextLink.body, ...nextLink.merge }
+      opts.body = JSON.stringify(merged)
+    }
+  }
+
+  const res = await fetch(nextLink.href, opts)
+  if (!res.ok) throw new Error(`STAC 검색 실패: ${res.status}`)
+  return res.json()
+}
+
+/**
  * STAC 컬렉션 목록 조회
  */
 export async function getStacCollections(apiUrl) {
