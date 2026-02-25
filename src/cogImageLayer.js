@@ -73,8 +73,6 @@ export async function createCOGImageLayer({ url, projectionMode = 'reproject', v
     ]
   }
 
-  console.log('COG Image mode:', { cogCRS, cogExtent, viewExtent, bandInfo, stats })
-
   // Cache & async state
   let cachedCanvas = null
   let cachedExtent = null
@@ -124,7 +122,6 @@ export async function createCOGImageLayer({ url, projectionMode = 'reproject', v
         resX, resY,
         samples
       }
-      console.log('readRasters params:', readParams)
       const rasters = await tiff.readRasters({ ...readParams, signal, pool })
 
       if (signal.aborted) return

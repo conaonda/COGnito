@@ -310,8 +310,6 @@ export async function createCOGLayer({ url, bands, projectionMode, viewProjectio
     : await detectBands(tiff)
   const resolvedBands = bandInfo.bands
 
-  console.log('Band detection:', bandInfo)
-
   const source = createCOGSource(url, resolvedBands)
   const [cogView, { stats }] = await Promise.all([
     source.getView(),
@@ -335,17 +333,6 @@ export async function createCOGLayer({ url, bands, projectionMode, viewProjectio
   const displayExtentSrc = rotatedSrcExtent || cogExtent
   const extent = displayExtentSrc ? transformExtent(displayExtentSrc, cogProjection, viewProjection) : undefined
   const center = cogView.center ? transform(cogView.center, cogProjection, viewProjection) : undefined
-
-  console.log('COG Info:', {
-    cogExtent,
-    displayExtentSrc,
-    cogProjection: cogProjection?.getCode(),
-    viewExtent: extent,
-    viewProjection,
-    zoom: cogView.zoom,
-    projectionMode
-  })
-  console.log('Band min/max stats:', stats)
 
   const layer = new WebGLTileLayer({
     source: source,

@@ -80,7 +80,7 @@ function openRegisterModal(meta) {
   // 자동 메타데이터 표시
   const metaInfo = document.createElement('div')
   metaInfo.style.cssText = 'font-size:0.75rem;color:#666;line-height:1.5;padding:0.5rem;background:#f9fafb;border-radius:4px;'
-  metaInfo.textContent = `CRS: ${meta.crs} | Bands: ${meta.bands.join(',')} (${meta.bandType}) | Size: ${meta.width}×${meta.height}`
+  metaInfo.textContent = `CRS: ${meta.crs} | Bands: ${(meta.bands || []).join(',')} (${meta.bandType}) | Size: ${meta.width}×${meta.height}`
 
   // 제목 (자동 채움)
   const titleInput = document.createElement('input')
