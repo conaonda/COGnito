@@ -7,6 +7,7 @@ import { createCOGLayer } from './cogLayer.js'
 import { createCOGImageLayer } from './cogImageLayer.js'
 import { extractCogMetadata } from './catalog.js'
 import { initAuthUI } from './authUI.js'
+import { consumePreLoginState } from './auth.js'
 import { initRegisterUI } from './registerUI.js'
 import { initCatalogUI } from './catalogUI.js'
 import { initStacUI } from './stacUI.js'
@@ -41,8 +42,10 @@ function proxyCogUrl(url) {
 
 const DEFAULT_COG_URL = 'https://storage.googleapis.com/pdd-stac/disasters/hurricane-harvey/0831/SkySat_20170831T195552Z_RGB.tif'
 
+const preLoginState = consumePreLoginState()
+
 const urlParams = new URLSearchParams(window.location.search)
-const COG_URL = urlParams.get('url') || DEFAULT_COG_URL
+const COG_URL = urlParams.get('url') || preLoginState?.cogUrl || DEFAULT_COG_URL
 const PROJECTION_MODE = urlParams.get('mode') || 'affine'    // 'affine' | 'reproject'
 const RENDER_PIPELINE = urlParams.get('render') || 'tile'    // 'tile' | 'image'
 const TARGET_TILE_SIZE = parseInt(urlParams.get('tileSize'), 10) || 256
@@ -251,6 +254,13 @@ const loadCOG = async (rawUrl, catalogMeta = null) => {
 
   // 초기 COG 로드
   await loadCOG(COG_URL)
+
+  // 로그인 전 맵 뷰 복원 (COG fit 애니메이션 취소 후 즉시 적용)
+  if (preLoginState?.center && preLoginState?.zoom) {
+    view.cancelAnimations()
+    view.setCenter(preLoginState.center)
+    view.setZoom(preLoginState.zoom)
+  }
 
   // UI 이벤트
   loadBtn.addEventListener('click', () => {
