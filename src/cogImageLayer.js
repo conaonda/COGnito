@@ -186,7 +186,7 @@ export async function createCOGImageLayer({ url, projectionMode = 'reproject', v
       }
 
       clearTimeout(debounceTimer)
-      debounceTimer = setTimeout(() => loadAndRender(extent, size, canvas), 150)
+      debounceTimer = setTimeout(() => loadAndRender(extent, size, canvas), 200)
 
       return canvas
     },

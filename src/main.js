@@ -205,8 +205,7 @@ const loadCOG = async (rawUrl, catalogMeta = null) => {
             hideLoading()
           }
           if (cogSource.getState() === 'error') {
-            const error = cogSource.getError()
-            console.error('COG Error:', error)
+            console.error('COG Error:', cogSource.getError())
             showError('COG 영상을 로드하는 중 오류가 발생했습니다.')
           }
         })
@@ -214,6 +213,14 @@ const loadCOG = async (rawUrl, catalogMeta = null) => {
         if (cogSource.getState() === 'ready') {
           hideLoading()
         }
+
+        // 연속 줌/팬 중 불필요한 타일 렌더링 억제
+        let interacting = false
+        map.on('movestart', () => { interacting = true })
+        map.on('moveend', () => {
+          interacting = false
+          cogLayer.changed()
+        })
       }
 
       currentCogLayer = cogLayer
