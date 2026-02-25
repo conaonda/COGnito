@@ -10,10 +10,11 @@ export const STAC_PRESETS = [
 /**
  * STAC API 검색
  */
-export async function searchStac({ apiUrl, collections, bbox, datetime, limit = 10 }) {
+export async function searchStac({ apiUrl, collections, bbox, intersects, datetime, limit = 10 }) {
   const body = { limit }
   if (collections && collections.length > 0) body.collections = collections
-  if (bbox) body.bbox = bbox
+  if (intersects) body.intersects = intersects
+  else if (bbox) body.bbox = bbox
   if (datetime) body.datetime = datetime
 
   const res = await fetch(`${apiUrl}/search`, {

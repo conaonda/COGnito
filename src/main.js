@@ -49,6 +49,8 @@ const COG_URL = urlParams.get('url') || preLoginState?.cogUrl || DEFAULT_COG_URL
 const PROJECTION_MODE = urlParams.get('mode') || 'affine'    // 'affine' | 'reproject'
 const RENDER_PIPELINE = urlParams.get('render') || 'tile'    // 'tile' | 'image'
 const TARGET_TILE_SIZE = parseInt(urlParams.get('tileSize'), 10) || 256
+const SHARED_CENTER = urlParams.get('center')  // 'lon,lat'
+const SHARED_ZOOM = urlParams.get('zoom')
 
 const MOBILE_MAX_ZOOM = 16
 const DEFAULT_MAX_ZOOM = 20
@@ -262,8 +264,16 @@ const loadCOG = async (rawUrl, catalogMeta = null) => {
   // 초기 COG 로드
   await loadCOG(COG_URL)
 
-  // 로그인 전 맵 뷰 복원 (COG fit 애니메이션 취소 후 즉시 적용)
-  if (preLoginState?.center && preLoginState?.zoom) {
+  // 공유 URL의 center/zoom 복원
+  if (SHARED_CENTER && SHARED_ZOOM) {
+    const [lon, lat] = SHARED_CENTER.split(',').map(Number)
+    if (isFinite(lon) && isFinite(lat)) {
+      view.cancelAnimations()
+      view.setCenter(transform([lon, lat], 'EPSG:4326', viewProjection))
+      view.setZoom(Number(SHARED_ZOOM))
+    }
+  } else if (preLoginState?.center && preLoginState?.zoom) {
+    // 로그인 전 맵 뷰 복원 (COG fit 애니메이션 취소 후 즉시 적용)
     view.cancelAnimations()
     view.setCenter(preLoginState.center)
     view.setZoom(preLoginState.zoom)
@@ -279,6 +289,26 @@ const loadCOG = async (rawUrl, catalogMeta = null) => {
       const url = urlInput.value.trim()
       if (url) loadCOG(url)
     }
+  })
+
+  // 공유 버튼
+  document.getElementById('cog-share-btn').addEventListener('click', () => {
+    const center = view.getCenter()
+    const lonLat = transform(center, viewProjection, 'EPSG:4326')
+    const zoom = view.getZoom()
+    const cogUrl = urlInput.value.trim() || COG_URL
+    const params = new URLSearchParams()
+    params.set('url', cogUrl)
+    params.set('center', `${lonLat[0].toFixed(6)},${lonLat[1].toFixed(6)}`)
+    params.set('zoom', zoom.toFixed(1))
+    const shareUrl = `${window.location.origin}${window.location.pathname}?${params}`
+    navigator.clipboard.writeText(shareUrl).then(() => {
+      const btn = document.getElementById('cog-share-btn')
+      btn.textContent = '복사됨!'
+      setTimeout(() => { btn.textContent = '공유' }, 2000)
+    }).catch(() => {
+      prompt('공유 URL:', shareUrl)
+    })
   })
 
   // 모바일 화질 토글
@@ -330,7 +360,8 @@ const loadCOG = async (rawUrl, catalogMeta = null) => {
       const bl = transform([extent[0], extent[1]], viewProjection, 'EPSG:4326')
       const tr = transform([extent[2], extent[3]], viewProjection, 'EPSG:4326')
       return [bl[0], bl[1], tr[0], tr[1]]
-    }
+    },
+    map
   )
 
   console.log('Map initialized successfully')

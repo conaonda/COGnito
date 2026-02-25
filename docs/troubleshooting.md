@@ -31,3 +31,35 @@ COGnito 개발 중 발견된 이슈와 해결 방법을 기록합니다.
 3. **main.js**: `movestart`/`moveend` 이벤트로 연속 조작 중 불필요한 렌더링 억제
 
 **관련 코드**: `src/cogLayer.js`, `src/cogImageLayer.js`, `src/main.js`
+
+---
+
+## #55: 영상 영역 공유 기능
+
+**구현**: URL 파라미터에 `center` (경위도), `zoom` 을 포함하여 현재 뷰 상태를 공유.
+
+**동작**:
+1. 공유 버튼 클릭 → 현재 COG URL + center + zoom 을 URL 파라미터로 생성
+2. 클립보드에 자동 복사 (실패 시 prompt 대체)
+3. 공유 URL 접속 시 COG 로드 후 해당 위치/줌으로 자동 이동
+4. 공유 URL이 로그인 복원보다 우선
+
+**URL 형식**: `?url=<COG_URL>&center=<lon>,<lat>&zoom=<level>`
+
+**관련 코드**: `src/main.js`
+
+---
+
+## #70: STAC AOI 설정 기능
+
+**구현**: `ol/interaction/Draw`를 사용하여 맵에서 사각형 AOI를 그리고, STAC `intersects` 파라미터로 검색.
+
+**동작**:
+1. STAC 패널의 "영역 그리기" 버튼 → 맵에서 사각형 드래그
+2. 그려진 영역이 벡터 레이어로 맵에 표시 (파선, 연한 파란색)
+3. 검색 시 AOI가 설정되어 있으면 `intersects` 파라미터 사용 (bbox보다 우선)
+4. "초기화" 버튼으로 AOI 삭제
+
+**주의**: `createBox()`는 ol/interaction/Draw의 static 메서드. `Draw.createBox()` 형식으로 호출.
+
+**관련 코드**: `src/stacUI.js`, `src/stac.js`

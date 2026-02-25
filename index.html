@@ -1004,6 +1004,7 @@
       <div class="header-url">
         <input type="text" id="cog-url-input" placeholder="COG URL 입력">
         <button id="cog-url-load">로드</button>
+        <button id="cog-share-btn" title="현재 뷰 공유">공유</button>
         <button id="cog-register-btn" style="display:none">등록</button>
       </div>
     </header>
@@ -1064,6 +1065,11 @@
           <option value="contains">포함 (영상이 맵 범위를 포함)</option>
           <option value="intersects">교차 (맵 범위와 겹침)</option>
         </select>
+        <div style="display:flex;gap:0.3rem;align-items:center;">
+          <button id="stac-aoi-draw" type="button" style="flex:1;padding:0.3rem 0.5rem;border:1px solid #d1d5db;border-radius:4px;background:white;font-size:0.75rem;cursor:pointer;">영역 그리기</button>
+          <button id="stac-aoi-clear" type="button" style="padding:0.3rem 0.5rem;border:1px solid #d1d5db;border-radius:4px;background:white;font-size:0.75rem;cursor:pointer;">초기화</button>
+        </div>
+        <div id="stac-aoi-status" style="font-size:0.7rem;color:#667eea;"></div>
         <div class="stac-date-row">
           <input type="date" id="stac-date-from" title="시작일">
           <input type="date" id="stac-date-to" title="종료일">
