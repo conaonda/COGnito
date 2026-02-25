@@ -74,7 +74,11 @@ export async function getCogImages({ search = '', tag = '', sensor = '', region 
     .range(offset, offset + limit - 1)
 
   if (search) {
-    query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%`)
+    // PostgREST 필터 연산자 주입 방지를 위해 특수문자 이스케이프
+    const sanitized = search.replace(/[%_,().*]/g, '')
+    if (sanitized) {
+      query = query.or(`title.ilike.%${sanitized}%,description.ilike.%${sanitized}%`)
+    }
   }
   if (tag) {
     query = query.contains('tags', [tag])

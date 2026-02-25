@@ -17,11 +17,19 @@ export function updateViewerMeta(meta) {
   }
 
   if (controlsInfo) {
+    controlsInfo.textContent = ''
     const lines = []
     if (meta.filename) lines.push(meta.filename)
     if (meta.description) lines.push(meta.description)
     if (meta.crs) lines.push(`CRS: ${meta.crs}`)
     if (meta.bands) lines.push(`Bands: ${meta.bands.join(',')}`)
-    controlsInfo.innerHTML = lines.length > 0 ? lines.join('<br>') : '-'
+    if (lines.length === 0) {
+      controlsInfo.textContent = '-'
+    } else {
+      lines.forEach((line, i) => {
+        if (i > 0) controlsInfo.appendChild(document.createElement('br'))
+        controlsInfo.appendChild(document.createTextNode(line))
+      })
+    }
   }
 }

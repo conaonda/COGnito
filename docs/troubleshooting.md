@@ -99,3 +99,16 @@ COGnito 개발 중 발견된 이슈와 해결 방법을 기록합니다.
 자세한 가이드는 `docs/SETUP.md` 6번 참조.
 
 **관련 코드**: 없음 (인프라 설정)
+
+---
+
+## v1.0.0 릴리스 전 보안 점검
+
+**수정된 보안 이슈**:
+
+1. **viewerMeta.js XSS**: `innerHTML`로 메타데이터(파일명, CRS)를 직접 삽입하던 코드를 `textContent` + `createTextNode` 기반 DOM 구성으로 교체
+2. **catalog.js 검색 인젝션**: PostgREST 필터 연산자 주입 방지를 위해 검색어에서 특수문자(`%_,().*`) 제거
+3. **stacUI.js 썸네일 URL XSS**: `<img src>` 속성에 `escapeHtml()` 적용
+4. **registerUI.js null guard**: `meta.bands`가 없을 때 `join()` 오류 방지
+5. **프로덕션 로그 제거**: `cogLayer.js`, `cogImageLayer.js`의 `console.log` 제거
+6. **중복 import 정리**: `main.js`에서 `registerUI.js` import 통합

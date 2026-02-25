@@ -141,7 +141,7 @@ export function initStacUI(onViewCog, onRegisterCog, getMapBbox, map) {
       card.className = 'stac-result-card'
 
       const thumbHtml = meta.thumbnail_url
-        ? `<img src="${meta.thumbnail_url}" class="stac-result-thumb" alt="">`
+        ? `<img src="${escapeHtml(meta.thumbnail_url)}" class="stac-result-thumb" alt="">`
         : ''
 
       card.innerHTML = `
