@@ -100,6 +100,12 @@ const applyAffineBypass = (cogSource, cogView, viewProjection, targetTileSize) =
   let sourceTileSizes
   let extraCount = 0
 
+  // extra 레벨 source tile 크기를 coarsest overview 크기로 제한
+  const imagery = cogSource.sourceImagery_[0]
+  const coarsestImage = imagery[0]
+  const coarsestW = coarsestImage.getWidth()
+  const coarsestH = coarsestImage.getHeight()
+
   if (dstResolutions[0] < maxViewRes) {
     const baseTile = tileSizes[0]
     const extraResolutions = []
@@ -111,8 +117,10 @@ const applyAffineBypass = (cogSource, cogView, viewProjection, targetTileSize) =
     while (true) {
       extraResolutions.push(r)
       extraRenderTileSizes.push([baseTile[0], baseTile[1]])
-      const cappedW = Math.min(baseTile[0] * factor, MAX_SOURCE_TILE_DIM)
-      const cappedH = Math.min(baseTile[1] * factor, MAX_SOURCE_TILE_DIM)
+      // coarsest overview 크기를 초과하지 않도록 제한하여
+      // out-of-bounds 읽기로 인한 영상 왜곡 방지
+      const cappedW = Math.min(baseTile[0] * factor, MAX_SOURCE_TILE_DIM, coarsestW)
+      const cappedH = Math.min(baseTile[1] * factor, MAX_SOURCE_TILE_DIM, coarsestH)
       extraSourceTileSizes.push([cappedW, cappedH])
       if (r >= maxViewRes) break
       r *= 2
@@ -148,14 +156,13 @@ const applyAffineBypass = (cogSource, cogView, viewProjection, targetTileSize) =
 
   // 추가 레벨에 대응하는 sourceImagery_ / sourceMasks_ 패딩
   if (extraCount > 0) {
-    const imagery = cogSource.sourceImagery_[0]
-    const coarsestImage = imagery[0]
     for (let i = 0; i < extraCount; i++) {
       imagery.unshift(coarsestImage)
     }
     const masks = cogSource.sourceMasks_[0]
+    const coarsestMask = masks[0]
     for (let i = 0; i < extraCount; i++) {
-      masks.unshift(undefined)
+      masks.unshift(coarsestMask)
     }
   }
 
@@ -344,7 +351,9 @@ export async function createCOGLayer({ url, bands, projectionMode, viewProjectio
     source: source,
     style: buildStyle(bandInfo, stats),
     extent: extent,
-    opacity
+    opacity,
+    preload: 0,
+    transition: 250
   })
 
   if (projectionMode === 'affine' && sourceTileSizes) {
