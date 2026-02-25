@@ -205,6 +205,11 @@ function openRegisterModal(meta) {
     }
   })
 
+  const onEscape = (e) => {
+    if (e.key === 'Escape') { overlay.remove(); document.removeEventListener('keydown', onEscape) }
+  }
+  document.addEventListener('keydown', onEscape)
+
   overlay.appendChild(modal)
   document.body.appendChild(overlay)
   titleInput.focus()

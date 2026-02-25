@@ -40,7 +40,9 @@ export function initCatalogUI(onSelectCog) {
 
   toggleBtn.addEventListener('click', () => {
     panel.classList.toggle('open')
-    if (panel.classList.contains('open')) {
+    const isOpen = panel.classList.contains('open')
+    toggleBtn.setAttribute('aria-expanded', String(isOpen))
+    if (isOpen) {
       loadPage()
     }
   })
@@ -48,7 +50,10 @@ export function initCatalogUI(onSelectCog) {
   // 패널 닫기 버튼
   const closeBtn = panel.querySelector('#catalog-panel-close')
   if (closeBtn) {
-    closeBtn.addEventListener('click', () => panel.classList.remove('open'))
+    closeBtn.addEventListener('click', () => {
+      panel.classList.remove('open')
+      toggleBtn.setAttribute('aria-expanded', 'false')
+    })
   }
 
   function onFilterChange() {
