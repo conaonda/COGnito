@@ -92,10 +92,12 @@ export function initStacUI(onViewCog, onRegisterCog, getMapBbox, map) {
 
   stacBtn.addEventListener('click', () => {
     panel.classList.toggle('open')
+    stacBtn.setAttribute('aria-expanded', String(panel.classList.contains('open')))
   })
 
   closeBtn.addEventListener('click', () => {
     panel.classList.remove('open')
+    stacBtn.setAttribute('aria-expanded', 'false')
   })
 
   // 프리셋 변경 시 컬렉션 로드

@@ -442,6 +442,18 @@
       color: #333;
     }
 
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0,0,0,0);
+      white-space: nowrap;
+      border: 0;
+    }
+
     .login-modal-title {
       text-align: center;
       font-size: 1.25rem;
@@ -1002,15 +1014,16 @@
         </div>
       </div>
       <div class="header-url">
-        <input type="text" id="cog-url-input" placeholder="COG URL 입력">
-        <button id="cog-url-load">로드</button>
-        <button id="cog-share-btn" title="현재 뷰 공유">공유</button>
-        <button id="cog-register-btn" style="display:none">등록</button>
+        <label for="cog-url-input" class="sr-only">COG URL</label>
+        <input type="text" id="cog-url-input" placeholder="COG URL 입력" aria-label="COG 영상 URL 입력">
+        <button id="cog-url-load" aria-label="COG 영상 로드">로드</button>
+        <button id="cog-share-btn" title="현재 뷰 공유" aria-label="현재 뷰 공유 URL 복사">공유</button>
+        <button id="cog-register-btn" style="display:none" aria-label="카탈로그에 COG 등록">등록</button>
       </div>
     </header>
-    <div id="map"></div>
-    <div id="loading" class="loading">영상 로딩 중...</div>
-    <div id="error" class="error"></div>
+    <div id="map" role="application" aria-label="COG 영상 지도 뷰어"></div>
+    <div id="loading" class="loading" role="status" aria-live="polite">영상 로딩 중...</div>
+    <div id="error" class="error" role="alert" aria-live="assertive"></div>
     <div class="controls">
       <h3 id="controls-title">영상 정보</h3>
       <p id="controls-info">-</p>
@@ -1019,7 +1032,7 @@
       <span id="quality-dot" class="quality-dot"></span>
       <span id="quality-label">저해상도</span>
     </div>
-    <div id="quality-warning-modal" class="quality-warning-modal">
+    <div id="quality-warning-modal" class="quality-warning-modal" role="dialog" aria-label="고해상도 경고">
       <div class="quality-warning-content">
         <h3>고해상도 영상 로드</h3>
         <p>고해상도 영상은 모바일 데이터 사용량이 크게 증가할 수 있습니다. Wi-Fi 환경에서 사용을 권장합니다.</p>
@@ -1029,25 +1042,25 @@
         </div>
       </div>
     </div>
-    <button id="catalog-toggle-btn" class="catalog-toggle-btn" title="카탈로그">&#9776;</button>
-    <div id="catalog-panel" class="catalog-panel">
+    <button id="catalog-toggle-btn" class="catalog-toggle-btn" title="카탈로그" aria-label="카탈로그 패널 열기" aria-expanded="false" aria-controls="catalog-panel">&#9776;</button>
+    <div id="catalog-panel" class="catalog-panel" role="dialog" aria-label="영상 카탈로그">
       <div class="catalog-panel-header">
         <h3>영상 카탈로그</h3>
-        <button id="catalog-panel-close" class="catalog-panel-close">✕</button>
+        <button id="catalog-panel-close" class="catalog-panel-close" aria-label="카탈로그 닫기">✕</button>
       </div>
-      <input type="text" id="catalog-search" class="catalog-search" placeholder="제목/설명 검색...">
+      <input type="text" id="catalog-search" class="catalog-search" placeholder="제목/설명 검색..." aria-label="카탈로그 검색">
       <div id="catalog-list" class="catalog-list"></div>
       <div class="catalog-pagination">
-        <button id="catalog-prev" disabled>&larr;</button>
-        <span id="catalog-page-info"></span>
-        <button id="catalog-next">&rarr;</button>
+        <button id="catalog-prev" disabled aria-label="이전 페이지">&larr;</button>
+        <span id="catalog-page-info" aria-live="polite"></span>
+        <button id="catalog-next" aria-label="다음 페이지">&rarr;</button>
       </div>
     </div>
-    <button id="stac-toggle-btn" class="stac-toggle-btn" title="STAC 검색">STAC</button>
-    <div id="stac-panel" class="stac-panel">
+    <button id="stac-toggle-btn" class="stac-toggle-btn" title="STAC 검색" aria-label="STAC 검색 패널 열기" aria-expanded="false" aria-controls="stac-panel">STAC</button>
+    <div id="stac-panel" class="stac-panel" role="dialog" aria-label="STAC 검색">
       <div class="stac-panel-header">
         <h3>STAC 검색</h3>
-        <button id="stac-panel-close" class="stac-panel-close">✕</button>
+        <button id="stac-panel-close" class="stac-panel-close" aria-label="STAC 패널 닫기">✕</button>
       </div>
       <div class="stac-controls">
         <select id="stac-preset">
