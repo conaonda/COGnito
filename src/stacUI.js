@@ -1,12 +1,18 @@
 import { STAC_PRESETS, searchStac, searchStacNext, getStacCollections, extractStacItemMeta, signPlanetaryComputerUrl } from './stac.js'
+import Draw, { createBox } from 'ol/interaction/Draw'
+import VectorSource from 'ol/source/Vector'
+import VectorLayer from 'ol/layer/Vector'
+import { Style, Stroke, Fill } from 'ol/style'
+import GeoJSON from 'ol/format/GeoJSON'
 
 /**
  * STAC 검색 UI 초기화
  * @param {(url: string) => void} onViewCog — 뷰어에서 COG 로드
  * @param {(meta: object) => void} onRegisterCog — 등록 모달 열기 (STAC 메타데이터 포함)
  * @param {() => number[]} getMapBbox — 현재 맵 범위 [minLon, minLat, maxLon, maxLat]
+ * @param {import('ol/Map').default} [map] — 맵 인스턴스 (AOI 그리기 지원)
  */
-export function initStacUI(onViewCog, onRegisterCog, getMapBbox) {
+export function initStacUI(onViewCog, onRegisterCog, getMapBbox, map) {
   const stacBtn = document.getElementById('stac-toggle-btn')
   const panel = document.getElementById('stac-panel')
   if (!stacBtn || !panel) return
@@ -19,6 +25,62 @@ export function initStacUI(onViewCog, onRegisterCog, getMapBbox) {
   const spatialFilter = panel.querySelector('#stac-spatial-filter')
   const dateFrom = panel.querySelector('#stac-date-from')
   const dateTo = panel.querySelector('#stac-date-to')
+
+  // AOI 그리기
+  const aoiDrawBtn = panel.querySelector('#stac-aoi-draw')
+  const aoiClearBtn = panel.querySelector('#stac-aoi-clear')
+  const aoiStatus = panel.querySelector('#stac-aoi-status')
+
+  let aoiSource = null
+  let aoiLayer = null
+  let aoiDraw = null
+  let aoiGeometry = null  // GeoJSON geometry (EPSG:4326)
+
+  if (map) {
+    aoiSource = new VectorSource()
+    aoiLayer = new VectorLayer({
+      source: aoiSource,
+      style: new Style({
+        stroke: new Stroke({ color: '#667eea', width: 2, lineDash: [6, 4] }),
+        fill: new Fill({ color: 'rgba(102,126,234,0.1)' })
+      }),
+      zIndex: 100
+    })
+    map.addLayer(aoiLayer)
+  }
+
+  function startAoiDraw() {
+    if (!map) return
+    aoiSource.clear()
+    aoiGeometry = null
+    if (aoiDraw) map.removeInteraction(aoiDraw)
+    aoiDraw = new Draw({ source: aoiSource, type: 'Circle', geometryFunction: createBox() })
+    aoiDraw.on('drawend', (e) => {
+      map.removeInteraction(aoiDraw)
+      aoiDraw = null
+      const geojson = new GeoJSON()
+      aoiGeometry = geojson.writeGeometryObject(e.feature.getGeometry(), {
+        dataProjection: 'EPSG:4326',
+        featureProjection: map.getView().getProjection()
+      })
+      aoiStatus.textContent = 'AOI 설정됨'
+      aoiDrawBtn.textContent = '다시 그리기'
+    })
+    map.addInteraction(aoiDraw)
+    aoiStatus.textContent = '맵에서 사각형을 그려주세요'
+    aoiDrawBtn.textContent = '그리는 중...'
+  }
+
+  function clearAoi() {
+    if (aoiDraw && map) { map.removeInteraction(aoiDraw); aoiDraw = null }
+    if (aoiSource) aoiSource.clear()
+    aoiGeometry = null
+    aoiStatus.textContent = ''
+    if (aoiDrawBtn) aoiDrawBtn.textContent = '영역 그리기'
+  }
+
+  if (aoiDrawBtn) aoiDrawBtn.addEventListener('click', startAoiDraw)
+  if (aoiClearBtn) aoiClearBtn.addEventListener('click', clearAoi)
 
   // bbox 체크 시 공간 필터 드롭다운 표시
   bboxCheckbox.addEventListener('change', () => {
@@ -179,7 +241,8 @@ export function initStacUI(onViewCog, onRegisterCog, getMapBbox) {
       const col = collectionSelect.value
       if (col) params.collections = [col]
 
-      if (currentBbox) params.bbox = currentBbox
+      if (aoiGeometry) params.intersects = aoiGeometry
+      else if (currentBbox) params.bbox = currentBbox
 
       if (dateFrom.value || dateTo.value) {
         const from = dateFrom.value || '..'
