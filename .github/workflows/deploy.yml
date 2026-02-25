@@ -55,11 +55,37 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
 
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
+
+      - name: Detect changed paths
+        id: changes
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            core:
+              - 'src/main.js'
+              - 'index.html'
+              - 'vite.config.js'
+            cog:
+              - 'src/cogLayer.js'
+              - 'src/cogImageLayer.js'
+              - 'src/AffineTileLayer.js'
+            stac:
+              - 'src/stac.js'
+              - 'src/stacUI.js'
+            auth:
+              - 'src/auth.js'
+              - 'src/authUI.js'
+            ci:
+              - '.github/workflows/**'
+              - 'playwright.config.js'
+              - 'playwright.auth.config.js'
 
       - run: npm ci
 
@@ -84,12 +110,27 @@ jobs:
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
           VITE_CORS_PROXY_URL: https://cog-cors-proxy.conaonda.workers.dev
 
-      - name: Run tests
+      # core 또는 CI 변경 시 전체 테스트, 아니면 관련 그룹만 실행
+      - name: Run all tests
+        if: steps.changes.outputs.core == 'true' || steps.changes.outputs.ci == 'true'
         run: npx playwright test
         env:
           CI: true
 
+      - name: Run COG rendering tests only
+        if: steps.changes.outputs.core != 'true' && steps.changes.outputs.ci != 'true' && steps.changes.outputs.cog == 'true'
+        run: npx playwright test --project=cog-rendering
+        env:
+          CI: true
+
+      - name: Run core tests for STAC changes
+        if: steps.changes.outputs.core != 'true' && steps.changes.outputs.ci != 'true' && steps.changes.outputs.stac == 'true'
+        run: npx playwright test --project=core
+        env:
+          CI: true
+
       - name: Run auth tests
+        if: steps.changes.outputs.auth == 'true' || steps.changes.outputs.core == 'true' || steps.changes.outputs.ci == 'true'
         run: npx playwright test --config=playwright.auth.config.js
         env:
           CI: true
