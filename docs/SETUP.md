@@ -69,7 +69,39 @@ Supabase Dashboard → **Authentication → URL Configuration**:
 | Redirect URLs | `https://<your-username>.github.io/COGnito/` |
 | | `http://localhost:5173/COGnito/` |
 
-## 6. CORS 프록시 설정 (선택사항)
+## 6. Supabase 브랜딩 설정 (선택사항)
+
+기본 설정에서는 OAuth 로그인 화면과 인증 메일에 Supabase 도메인이 노출됩니다 (#33).
+사용자에게 COGnito 브랜드로 표시하려면 아래 설정을 변경하세요.
+
+### 6-1. 프로젝트 표시 이름
+
+Supabase Dashboard → **Settings → General**:
+- **Project Name**을 `COGnito`로 변경
+
+### 6-2. 이메일 템플릿 커스터마이징
+
+Supabase Dashboard → **Authentication → Email Templates**:
+- 각 템플릿(Confirm, Invite, Magic Link, Reset Password)에서 발신자 이름과 내용을 수정
+
+### 6-3. 커스텀 SMTP (선택)
+
+기본 `noreply@mail.app.supabase.io` 대신 자체 도메인 이메일을 사용하려면:
+
+Supabase Dashboard → **Settings → Auth → SMTP Settings**:
+- Enable Custom SMTP
+- SMTP Host, Port, User, Password 설정
+- Sender email: `noreply@yourdomain.com`
+
+### 6-4. 커스텀 도메인 (유료)
+
+OAuth 리다이렉트 URL에서 `xxx.supabase.co`를 자체 도메인으로 변경하려면:
+
+Supabase Dashboard → **Settings → Custom Domains**:
+- 유료 플랜에서 커스텀 도메인 설정 가능
+- DNS CNAME 레코드 추가 필요
+
+## 7. CORS 프록시 설정 (선택사항)
 
 외부 COG 서버가 CORS를 허용하지 않을 때 Cloudflare Worker 프록시를 사용합니다.
 
@@ -89,7 +121,7 @@ VITE_CORS_PROXY_URL=https://your-worker-name.workers.dev
 
 > 프록시 없이도 CORS를 허용하는 COG 서버의 영상은 정상 로드됩니다.
 
-## 7. 로컬 개발 실행
+## 8. 로컬 개발 실행
 
 ```bash
 npm run dev
@@ -97,9 +129,9 @@ npm run dev
 
 브라우저에서 `http://localhost:5173/COGnito/` 로 접속합니다.
 
-## 8. GitHub Pages 배포
+## 9. GitHub Pages 배포
 
-### 8-1. GitHub Secrets 등록
+### 9-1. GitHub Secrets 등록
 
 `setup-supabase.sh`에서 자동 등록을 시도하지만, Codespaces 등 토큰 권한이 제한된 환경에서는 실패할 수 있습니다. 그 경우 웹 UI에서 직접 등록하세요.
 
@@ -113,14 +145,14 @@ npm run dev
 | `VITE_SUPABASE_URL` | `https://xxx.supabase.co` (Supabase Project URL) |
 | `VITE_SUPABASE_ANON_KEY` | Supabase Dashboard → Settings → API의 `anon` `public` 키 |
 
-### 8-2. GitHub Pages 활성화
+### 9-2. GitHub Pages 활성화
 
 Repository → **Settings → Pages**:
 - Source: **GitHub Actions**
 
 `main` 브랜치에 push하면 `.github/workflows/deploy.yml`이 자동으로 빌드 및 배포합니다.
 
-## 9. 트러블슈팅
+## 10. 트러블슈팅
 
 ### `.env` 파일이 없다는 에러
 
@@ -145,7 +177,7 @@ cp .env.example .env
 ### COG 영상 로드 실패 (CORS 에러)
 
 - 브라우저 개발자 도구 → Network 탭에서 CORS 에러 확인
-- CORS 프록시가 설정되어 있는지 확인 (6번 참조)
+- CORS 프록시가 설정되어 있는지 확인 (7번 참조)
 - 프록시 Worker가 정상 배포되었는지 `curl` 등으로 확인
 
 ### 빌드 실패

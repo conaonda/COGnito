@@ -60,6 +60,42 @@ COGnito 개발 중 발견된 이슈와 해결 방법을 기록합니다.
 3. 검색 시 AOI가 설정되어 있으면 `intersects` 파라미터 사용 (bbox보다 우선)
 4. "초기화" 버튼으로 AOI 삭제
 
-**주의**: `createBox()`는 ol/interaction/Draw의 static 메서드. `Draw.createBox()` 형식으로 호출.
+**주의**: `createBox()`는 `ol/interaction/Draw`에서 named export. `import { createBox } from 'ol/interaction/Draw'` 로 import.
 
 **관련 코드**: `src/stacUI.js`, `src/stac.js`
+
+---
+
+## #53: 테스트 그룹화 및 변경 기반 선택적 테스트 실행
+
+**배경**: push마다 모든 Playwright 테스트가 일괄 실행되어 CI 시간이 길어짐.
+
+**해결**:
+1. Playwright config에 4개 프로젝트로 테스트 그룹화:
+   - `core`: 페이지 로드 (01-page-load)
+   - `map-interaction`: 팬/줌 (02-map-pan, 03-map-zoom)
+   - `cog-rendering`: COG 렌더링 (05~08)
+   - `state`: 상태 스냅샷 (04-detailed-state)
+2. CI에서 `dorny/paths-filter`로 변경 경로 감지:
+   - `src/main.js`, `index.html` 변경 → 전체 테스트
+   - `src/cogLayer.js` 등 변경 → `cog-rendering` 그룹만
+   - `src/auth*.js` 변경 → auth 테스트만
+3. auth 테스트는 별도 config(`playwright.auth.config.js`)로 유지
+
+**관련 코드**: `playwright.config.js`, `.github/workflows/deploy.yml`
+
+---
+
+## #33: OAuth/인증 메일에 Supabase 도메인 노출
+
+**증상**: OAuth 로그인 시 `xxx.supabase.co`가 표시되고, 인증 메일 발신자가 Supabase로 표시됨.
+
+**해결**: 코드 변경 아님. Supabase Dashboard 설정으로 해결:
+1. **Settings → General**: 프로젝트 이름을 `COGnito`로 변경
+2. **Authentication → Email Templates**: 이메일 내용 커스터마이징
+3. **(선택) Settings → Auth → SMTP**: 커스텀 SMTP로 자체 발신 주소 사용
+4. **(유료) Settings → Custom Domains**: 커스텀 도메인 설정
+
+자세한 가이드는 `docs/SETUP.md` 6번 참조.
+
+**관련 코드**: 없음 (인프라 설정)
