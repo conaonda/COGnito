@@ -37,6 +37,8 @@ async function waitForCogLoad(page) {
 }
 
 test.describe('뷰어 컨트롤: 컬러맵 검증 (Capella SAR)', () => {
+  // 외부 COG 로드가 느릴 수 있으므로 타임아웃 확장
+  test.setTimeout(120_000)
 
   test('단일 밴드 COG → 컬러맵 드롭다운 활성화 + Viridis 적용', async ({ page }) => {
     await mockSupabase(page)
