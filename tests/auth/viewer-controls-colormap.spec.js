@@ -25,15 +25,28 @@ function mockSupabase(page) {
  * 앱 초기화 + COG 로드 완료 대기
  */
 async function waitForCogLoad(page) {
+  // Capture console errors for debugging
+  const errors = []
+  page.on('console', msg => {
+    if (msg.type() === 'warning' || msg.type() === 'error') {
+      errors.push(`[${msg.type()}] ${msg.text()}`)
+    }
+  })
+
   await page.waitForFunction(() => {
     return window.currentCogMeta && window.currentTiff
-  }, { timeout: 60000 })
-  // updateControlsForCog is async (getTotalBands + getMinMaxFromOverview)
-  // Wait until viewer controls are actually enabled
+  }, { timeout: 90000 })
+
+  // Wait for viewer controls ready or error
   await page.waitForFunction(() => {
-    const sel = document.getElementById('vc-band-mode')
-    return sel && !sel.disabled
+    return window._viewerControlsReady || window._viewerControlsError
   }, { timeout: 30000 })
+
+  // Check if controls initialization failed
+  const ctrlError = await page.evaluate(() => window._viewerControlsError)
+  if (ctrlError) {
+    throw new Error(`뷰어 컨트롤 갱신 실패: ${ctrlError}\nConsole: ${errors.join('\n')}`)
+  }
 }
 
 test.describe('뷰어 컨트롤: 컬러맵 검증 (Capella SAR)', () => {

@@ -255,8 +255,10 @@ const loadCOG = async (rawUrl, catalogMeta = null) => {
           const stats = (await getMinMaxFromOverview(tiff, cogMeta.bands)).stats
           updateControlsForCog(totalBands, { type: cogMeta.bandType, bands: cogMeta.bands }, stats, PROJECTION_MODE)
           window._currentViewerState = { url: rawUrl, catalogMeta, stats, bandInfo: { type: cogMeta.bandType, bands: cogMeta.bands } }
+          window._viewerControlsReady = true
         } catch (ctrlErr) {
           console.warn('뷰어 컨트롤 갱신 실패:', ctrlErr)
+          window._viewerControlsError = ctrlErr?.message || String(ctrlErr)
         }
       } catch (metaErr) {
         console.warn('메타데이터 추출 실패:', metaErr)
