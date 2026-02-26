@@ -4,11 +4,12 @@ import { transformExtent } from 'ol/proj'
 import { intersects, getIntersection } from 'ol/extent'
 import { fromUrl as tiffFromUrl, Pool } from 'geotiff'
 import { detectBands, getMinMaxFromOverview } from './cogLayer.js'
+import { COLORMAPS } from './colormap.js'
 
 let pool
 try { pool = new Pool(4) } catch { /* worker unavailable – decode on main thread */ }
 
-function fillPixelData(px, rasters, bandInfo, stats, pixelCount) {
+function fillPixelData(px, rasters, bandInfo, stats, pixelCount, colormapName) {
   if (bandInfo.type === 'rgb') {
     const r = rasters[0], g = rasters[1], b = rasters[2]
     const rMin = stats[0].min, rScale = 255 / (stats[0].max - stats[0].min)
@@ -28,13 +29,19 @@ function fillPixelData(px, rasters, bandInfo, stats, pixelCount) {
   } else {
     const band = rasters[0]
     const bMin = stats[0].min, bScale = 255 / (stats[0].max - stats[0].min)
+    const lut = colormapName ? COLORMAPS[colormapName] : null
     for (let i = 0; i < pixelCount; i++) {
       const j = i * 4
       if (band[i] === 0) {
         px[j + 3] = 0
       } else {
         const v = ((band[i] - bMin) * bScale + 0.5) | 0
-        px[j] = v; px[j + 1] = v; px[j + 2] = v; px[j + 3] = 255
+        if (lut) {
+          const idx = Math.min(255, Math.max(0, v))
+          px[j] = lut[idx][0]; px[j + 1] = lut[idx][1]; px[j + 2] = lut[idx][2]; px[j + 3] = 255
+        } else {
+          px[j] = v; px[j + 1] = v; px[j + 2] = v; px[j + 3] = 255
+        }
       }
     }
   }
@@ -51,6 +58,7 @@ export async function createCOGImageLayer({ url, projectionMode = 'reproject', v
   const overview = await getMinMaxFromOverview(tiff, bandInfo.bands)
   const stats = overview.stats
   const samples = bandInfo.bands.map(b => b - 1)
+  let currentColormap = null
 
   // COG native CRS
   const geoKeys = image.getGeoKeys()
@@ -87,7 +95,7 @@ export async function createCOGImageLayer({ url, projectionMode = 'reproject', v
   previewCanvas.height = pvH
   const previewCtx = previewCanvas.getContext('2d')
   const previewImgData = previewCtx.createImageData(pvW, pvH)
-  fillPixelData(previewImgData.data, overview.rasters, bandInfo, stats, pvW * pvH)
+  fillPixelData(previewImgData.data, overview.rasters, bandInfo, stats, pvW * pvH, currentColormap)
   previewCtx.putImageData(previewImgData, 0, 0)
   cachedCanvas = previewCanvas
   cachedExtent = viewExtent.slice()
@@ -136,7 +144,7 @@ export async function createCOGImageLayer({ url, projectionMode = 'reproject', v
       tmpCanvas.height = natH
       const tmpCtx = tmpCanvas.getContext('2d')
       const imgData = tmpCtx.createImageData(natW, natH)
-      fillPixelData(imgData.data, rasters, bandInfo, stats, natW * natH)
+      fillPixelData(imgData.data, rasters, bandInfo, stats, natW * natH, currentColormap)
       tmpCtx.putImageData(imgData, 0, 0)
 
       // GPU-accelerated scaling to viewport
@@ -196,5 +204,21 @@ export async function createCOGImageLayer({ url, projectionMode = 'reproject', v
     opacity
   })
 
-  return { layer, source, extent: viewExtent, center: [(viewExtent[0] + viewExtent[2]) / 2, (viewExtent[1] + viewExtent[3]) / 2], tiff }
+  return {
+    layer, source, extent: viewExtent, tiff,
+    center: [(viewExtent[0] + viewExtent[2]) / 2, (viewExtent[1] + viewExtent[3]) / 2],
+    getStats() { return stats },
+    getBandInfo() { return bandInfo },
+    setStats(newStats) {
+      stats.length = 0
+      newStats.forEach(s => stats.push(s))
+      cachedKey = null
+      source.changed()
+    },
+    setColormap(name) {
+      currentColormap = name || null
+      cachedKey = null
+      source.changed()
+    }
+  }
 }

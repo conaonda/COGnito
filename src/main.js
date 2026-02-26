@@ -13,6 +13,9 @@ import { initCatalogUI } from './catalogUI.js'
 import { initStacUI } from './stacUI.js'
 import { initWatchlistUI } from './watchlistUI.js'
 import { updateViewerMeta } from './viewerMeta.js'
+import { initViewerControls, updateControlsForCog, getCurrentStyle } from './viewerControls.js'
+import { buildStyle, getTotalBands, getMinMaxFromOverview, createCOGSource } from './cogLayer.js'
+import { buildStyleWithColormap } from './colormap.js'
 import 'ol/ol.css'
 
 document.getElementById('app-version').textContent = 'v' + __APP_VERSION__
@@ -46,7 +49,7 @@ const preLoginState = consumePreLoginState()
 
 const urlParams = new URLSearchParams(window.location.search)
 const COG_URL = urlParams.get('url') || preLoginState?.cogUrl || DEFAULT_COG_URL
-const PROJECTION_MODE = urlParams.get('mode') || 'affine'    // 'affine' | 'reproject'
+let PROJECTION_MODE = urlParams.get('mode') || 'affine'    // 'affine' | 'reproject'
 const RENDER_PIPELINE = urlParams.get('render') || 'tile'    // 'tile' | 'image'
 const TARGET_TILE_SIZE = parseInt(urlParams.get('tileSize'), 10) || 256
 const SHARED_CENTER = urlParams.get('center')  // 'lon,lat'
@@ -174,7 +177,7 @@ const initMap = async () => {
   }
 }
 
-const loadCOG = async (rawUrl, catalogMeta = null) => {
+const loadCOG = async (rawUrl, catalogMeta = null, overrideBandInfo = null) => {
     const url = proxyCogUrl(rawUrl)
     showLoading()
     errorEl.classList.remove('active')
@@ -194,13 +197,15 @@ const loadCOG = async (rawUrl, catalogMeta = null) => {
         cogSource = result.source
         extent = result.extent
         tiff = result.tiff
+        window._currentImageResult = result
         hideLoading()
       } else {
-        const result = await createCOGLayer({ url, projectionMode: PROJECTION_MODE, viewProjection, targetTileSize: TARGET_TILE_SIZE, opacity: 0.8 })
+        const result = await createCOGLayer({ url, bandInfo: overrideBandInfo, projectionMode: PROJECTION_MODE, viewProjection, targetTileSize: TARGET_TILE_SIZE, opacity: 0.8 })
         cogLayer = result.layer
         cogSource = result.source
         extent = result.extent
         tiff = result.tiff
+        window._currentImageResult = null
 
         cogSource.on('change', () => {
           if (cogSource.getState() === 'ready') {
@@ -243,6 +248,19 @@ const loadCOG = async (rawUrl, catalogMeta = null) => {
           ? { title: catalogMeta.title, description: catalogMeta.description, crs: cogMeta.crs, bands: cogMeta.bands, filename }
           : { title: null, crs: cogMeta.crs, bands: cogMeta.bands, filename }
         updateViewerMeta(displayMeta)
+
+        // 뷰어 컨트롤 갱신
+        try {
+          const totalBands = await getTotalBands(tiff)
+          const activeBandInfo = overrideBandInfo || { type: cogMeta.bandType, bands: cogMeta.bands }
+          const stats = (await getMinMaxFromOverview(tiff, activeBandInfo.bands)).stats
+          updateControlsForCog(totalBands, activeBandInfo, stats, PROJECTION_MODE)
+          window._currentViewerState = { url: rawUrl, catalogMeta, stats, bandInfo: activeBandInfo }
+          window._viewerControlsReady = true
+        } catch (ctrlErr) {
+          console.warn('뷰어 컨트롤 갱신 실패:', ctrlErr)
+          window._viewerControlsError = ctrlErr?.message || String(ctrlErr)
+        }
       } catch (metaErr) {
         console.warn('메타데이터 추출 실패:', metaErr)
         window.currentCogMeta = null
@@ -260,6 +278,43 @@ const loadCOG = async (rawUrl, catalogMeta = null) => {
       showError(`COG 로드 실패: ${error.message}`)
     }
   }
+
+  // 뷰어 컨트롤 초기화 (loadCOG 전에 호출해야 updateControlsForCog가 정상 동작)
+  initViewerControls(
+    (style) => {
+      // 스타일 변경 핸들러 (min/max, 밴드, 컬러맵)
+      const state = window._currentViewerState
+      if (!state || !currentCogLayer) return
+
+      const newBandInfo = { type: style.bandType, bands: style.bands }
+      const newStats = style.bandType === 'rgb'
+        ? state.stats.map(() => ({ min: style.min, max: style.max }))
+        : [{ min: style.min, max: style.max }]
+
+      const bandsChanged = JSON.stringify(style.bands) !== JSON.stringify(state.bandInfo.bands)
+
+      if (bandsChanged) {
+        loadCOG(state.url, state.catalogMeta, newBandInfo)
+        return
+      }
+
+      // WebGL 파이프라인: setStyle로 실시간 반영
+      if (currentCogLayer.setStyle) {
+        currentCogLayer.setStyle(buildStyleWithColormap(newBandInfo, newStats, style.colormap))
+      }
+      // Canvas 파이프라인: setStats + setColormap로 실시간 반영
+      if (window._currentImageResult?.setStats) {
+        window._currentImageResult.setStats(newStats)
+        window._currentImageResult.setColormap(style.colormap)
+      }
+    },
+    (mode) => {
+      // 투영 모드 변경 핸들러
+      PROJECTION_MODE = mode
+      const state = window._currentViewerState
+      if (state) loadCOG(state.url, state.catalogMeta)
+    }
+  )
 
   // 초기 COG 로드
   await loadCOG(COG_URL)
@@ -343,6 +398,18 @@ const loadCOG = async (rawUrl, catalogMeta = null) => {
   })
 
   initRegisterUI()
+
+  // 패널 토글
+  const vcToggleBtn = document.getElementById('vc-toggle-btn')
+  const vcPanel = document.getElementById('viewer-controls-panel')
+  const vcCloseBtn = document.getElementById('vc-toggle-btn-close')
+  if (vcToggleBtn && vcPanel) {
+    vcToggleBtn.addEventListener('click', () => vcPanel.classList.add('open'))
+  }
+  if (vcCloseBtn && vcPanel) {
+    vcCloseBtn.addEventListener('click', () => vcPanel.classList.remove('open'))
+  }
+
   initCatalogUI((url, catalogItem) => loadCOG(url, catalogItem))
   initWatchlistUI((url, catalogItem) => loadCOG(url, catalogItem))
 
