@@ -177,7 +177,7 @@ const initMap = async () => {
   }
 }
 
-const loadCOG = async (rawUrl, catalogMeta = null) => {
+const loadCOG = async (rawUrl, catalogMeta = null, overrideBandInfo = null) => {
     const url = proxyCogUrl(rawUrl)
     showLoading()
     errorEl.classList.remove('active')
@@ -200,7 +200,7 @@ const loadCOG = async (rawUrl, catalogMeta = null) => {
         window._currentImageResult = result
         hideLoading()
       } else {
-        const result = await createCOGLayer({ url, projectionMode: PROJECTION_MODE, viewProjection, targetTileSize: TARGET_TILE_SIZE, opacity: 0.8 })
+        const result = await createCOGLayer({ url, bandInfo: overrideBandInfo, projectionMode: PROJECTION_MODE, viewProjection, targetTileSize: TARGET_TILE_SIZE, opacity: 0.8 })
         cogLayer = result.layer
         cogSource = result.source
         extent = result.extent
@@ -252,9 +252,10 @@ const loadCOG = async (rawUrl, catalogMeta = null) => {
         // 뷰어 컨트롤 갱신
         try {
           const totalBands = await getTotalBands(tiff)
-          const stats = (await getMinMaxFromOverview(tiff, cogMeta.bands)).stats
-          updateControlsForCog(totalBands, { type: cogMeta.bandType, bands: cogMeta.bands }, stats, PROJECTION_MODE)
-          window._currentViewerState = { url: rawUrl, catalogMeta, stats, bandInfo: { type: cogMeta.bandType, bands: cogMeta.bands } }
+          const activeBandInfo = overrideBandInfo || { type: cogMeta.bandType, bands: cogMeta.bands }
+          const stats = (await getMinMaxFromOverview(tiff, activeBandInfo.bands)).stats
+          updateControlsForCog(totalBands, activeBandInfo, stats, PROJECTION_MODE)
+          window._currentViewerState = { url: rawUrl, catalogMeta, stats, bandInfo: activeBandInfo }
           window._viewerControlsReady = true
         } catch (ctrlErr) {
           console.warn('뷰어 컨트롤 갱신 실패:', ctrlErr)
@@ -293,7 +294,7 @@ const loadCOG = async (rawUrl, catalogMeta = null) => {
       const bandsChanged = JSON.stringify(style.bands) !== JSON.stringify(state.bandInfo.bands)
 
       if (bandsChanged) {
-        loadCOG(state.url, state.catalogMeta)
+        loadCOG(state.url, state.catalogMeta, newBandInfo)
         return
       }
 
