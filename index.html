@@ -741,6 +741,233 @@
       }
     }
 
+    /* Catalog sort */
+    .catalog-sort {
+      padding: 0 0.75rem 0.25rem;
+    }
+
+    /* Catalog card actions (like + watchlist) */
+    .catalog-card-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.4rem;
+      align-items: center;
+    }
+
+    .catalog-like-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.2rem 0.5rem;
+      border: 1px solid #e5e7eb;
+      border-radius: 4px;
+      background: white;
+      font-size: 0.75rem;
+      cursor: pointer;
+      color: #999;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    .catalog-like-btn:hover {
+      border-color: #f87171;
+      color: #f87171;
+    }
+
+    .catalog-like-btn.liked {
+      color: #ef4444;
+      border-color: #fca5a5;
+    }
+
+    .catalog-like-btn.liked .like-heart {
+      color: #ef4444;
+    }
+
+    .catalog-watchlist-btn {
+      padding: 0.2rem 0.5rem;
+      border: 1px solid #e5e7eb;
+      border-radius: 4px;
+      background: white;
+      font-size: 0.7rem;
+      cursor: pointer;
+      color: #666;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .catalog-watchlist-btn:hover {
+      border-color: #667eea;
+      color: #667eea;
+    }
+
+    /* Watchlist Panel */
+    .watchlist-toggle-btn {
+      position: absolute;
+      top: calc(50% + 3rem);
+      left: 0;
+      z-index: 20;
+      background: rgba(234, 102, 138, 0.9);
+      color: white;
+      border: none;
+      border-radius: 0 6px 6px 0;
+      padding: 0.75rem 0.5rem;
+      font-size: 0.7rem;
+      cursor: pointer;
+      writing-mode: vertical-rl;
+      letter-spacing: 0.05em;
+      display: none;
+    }
+
+    .watchlist-toggle-btn:hover {
+      background: rgba(234, 102, 138, 1);
+    }
+
+    .watchlist-panel {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 320px;
+      height: 100%;
+      background: white;
+      z-index: 31;
+      box-shadow: 2px 0 12px rgba(0,0,0,0.15);
+      transform: translateX(-100%);
+      transition: transform 0.25s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .watchlist-panel.open {
+      transform: translateX(0);
+    }
+
+    .watchlist-panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .watchlist-panel-header h3 {
+      font-size: 1rem;
+      color: #333;
+      margin: 0;
+    }
+
+    .watchlist-panel-close {
+      background: none;
+      border: none;
+      font-size: 1.1rem;
+      cursor: pointer;
+      color: #999;
+    }
+
+    .watchlist-panel-close:hover {
+      color: #333;
+    }
+
+    .watchlist-create-btn {
+      margin: 0.75rem;
+      padding: 0.5rem;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+
+    .watchlist-create-btn:hover {
+      background: #5a6fd6;
+    }
+
+    .watchlist-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0 0.75rem;
+    }
+
+    .watchlist-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.6rem 0.75rem;
+      border: 1px solid #e5e7eb;
+      border-radius: 6px;
+      margin-bottom: 0.5rem;
+    }
+
+    .watchlist-item-name {
+      font-size: 0.85rem;
+      color: #333;
+      font-weight: 500;
+    }
+
+    .watchlist-item-actions {
+      display: flex;
+      gap: 0.3rem;
+    }
+
+    .watchlist-item-actions button {
+      padding: 0.2rem 0.5rem;
+      border: 1px solid #d1d5db;
+      border-radius: 3px;
+      background: white;
+      font-size: 0.7rem;
+      cursor: pointer;
+    }
+
+    .watchlist-item-actions button:hover {
+      background: #f3f4f6;
+    }
+
+    .watchlist-delete-btn:hover {
+      background: #fee2e2 !important;
+      border-color: #fca5a5 !important;
+      color: #dc2626 !important;
+    }
+
+    .watchlist-back-btn {
+      display: block;
+      width: 100%;
+      padding: 0.5rem;
+      border: none;
+      background: #f3f4f6;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      text-align: left;
+      color: #667eea;
+      margin-bottom: 0.5rem;
+    }
+
+    .watchlist-back-btn:hover {
+      background: #e5e7eb;
+    }
+
+    .watchlist-remove-item-btn {
+      display: block;
+      margin-top: 0.3rem;
+      padding: 0.15rem 0.4rem;
+      border: 1px solid #e5e7eb;
+      border-radius: 3px;
+      background: white;
+      font-size: 0.65rem;
+      cursor: pointer;
+      color: #999;
+    }
+
+    .watchlist-remove-item-btn:hover {
+      background: #fee2e2;
+      border-color: #fca5a5;
+      color: #dc2626;
+    }
+
+    @media (max-width: 768px) {
+      .watchlist-panel {
+        width: 100%;
+      }
+    }
+
     /* Catalog filters */
     .catalog-filters {
       display: flex;
@@ -1003,7 +1230,7 @@
       }
     }
   </style>
-  <script type="module" crossorigin src="/COGnito/assets/index-2xXgXlFq.js"></script>
+  <script type="module" crossorigin src="/COGnito/assets/index-it3Qjc4O.js"></script>
   <link rel="modulepreload" crossorigin href="/COGnito/assets/vendor-CE7cedER.js">
   <link rel="stylesheet" crossorigin href="/COGnito/assets/index-BtPuoxOl.css">
 </head>
@@ -1058,6 +1285,15 @@
         <span id="catalog-page-info" aria-live="polite"></span>
         <button id="catalog-next" aria-label="다음 페이지">&rarr;</button>
       </div>
+    </div>
+    <button id="watchlist-toggle-btn" class="watchlist-toggle-btn" title="관심목록" aria-label="관심목록 패널 열기" aria-expanded="false" aria-controls="watchlist-panel">관심</button>
+    <div id="watchlist-panel" class="watchlist-panel" role="dialog" aria-label="관심목록">
+      <div class="watchlist-panel-header">
+        <h3>관심목록</h3>
+        <button id="watchlist-panel-close" class="watchlist-panel-close" aria-label="관심목록 닫기">✕</button>
+      </div>
+      <button id="watchlist-create-btn" class="watchlist-create-btn">+ 새 관심목록</button>
+      <div id="watchlist-list" class="watchlist-list"></div>
     </div>
     <button id="stac-toggle-btn" class="stac-toggle-btn" title="STAC 검색" aria-label="STAC 검색 패널 열기" aria-expanded="false" aria-controls="stac-panel">STAC</button>
     <div id="stac-panel" class="stac-panel" role="dialog" aria-label="STAC 검색">
