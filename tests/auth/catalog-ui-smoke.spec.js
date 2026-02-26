@@ -19,12 +19,22 @@ function mockSupabase(page) {
   }))
 }
 
+/**
+ * 앱 초기화 완료 대기 (COG 로딩 후 initCatalogUI가 호출됨)
+ */
+async function waitForAppInit(page) {
+  await page.waitForFunction(() => {
+    const loadingEl = document.getElementById('loading')
+    return loadingEl && !loadingEl.classList.contains('active')
+  }, { timeout: 30000 })
+}
+
 test.describe('카탈로그 UI 스모크 테스트', () => {
 
   test('카탈로그 패널: 토글 버튼 존재 + 패널 열기/닫기', async ({ page }) => {
     await mockSupabase(page)
     await page.goto('')
-    await page.waitForLoadState('domcontentloaded')
+    await waitForAppInit(page)
 
     const toggleBtn = page.locator('#catalog-toggle-btn')
     await expect(toggleBtn).toBeVisible()
@@ -45,7 +55,7 @@ test.describe('카탈로그 UI 스모크 테스트', () => {
   test('카탈로그 패널: 정렬 드롭다운 존재', async ({ page }) => {
     await mockSupabase(page)
     await page.goto('')
-    await page.waitForLoadState('domcontentloaded')
+    await waitForAppInit(page)
 
     await page.locator('#catalog-toggle-btn').click()
 
@@ -61,7 +71,7 @@ test.describe('카탈로그 UI 스모크 테스트', () => {
   test('관심목록 패널: 비로그인 시 토글 버튼 숨김', async ({ page }) => {
     await mockSupabase(page)
     await page.goto('')
-    await page.waitForLoadState('domcontentloaded')
+    await waitForAppInit(page)
 
     // 비로그인 상태에서는 관심목록 버튼이 display:none
     const watchlistBtn = page.locator('#watchlist-toggle-btn')
@@ -71,7 +81,7 @@ test.describe('카탈로그 UI 스모크 테스트', () => {
   test('관심목록 패널: HTML 구조 존재', async ({ page }) => {
     await mockSupabase(page)
     await page.goto('')
-    await page.waitForLoadState('domcontentloaded')
+    await waitForAppInit(page)
 
     // 패널 자체는 DOM에 존재
     const panel = page.locator('#watchlist-panel')
