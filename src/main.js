@@ -278,6 +278,43 @@ const loadCOG = async (rawUrl, catalogMeta = null) => {
     }
   }
 
+  // 뷰어 컨트롤 초기화 (loadCOG 전에 호출해야 updateControlsForCog가 정상 동작)
+  initViewerControls(
+    (style) => {
+      // 스타일 변경 핸들러 (min/max, 밴드, 컬러맵)
+      const state = window._currentViewerState
+      if (!state || !currentCogLayer) return
+
+      const newBandInfo = { type: style.bandType, bands: style.bands }
+      const newStats = style.bandType === 'rgb'
+        ? state.stats.map(() => ({ min: style.min, max: style.max }))
+        : [{ min: style.min, max: style.max }]
+
+      const bandsChanged = JSON.stringify(style.bands) !== JSON.stringify(state.bandInfo.bands)
+
+      if (bandsChanged) {
+        loadCOG(state.url, state.catalogMeta)
+        return
+      }
+
+      // WebGL 파이프라인: setStyle로 실시간 반영
+      if (currentCogLayer.setStyle) {
+        currentCogLayer.setStyle(buildStyleWithColormap(newBandInfo, newStats, style.colormap))
+      }
+      // Canvas 파이프라인: setStats + setColormap로 실시간 반영
+      if (window._currentImageResult?.setStats) {
+        window._currentImageResult.setStats(newStats)
+        window._currentImageResult.setColormap(style.colormap)
+      }
+    },
+    (mode) => {
+      // 투영 모드 변경 핸들러
+      PROJECTION_MODE = mode
+      const state = window._currentViewerState
+      if (state) loadCOG(state.url, state.catalogMeta)
+    }
+  )
+
   // 초기 COG 로드
   await loadCOG(COG_URL)
 
@@ -360,43 +397,6 @@ const loadCOG = async (rawUrl, catalogMeta = null) => {
   })
 
   initRegisterUI()
-
-  // 뷰어 컨트롤 초기화
-  initViewerControls(
-    (style) => {
-      // 스타일 변경 핸들러 (min/max, 밴드, 컬러맵)
-      const state = window._currentViewerState
-      if (!state || !currentCogLayer) return
-
-      const newBandInfo = { type: style.bandType, bands: style.bands }
-      const newStats = style.bandType === 'rgb'
-        ? state.stats.map(() => ({ min: style.min, max: style.max }))
-        : [{ min: style.min, max: style.max }]
-
-      const bandsChanged = JSON.stringify(style.bands) !== JSON.stringify(state.bandInfo.bands)
-
-      if (bandsChanged) {
-        loadCOG(state.url, state.catalogMeta)
-        return
-      }
-
-      // WebGL 파이프라인: setStyle로 실시간 반영
-      if (currentCogLayer.setStyle) {
-        currentCogLayer.setStyle(buildStyleWithColormap(newBandInfo, newStats, style.colormap))
-      }
-      // Canvas 파이프라인: setStats + setColormap로 실시간 반영
-      if (window._currentImageResult?.setStats) {
-        window._currentImageResult.setStats(newStats)
-        window._currentImageResult.setColormap(style.colormap)
-      }
-    },
-    (mode) => {
-      // 투영 모드 변경 핸들러
-      PROJECTION_MODE = mode
-      const state = window._currentViewerState
-      if (state) loadCOG(state.url, state.catalogMeta)
-    }
-  )
 
   // 패널 토글
   const vcToggleBtn = document.getElementById('vc-toggle-btn')
