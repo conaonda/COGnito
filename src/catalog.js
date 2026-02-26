@@ -64,12 +64,12 @@ export async function saveCogImage(data) {
 /**
  * COG 영상 목록 조회
  */
-export async function getCogImages({ search = '', tag = '', sensor = '', region = '', limit = 20, offset = 0 } = {}) {
+export async function getCogImages({ search = '', tag = '', sensor = '', region = '', sortBy = 'created_at', limit = 20, offset = 0 } = {}) {
   if (!supabase) return { data: [], error: null }
 
   let query = supabase
     .from('cog_images')
-    .select('*')
+    .select('*, likes(count)')
     .order('created_at', { ascending: false })
     .range(offset, offset + limit - 1)
 
@@ -90,7 +90,18 @@ export async function getCogImages({ search = '', tag = '', sensor = '', region 
     query = query.ilike('region', `%${region}%`)
   }
 
-  return query
+  const result = await query
+
+  // 인기순 정렬: likes count 기준 내림차순 (클라이언트 사이드)
+  if (sortBy === 'like_count' && result.data) {
+    result.data.sort((a, b) => {
+      const countA = a.likes?.[0]?.count || 0
+      const countB = b.likes?.[0]?.count || 0
+      return countB - countA
+    })
+  }
+
+  return result
 }
 
 /**
