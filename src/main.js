@@ -11,6 +11,7 @@ import { consumePreLoginState } from './auth.js'
 import { initRegisterUI, openRegisterModalWithMeta } from './registerUI.js'
 import { initCatalogUI } from './catalogUI.js'
 import { initStacUI } from './stacUI.js'
+import { initWatchlistUI } from './watchlistUI.js'
 import { updateViewerMeta } from './viewerMeta.js'
 import 'ol/ol.css'
 
@@ -343,6 +344,7 @@ const loadCOG = async (rawUrl, catalogMeta = null) => {
 
   initRegisterUI()
   initCatalogUI((url, catalogItem) => loadCOG(url, catalogItem))
+  initWatchlistUI((url, catalogItem) => loadCOG(url, catalogItem))
 
   // STAC UI 초기화
   initStacUI(

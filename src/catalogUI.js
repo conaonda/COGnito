@@ -1,5 +1,7 @@
 import { supabase } from './supabase.js'
 import { getCogImages } from './catalog.js'
+import { toggleLike, getLikeStates } from './likes.js'
+import { getSession } from './auth.js'
 
 const PAGE_SIZE = 20
 
@@ -34,9 +36,30 @@ export function initCatalogUI(onSelectCog) {
   const sensorFilter = filterContainer.querySelector('#catalog-filter-sensor')
   const regionFilter = filterContainer.querySelector('#catalog-filter-region')
 
+  // 정렬 드롭다운
+  const sortContainer = document.createElement('div')
+  sortContainer.className = 'catalog-sort'
+  sortContainer.innerHTML = `
+    <select id="catalog-sort-select" class="catalog-filter-input" aria-label="정렬 기준">
+      <option value="created_at">최신순</option>
+      <option value="like_count">인기순</option>
+    </select>
+  `
+  filterContainer.parentNode.insertBefore(sortContainer, filterContainer.nextSibling)
+  const sortSelect = sortContainer.querySelector('#catalog-sort-select')
+
   let currentPage = 0
   let searchTerm = ''
+  let sortBy = 'created_at'
   let debounceTimer = null
+  let isUserLoggedIn = false
+
+  getSession().then(session => { isUserLoggedIn = !!session?.user })
+  if (supabase) {
+    supabase.auth.onAuthStateChange((_event, session) => {
+      isUserLoggedIn = !!session?.user
+    })
+  }
 
   toggleBtn.addEventListener('click', () => {
     panel.classList.toggle('open')
@@ -69,6 +92,11 @@ export function initCatalogUI(onSelectCog) {
   tagFilter.addEventListener('input', onFilterChange)
   sensorFilter.addEventListener('input', onFilterChange)
   regionFilter.addEventListener('input', onFilterChange)
+  sortSelect.addEventListener('change', () => {
+    sortBy = sortSelect.value
+    currentPage = 0
+    loadPage()
+  })
 
   prevBtn.addEventListener('click', () => {
     if (currentPage > 0) {
@@ -99,6 +127,7 @@ export function initCatalogUI(onSelectCog) {
       tag: tagFilter.value.trim(),
       sensor: sensorFilter.value.trim(),
       region: regionFilter.value.trim(),
+      sortBy,
       limit: PAGE_SIZE,
       offset
     })
@@ -117,6 +146,11 @@ export function initCatalogUI(onSelectCog) {
     }
 
     listEl.innerHTML = ''
+
+    // 좋아요 상태 일괄 조회
+    const ids = data.map(item => item.id)
+    const likeStates = await getLikeStates(ids)
+
     data.forEach(item => {
       const card = document.createElement('div')
       card.className = 'catalog-card'
@@ -141,6 +175,53 @@ export function initCatalogUI(onSelectCog) {
         ${tagsHtml}
         <div class="catalog-card-meta">${metaParts.filter(Boolean).join(' | ')}</div>
       `
+
+      // 좋아요 + 관심목록 버튼 (로그인 시만 표시)
+      if (isUserLoggedIn) {
+        const likeState = likeStates.get(item.id) || { count: 0, liked: false }
+        const actionsRow = document.createElement('div')
+        actionsRow.className = 'catalog-card-actions'
+
+        const likeBtn = document.createElement('button')
+        likeBtn.className = 'catalog-like-btn' + (likeState.liked ? ' liked' : '')
+        likeBtn.innerHTML = `<span class="like-heart">${likeState.liked ? '&#9829;' : '&#9825;'}</span> <span class="like-count">${likeState.count}</span>`
+        likeBtn.addEventListener('click', async (e) => {
+          e.stopPropagation()
+          likeBtn.disabled = true
+          const { liked, error: likeError } = await toggleLike(item.id)
+          if (!likeError) {
+            const countEl = likeBtn.querySelector('.like-count')
+            const heartEl = likeBtn.querySelector('.like-heart')
+            const prevCount = parseInt(countEl.textContent, 10) || 0
+            countEl.textContent = liked ? prevCount + 1 : Math.max(0, prevCount - 1)
+            heartEl.innerHTML = liked ? '&#9829;' : '&#9825;'
+            likeBtn.classList.toggle('liked', liked)
+          }
+          likeBtn.disabled = false
+        })
+
+        const watchlistBtn = document.createElement('button')
+        watchlistBtn.className = 'catalog-watchlist-btn'
+        watchlistBtn.textContent = '+ 관심목록'
+        watchlistBtn.addEventListener('click', (e) => {
+          e.stopPropagation()
+          document.dispatchEvent(new CustomEvent('watchlist-add', { detail: { cogImageId: item.id } }))
+        })
+
+        actionsRow.appendChild(likeBtn)
+        actionsRow.appendChild(watchlistBtn)
+        card.appendChild(actionsRow)
+      } else {
+        // 비로그인: 좋아요 수만 표시
+        const likeCount = item.likes?.[0]?.count || 0
+        if (likeCount > 0) {
+          const likeInfo = document.createElement('div')
+          likeInfo.className = 'catalog-card-meta'
+          likeInfo.textContent = `♥ ${likeCount}`
+          card.appendChild(likeInfo)
+        }
+      }
+
       card.addEventListener('click', () => {
         panel.classList.remove('open')
         onSelectCog(item.url, item)
