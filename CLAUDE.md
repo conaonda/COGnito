@@ -64,6 +64,26 @@
 
 성공 기준이 명확하면 스스로 반복하며 작업을 완성할 수 있습니다. 기준이 모호하면("작동하게 만들기") 계속 다시 물어봐야 합니다.
 
+## 5. 버전 정합성
+
+**기능 추가/릴리스 시 아래 파일의 버전 참조를 확인하세요.**
+
+버전의 단일 진실 공급원(Single Source of Truth)은 `package.json`의 `version` 필드입니다.
+
+| 파일 | 자동/수동 | 설명 |
+|------|----------|------|
+| `package.json` | release-please 자동 | SSOT. `vite.config.js`가 `__APP_VERSION__`으로 주입 |
+| `.release-please-manifest.json` | release-please 자동 | 릴리스 추적용 |
+| `docs/ROADMAP.md` | release-please 자동 | `x-release-please-version` 주석으로 자동 범프 |
+| `docs/ROADMAP.md` 마일스톤 | **수동** | 새 마일스톤 완료 시 ✅ 표시, 스코프 갱신 |
+| `docs/USER_GUIDE.md` | **수동** | 사용자 향 기능 추가 시 섹션 추가 |
+
+**릴리스 체크리스트:**
+
+1. `package.json` version 확인 (release-please가 처리)
+2. `docs/ROADMAP.md` 마일스톤 상태 갱신 (✅, 스코프, 검증 기준)
+3. `docs/USER_GUIDE.md`에 새 기능 반영 여부 확인
+
 ---
 
 **이 지침이 잘 작동하고 있다면:** Diff(변경 사항)에서 불필요한 수정이 줄어들고, 과도한 복잡성 때문에 코드를 다시 쓰는 일이 줄어들며, 실수한 뒤가 아니라 구현하기 전에 확인 질문이 오갈 것입니다.
