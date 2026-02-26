@@ -82,6 +82,13 @@ jobs:
             auth:
               - 'src/auth.js'
               - 'src/authUI.js'
+            catalog:
+              - 'src/catalog.js'
+              - 'src/catalogUI.js'
+              - 'src/registerUI.js'
+              - 'src/likes.js'
+              - 'src/watchlist.js'
+              - 'src/watchlistUI.js'
             ci:
               - '.github/workflows/**'
               - 'playwright.config.js'
@@ -129,8 +136,14 @@ jobs:
         env:
           CI: true
 
+      - name: Run catalog UI smoke tests
+        if: steps.changes.outputs.core != 'true' && steps.changes.outputs.ci != 'true' && steps.changes.outputs.catalog == 'true'
+        run: npx playwright test --config=playwright.auth.config.js
+        env:
+          CI: true
+
       - name: Run auth tests
-        if: steps.changes.outputs.auth == 'true' || steps.changes.outputs.core == 'true' || steps.changes.outputs.ci == 'true'
+        if: steps.changes.outputs.auth == 'true' || steps.changes.outputs.core == 'true' || steps.changes.outputs.ci == 'true' || steps.changes.outputs.catalog == 'true'
         run: npx playwright test --config=playwright.auth.config.js
         env:
           CI: true

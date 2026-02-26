@@ -46,6 +46,10 @@ jobs:
         run: npx playwright install-deps chromium
 
       - run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_CORS_PROXY_URL: https://cog-cors-proxy.conaonda.workers.dev
 
       - run: npx playwright test
         env:
