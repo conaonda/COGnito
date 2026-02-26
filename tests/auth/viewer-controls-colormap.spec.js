@@ -28,6 +28,12 @@ async function waitForCogLoad(page) {
   await page.waitForFunction(() => {
     return window.currentCogMeta && window.currentTiff
   }, { timeout: 60000 })
+  // updateControlsForCog is async (getTotalBands + getMinMaxFromOverview)
+  // Wait until viewer controls are actually enabled
+  await page.waitForFunction(() => {
+    const sel = document.getElementById('vc-band-mode')
+    return sel && !sel.disabled
+  }, { timeout: 30000 })
 }
 
 test.describe('뷰어 컨트롤: 컬러맵 검증 (Capella SAR)', () => {
