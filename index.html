@@ -176,6 +176,98 @@
       line-height: 1.4;
     }
     
+    /* 뷰어 컨트롤 패널 */
+    .vc-toggle-btn {
+      position: absolute;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      z-index: 10;
+      background: rgba(255,255,255,0.95);
+      border: none;
+      border-radius: 8px;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.8rem;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    .viewer-controls-panel {
+      position: absolute;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      z-index: 11;
+      background: rgba(255,255,255,0.97);
+      border-radius: 8px;
+      padding: 1rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      width: 260px;
+      display: none;
+      font-size: 0.75rem;
+    }
+    .viewer-controls-panel.open { display: block; }
+    .viewer-controls-panel .vc-toggle-btn {
+      position: static;
+      box-shadow: none;
+      padding: 0;
+      float: right;
+      font-size: 1rem;
+      background: none;
+    }
+    .vc-section { margin-bottom: 0.75rem; }
+    .vc-section:last-child { margin-bottom: 0; }
+    .vc-label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+      color: #333;
+      font-size: 0.7rem;
+    }
+    .vc-row {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-bottom: 0.25rem;
+    }
+    .vc-row label { min-width: 1.5rem; color: #666; }
+    .vc-row select, .vc-section select {
+      flex: 1;
+      font-size: 0.7rem;
+      padding: 0.15rem 0.25rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .vc-slider-group { width: 100%; }
+    .vc-slider-group input[type="range"] { width: 100%; }
+    .vc-slider-row {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+    .vc-slider-row span { font-size: 0.65rem; color: #666; min-width: 3rem; text-align: right; }
+    .vc-btn-group { display: flex; gap: 0.3rem; }
+    .vc-btn-group button {
+      flex: 1;
+      font-size: 0.7rem;
+      padding: 0.25rem 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background: #fff;
+      cursor: pointer;
+    }
+    .vc-btn-group button.active {
+      background: #4A90D9;
+      color: #fff;
+      border-color: #4A90D9;
+    }
+    #vc-reset-btn {
+      font-size: 0.65rem;
+      padding: 0.15rem 0.4rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background: #fff;
+      cursor: pointer;
+      margin-left: auto;
+    }
+
     .ol-control {
       background: rgba(255,255,255,0.9) !important;
       border-radius: 4px;
@@ -1254,6 +1346,55 @@
     <div class="controls">
       <h3 id="controls-title">영상 정보</h3>
       <p id="controls-info">-</p>
+    </div>
+    <button id="vc-toggle-btn" class="vc-toggle-btn" aria-label="뷰어 컨트롤 열기">&#9881;</button>
+    <div id="viewer-controls-panel" class="viewer-controls-panel">
+      <button id="vc-toggle-btn-close" class="vc-toggle-btn" aria-label="뷰어 컨트롤 닫기">&times;</button>
+      <div class="vc-section">
+        <span class="vc-label">Min / Max 스트레치</span>
+        <div class="vc-slider-row">
+          <span>Min</span>
+          <input type="range" id="vc-min-slider" min="0" max="1" step="0.1" value="0">
+          <span id="vc-min-value">0</span>
+        </div>
+        <div class="vc-slider-row">
+          <span>Max</span>
+          <input type="range" id="vc-max-slider" min="0" max="1" step="0.1" value="1">
+          <span id="vc-max-value">1</span>
+        </div>
+        <button id="vc-reset-btn">자동</button>
+      </div>
+      <div class="vc-section">
+        <span class="vc-label">밴드 선택</span>
+        <select id="vc-band-mode">
+          <option value="rgb">RGB</option>
+          <option value="single">단일 밴드</option>
+        </select>
+        <div id="vc-band-rgb-group">
+          <div class="vc-row"><label>R</label><select id="vc-band-r"></select></div>
+          <div class="vc-row"><label>G</label><select id="vc-band-g"></select></div>
+          <div class="vc-row"><label>B</label><select id="vc-band-b"></select></div>
+        </div>
+        <div id="vc-band-single-group" style="display:none">
+          <div class="vc-row"><label>Band</label><select id="vc-band-single"></select></div>
+        </div>
+      </div>
+      <div class="vc-section">
+        <span class="vc-label">컬러맵</span>
+        <select id="vc-colormap" disabled>
+          <option value="grayscale">Grayscale</option>
+          <option value="viridis">Viridis</option>
+          <option value="inferno">Inferno</option>
+          <option value="plasma">Plasma</option>
+        </select>
+      </div>
+      <div class="vc-section">
+        <span class="vc-label">투영 모드</span>
+        <div class="vc-btn-group">
+          <button id="vc-proj-affine">Affine</button>
+          <button id="vc-proj-reproject">Reproject</button>
+        </div>
+      </div>
     </div>
     <div id="mobile-quality-toggle" class="mobile-quality-toggle">
       <span id="quality-dot" class="quality-dot"></span>

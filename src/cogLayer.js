@@ -201,6 +201,15 @@ export const getMinMaxFromOverview = async (tiff, bands) => {
   return { stats, rasters, width: image.getWidth(), height: image.getHeight() }
 }
 
+export const getTotalBands = async (tiff) => {
+  const image = await tiff.getImage(0)
+  const extraSamples = image.fileDirectory.ExtraSamples
+  const alphaCount = extraSamples
+    ? extraSamples.filter(v => v === 1 || v === 2).length
+    : 0
+  return image.getSamplesPerPixel() - alphaCount
+}
+
 export const detectBands = async (tiff) => {
   const image = await tiff.getImage(0)
   const samplesPerPixel = image.getSamplesPerPixel()
@@ -221,7 +230,7 @@ export const detectBands = async (tiff) => {
   return { type: 'gray', bands: [1] }
 }
 
-const buildStyle = (bandInfo, stats) => {
+export const buildStyle = (bandInfo, stats) => {
   if (bandInfo.type === 'rgb') {
     return {
       color: [
@@ -239,7 +248,7 @@ const buildStyle = (bandInfo, stats) => {
   }
 }
 
-const createCOGSource = (url, bands) => {
+export const createCOGSource = (url, bands) => {
   return new GeoTIFFSource({
     sources: [{
       url: url,
