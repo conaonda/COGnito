@@ -79,26 +79,58 @@ test.describe('뷰어 컨트롤: 컬러맵 검증 (Capella SAR)', () => {
     await expect(colormapSelect).toHaveValue('viridis')
 
     // canvas에 실제로 컬러맵이 적용되었는지 확인 (pixel sampling)
-    // WebGL 파이프라인: canvas 픽셀에 viridis 색상이 존재해야 함
-    await page.waitForTimeout(2000)
+    await page.waitForTimeout(3000)
 
-    const hasColor = await page.evaluate(() => {
-      const canvas = document.querySelector('#map canvas')
-      if (!canvas) return false
-      const ctx = canvas.getContext('2d')
-      if (!ctx) return false
-      const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height)
-      const px = imgData.data
-      // 비-그레이스케일 픽셀이 존재하는지 확인 (R !== G || G !== B)
-      for (let i = 0; i < px.length; i += 4) {
-        if (px[i + 3] > 0 && (px[i] !== px[i + 1] || px[i + 1] !== px[i + 2])) {
-          return true
+    const analysis = await page.evaluate(() => {
+      const canvases = document.querySelectorAll('#map canvas')
+      for (const canvas of canvases) {
+        const ctx = canvas.getContext('2d')
+        if (!ctx) continue
+        const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+        const px = imgData.data
+        let totalVisible = 0
+        let nonGray = 0
+        // viridis 색상 계열 카운트 (보라~청록~녹~황)
+        let purple = 0, teal = 0, green = 0, yellow = 0
+        const sampleColors = []
+        for (let i = 0; i < px.length; i += 4) {
+          if (px[i + 3] === 0) continue
+          totalVisible++
+          const r = px[i], g = px[i + 1], b = px[i + 2]
+          if (r !== g || g !== b) nonGray++
+          // 색상 분류
+          if (b > r && b > g) purple++
+          else if (g > r && g > b && b > 80) teal++
+          else if (g > r && g > b) green++
+          else if (r > 200 && g > 200 && b < 100) yellow++
+          // 처음 10개 비그레이스케일 픽셀 샘플
+          if (sampleColors.length < 10 && (r !== g || g !== b)) {
+            sampleColors.push([r, g, b])
+          }
+        }
+        if (totalVisible > 0) {
+          return {
+            canvasSize: `${canvas.width}x${canvas.height}`,
+            totalVisible, nonGray,
+            nonGrayRatio: (nonGray / totalVisible * 100).toFixed(1),
+            purple, teal, green, yellow,
+            sampleColors,
+            pipeline: window._currentImageResult ? 'canvas' : 'webgl'
+          }
         }
       }
-      return false
+      return null
     })
 
-    expect(hasColor).toBe(true)
+    console.log('Viridis pixel analysis:', JSON.stringify(analysis, null, 2))
+
+    expect(analysis).not.toBeNull()
+    // 최소 10% 이상의 가시 픽셀이 비-그레이스케일이어야 함
+    expect(Number(analysis.nonGrayRatio)).toBeGreaterThan(10)
+    // viridis 스펙트럼: 최소 2개 색상 계열이 존재해야 함
+    const colorCategories = [analysis.purple, analysis.teal, analysis.green, analysis.yellow]
+      .filter(c => c > 0).length
+    expect(colorCategories).toBeGreaterThanOrEqual(2)
   })
 
   test('Min/Max 슬라이더 존재 + 통계값 반영', async ({ page }) => {

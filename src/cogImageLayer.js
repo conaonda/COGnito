@@ -212,10 +212,12 @@ export async function createCOGImageLayer({ url, projectionMode = 'reproject', v
     setStats(newStats) {
       stats.length = 0
       newStats.forEach(s => stats.push(s))
+      cachedKey = null
       source.changed()
     },
     setColormap(name) {
       currentColormap = name || null
+      cachedKey = null
       source.changed()
     }
   }
