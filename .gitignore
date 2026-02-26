@@ -18,6 +18,7 @@ supabase/.temp/
 tmp/
 
 # bkit plugin state
+.bkit/
 docs/.bkit-memory.json
 docs/.pdca-status.json
 docs/.pdca-snapshots/
