@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.0.0...COGnito-v1.1.0) (2026-02-26)
+
+
+### Features
+
+* viewer enhancement — band selection, colormap, min/max stretch, projection toggle ([151a88d](https://github.com/conaonda/COGnito/commit/151a88d61255b05ded8a158376878410c0c434cf))
+
 ## [0.3.0](https://github.com/conaonda/COGnito/compare/COGnito-v0.3.0...COGnito-v0.3.0) (2026-02-24)
 
 
