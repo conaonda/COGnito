@@ -76,7 +76,7 @@ export function buildStyleWithColormap(bandInfo, stats, colormapName) {
     return { color: ['array', norm, norm, norm, ['/', ['band', 2], 255]] }
   }
 
-  // 16 stops로 컬러맵 근사
+  // 16 stops로 컬러맵 근사 — nodata(alpha=0) 투명 유지
   const norm = ['/', ['-', ['band', 1], stats[0].min], stats[0].max - stats[0].min]
   const stops = []
   for (let i = 0; i <= 15; i++) {
@@ -86,7 +86,13 @@ export function buildStyleWithColormap(bandInfo, stats, colormapName) {
     stops.push(t, ['color', r, g, b, 1])
   }
 
-  return { color: ['interpolate', ['linear'], norm, ...stops] }
+  const colormapColor = ['interpolate', ['linear'], norm, ...stops]
+  return {
+    color: ['case',
+      ['==', ['band', 2], 0], ['color', 0, 0, 0, 0],
+      colormapColor
+    ]
+  }
 }
 
 /**
