@@ -16,3 +16,8 @@ supabase/.temp/
 # System files
 .sisyphus/
 tmp/
+
+# bkit plugin state
+docs/.bkit-memory.json
+docs/.pdca-status.json
+docs/.pdca-snapshots/
