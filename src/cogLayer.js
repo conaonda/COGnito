@@ -119,12 +119,25 @@ const applyAffineBypass = (cogSource, cogView, viewProjection, targetTileSize) =
     let factor = 2
     while (true) {
       extraResolutions.push(r)
-      extraRenderTileSizes.push([baseTile[0], baseTile[1]])
       // coarsest overview 크기를 초과하지 않도록 제한하여
       // out-of-bounds 읽기로 인한 영상 왜곡 방지
-      const cappedW = Math.min(baseTile[0] * factor, MAX_SOURCE_TILE_DIM, coarsestW)
-      const cappedH = Math.min(baseTile[1] * factor, MAX_SOURCE_TILE_DIM, coarsestH)
+      const uncappedW = baseTile[0] * factor
+      const uncappedH = baseTile[1] * factor
+      const cappedW = Math.min(uncappedW, MAX_SOURCE_TILE_DIM, coarsestW)
+      const cappedH = Math.min(uncappedH, MAX_SOURCE_TILE_DIM, coarsestH)
       extraSourceTileSizes.push([cappedW, cappedH])
+
+      const isCapped = cappedW < uncappedW || cappedH < uncappedH
+      if (!isCapped) {
+        extraRenderTileSizes.push([baseTile[0], baseTile[1]])
+      } else {
+        // cap된 레벨: 1개 타일이 정확히 extent를 덮도록 renderTileSize 역산.
+        // 해상도 r은 scaleX 기반이므로, extW/r과 extH/r을 직접 사용해야
+        // X/Y 스케일 차이(UTM→3857 등)로 인한 왜곡을 방지할 수 있음.
+        const renderW = Math.max(1, Math.ceil(extW / r))
+        const renderH = Math.max(1, Math.ceil(extH / r))
+        extraRenderTileSizes.push([renderW, renderH])
+      }
       if (r >= maxViewRes) break
       r *= 2
       factor *= 2
