@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.2.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.1.0...COGnito-v1.2.0) (2026-02-27)
+
+
+### Features
+
+* add zoom level display to coordinate panel ([#107](https://github.com/conaonda/COGnito/issues/107)) ([f893483](https://github.com/conaonda/COGnito/commit/f8934839e5a9740627a63ffb3bbad118c0df6273))
+* resolve v1.1 open issues ([#92](https://github.com/conaonda/COGnito/issues/92), [#93](https://github.com/conaonda/COGnito/issues/93), [#94](https://github.com/conaonda/COGnito/issues/94), [#95](https://github.com/conaonda/COGnito/issues/95), [#97](https://github.com/conaonda/COGnito/issues/97)) ([#106](https://github.com/conaonda/COGnito/issues/106)) ([be2f7bc](https://github.com/conaonda/COGnito/commit/be2f7bce061c3e68984a84ee7787e1d9206f6534))
+
+
+### Bug Fixes
+
+* reposition viewer controls button closer to coordinate display ([#98](https://github.com/conaonda/COGnito/issues/98)) ([#103](https://github.com/conaonda/COGnito/issues/103)) ([9263160](https://github.com/conaonda/COGnito/commit/9263160b97d919220f3f298485325bdd8e65adc4))
+
 ## [1.1.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.0.0...COGnito-v1.1.0) (2026-02-26)
 
 
