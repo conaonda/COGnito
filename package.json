@@ -13,6 +13,8 @@
     "test:state": "npx playwright test tests/performance/04-detailed-state.spec.js",
     "test:state:headed": "npx playwright test tests/performance/04-detailed-state.spec.js --headed",
     "test:auth": "npx playwright test --config=playwright.auth.config.js",
+    "test:unit": "vitest run",
+    "test:unit:coverage": "vitest run --coverage",
     "setup": "bash scripts/setup-supabase.sh"
   },
   "dependencies": {
@@ -22,6 +24,8 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.58.2",
-    "vite": "^6.1.0"
+    "@vitest/coverage-v8": "^3.0.0",
+    "vite": "^6.1.0",
+    "vitest": "^3.0.0"
   }
 }

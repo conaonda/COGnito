@@ -7,6 +7,9 @@ import { createOrUpdate as createOrUpdateTileRange } from 'ol/TileRange.js'
 import { fromUrl as tiffFromUrl } from 'geotiff'
 import { patchRendererWithAffine } from './AffineTileLayer.js'
 
+const GEOTIFF_BLOCK_SIZE = 524288
+const GEOTIFF_CACHE_SIZE = 500
+
 /**
  * 회전된 GeoTIFF의 4 꼭짓점을 변환하여 정확한 AABB를 소스 CRS에서 계산.
  * ModelTransformation에 비대각선 항(회전)이 없으면 null 반환.
@@ -312,7 +315,7 @@ function patchTileGridForAffine(tileGrid, pixelToView, sourceTileSizes, overview
 }
 
 export async function createCOGLayer({ url, bandInfo: overrideBandInfo, projectionMode, viewProjection, targetTileSize = 256, opacity = 1 }) {
-  const tiff = await tiffFromUrl(url, { blockSize: 524288, cacheSize: 500 })
+  const tiff = await tiffFromUrl(url, { blockSize: GEOTIFF_BLOCK_SIZE, cacheSize: GEOTIFF_CACHE_SIZE })
 
   const bandInfo = overrideBandInfo || await detectBands(tiff)
   const resolvedBands = bandInfo.bands

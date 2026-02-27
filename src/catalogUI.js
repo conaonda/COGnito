@@ -156,7 +156,7 @@ export function initCatalogUI(onSelectCog) {
       card.className = 'catalog-card'
 
       const thumbHtml = item.thumbnail_url
-        ? `<img src="${escapeHtml(item.thumbnail_url)}" class="catalog-card-thumb" alt="">`
+        ? `<img src="${escapeHtml(item.thumbnail_url)}" class="catalog-card-thumb" alt="${escapeHtml(item.title || '영상')}" loading="lazy" onerror="this.style.display='none'">`
         : ''
 
       const tagsHtml = (item.tags && item.tags.length > 0)
