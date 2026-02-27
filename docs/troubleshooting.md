@@ -102,6 +102,28 @@ COGnito 개발 중 발견된 이슈와 해결 방법을 기록합니다.
 
 ---
 
+## #109: 줌 아웃 시 영상 늘어남/잘림 (zoom < 10)
+
+**증상**: 특정 COG 영상(예: SkySat Harvey)을 줌 레벨 10 미만으로 줌 아웃하면 영상이 늘어나고 바깥 부분이 잘림.
+
+**원인 분석**:
+- `applyAffineBypass`의 extra 레벨에서 `renderTileSize`가 고정([256, 256])
+- `dstResolutions`는 `scaleX`만 사용하여 계산되지만, UTM→EPSG:3857 등 투영 변환에서 X/Y 스케일이 다름
+- 결과: 타일의 지리적 영역이 실제 영상 extent보다 크게 잡히고, overview 텍스처가 큰 타일 영역으로 늘어나 매핑
+- `layer.extent`가 영상 범위로 클리핑하면서 늘어난 부분이 잘려 보임
+
+**해결**:
+cap된 extra 레벨에서 `renderTileSize`를 extent와 resolution으로부터 역산:
+```js
+const renderW = Math.max(1, Math.ceil(extW / r))
+const renderH = Math.max(1, Math.ceil(extH / r))
+```
+이렇게 하면 1개 타일이 정확히 영상 extent를 덮어, X/Y 스케일 차이와 무관하게 왜곡이 발생하지 않음.
+
+**관련 코드**: `src/cogLayer.js` — `applyAffineBypass()` extra 레벨 생성부
+
+---
+
 ## v1.0.0 릴리스 전 보안 점검
 
 **수정된 보안 이슈**:
