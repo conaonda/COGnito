@@ -6,6 +6,9 @@ import { fromUrl as tiffFromUrl, Pool } from 'geotiff'
 import { detectBands, getMinMaxFromOverview } from './cogLayer.js'
 import { COLORMAPS } from './colormap.js'
 
+const GEOTIFF_BLOCK_SIZE = 524288
+const GEOTIFF_CACHE_SIZE = 500
+
 let pool
 try { pool = new Pool(4) } catch { /* worker unavailable – decode on main thread */ }
 
@@ -48,7 +51,7 @@ function fillPixelData(px, rasters, bandInfo, stats, pixelCount, colormapName) {
 }
 
 export async function createCOGImageLayer({ url, projectionMode = 'reproject', viewProjection, opacity = 1, resolutionMultiplier = 1 }) {
-  const tiff = await tiffFromUrl(url, { blockSize: 524288, cacheSize: 500 })
+  const tiff = await tiffFromUrl(url, { blockSize: GEOTIFF_BLOCK_SIZE, cacheSize: GEOTIFF_CACHE_SIZE })
 
   const [bandInfo, image] = await Promise.all([
     detectBands(tiff),

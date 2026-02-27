@@ -177,7 +177,10 @@ const initMap = async () => {
   }
 }
 
+let _loadVersion = 0
+
 const loadCOG = async (rawUrl, catalogMeta = null, overrideBandInfo = null) => {
+    const thisLoad = ++_loadVersion
     const url = proxyCogUrl(rawUrl)
     showLoading()
     errorEl.classList.remove('active')
@@ -230,6 +233,9 @@ const loadCOG = async (rawUrl, catalogMeta = null, overrideBandInfo = null) => {
         })
       }
 
+      // stale 요청 무시 (연속 전환 시 이전 결과 폐기)
+      if (thisLoad !== _loadVersion) return
+
       currentCogLayer = cogLayer
       map.addLayer(cogLayer)
       window.cogSource = cogSource
@@ -237,6 +243,7 @@ const loadCOG = async (rawUrl, catalogMeta = null, overrideBandInfo = null) => {
       // 메타데이터 추출 및 저장
       try {
         const cogMeta = await extractCogMetadata(tiff)
+        if (thisLoad !== _loadVersion) return
         cogMeta.url = rawUrl
         window.currentCogMeta = cogMeta
         window.currentTiff = tiff
@@ -274,8 +281,14 @@ const loadCOG = async (rawUrl, catalogMeta = null, overrideBandInfo = null) => {
         })
       }
     } catch (error) {
+      if (thisLoad !== _loadVersion) return
       console.error('COG load error:', error)
       showError(`COG 로드 실패: ${error.message}`)
+      window.currentCogMeta = null
+      window.currentTiff = null
+      window._currentViewerState = null
+      window._viewerControlsReady = false
+      updateViewerMeta({ title: null, crs: null, bands: null, filename: null })
     }
   }
 
