@@ -123,11 +123,14 @@ const initMap = async () => {
     <div style="color: #666; margin-bottom: 0.25rem;">지도 좌표:</div>
     <div id="map-coords" style="color: #333; margin-bottom: 0.5rem;">-</div>
     <div style="color: #666; margin-bottom: 0.25rem;">경위도 (WGS84):</div>
-    <div id="wgs84-coords" style="color: #333;">-</div>
+    <div id="wgs84-coords" style="color: #333; margin-bottom: 0.5rem;">-</div>
+    <div style="color: #666; margin-bottom: 0.25rem;">줌 레벨:</div>
+    <div id="zoom-level" style="color: #333;">-</div>
   `
   document.getElementById('app').appendChild(coordDisplay)
   const mapCoordsEl = document.getElementById('map-coords')
   const wgs84CoordsEl = document.getElementById('wgs84-coords')
+  const zoomLevelEl = document.getElementById('zoom-level')
 
   map.on('pointermove', (event) => {
     const coord = event.coordinate
@@ -147,6 +150,12 @@ const initMap = async () => {
       }
     }
   })
+
+  const updateZoom = () => {
+    zoomLevelEl.textContent = view.getZoom().toFixed(1)
+  }
+  map.on('moveend', updateZoom)
+  updateZoom()
 
   const supportsWebGLFloat = () => {
   try {
