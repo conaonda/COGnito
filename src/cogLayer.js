@@ -119,12 +119,24 @@ const applyAffineBypass = (cogSource, cogView, viewProjection, targetTileSize) =
     let factor = 2
     while (true) {
       extraResolutions.push(r)
-      extraRenderTileSizes.push([baseTile[0], baseTile[1]])
       // coarsest overview 크기를 초과하지 않도록 제한하여
       // out-of-bounds 읽기로 인한 영상 왜곡 방지
-      const cappedW = Math.min(baseTile[0] * factor, MAX_SOURCE_TILE_DIM, coarsestW)
-      const cappedH = Math.min(baseTile[1] * factor, MAX_SOURCE_TILE_DIM, coarsestH)
+      const uncappedW = baseTile[0] * factor
+      const uncappedH = baseTile[1] * factor
+      const cappedW = Math.min(uncappedW, MAX_SOURCE_TILE_DIM, coarsestW)
+      const cappedH = Math.min(uncappedH, MAX_SOURCE_TILE_DIM, coarsestH)
       extraSourceTileSizes.push([cappedW, cappedH])
+
+      // sourceTileSize가 cap되면 비정방이 될 수 있음.
+      // renderTileSize를 source 비율에 맞춰 조정하여 왜곡 방지.
+      if (cappedW === uncappedW && cappedH === uncappedH) {
+        extraRenderTileSizes.push([baseTile[0], baseTile[1]])
+      } else {
+        const maxDim = Math.max(cappedW, cappedH)
+        const renderW = Math.max(1, Math.round(baseTile[0] * cappedW / maxDim))
+        const renderH = Math.max(1, Math.round(baseTile[0] * cappedH / maxDim))
+        extraRenderTileSizes.push([renderW, renderH])
+      }
       if (r >= maxViewRes) break
       r *= 2
       factor *= 2
