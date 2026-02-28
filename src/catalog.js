@@ -1,5 +1,5 @@
 import { supabase } from './supabase.js'
-import { detectBands } from './cogLayer.js'
+import { detectBands } from '@conaonda/ol-cog-layers'
 
 /**
  * data URL 썸네일을 Supabase Storage에 업로드하고 public URL 반환
