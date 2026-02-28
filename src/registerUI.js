@@ -1,6 +1,7 @@
 import { supabase } from './supabase.js'
 import { getSession } from './auth.js'
 import { saveCogImage, generateTitleFromUrl, generateDescriptionFromMeta, generateThumbnail } from './catalog.js'
+import { describeImage, isAvailable as isDescriptorAvailable } from './imageDescriptor.js'
 
 /**
  * COG 등록 UI 초기화
@@ -97,6 +98,49 @@ function openRegisterModal(meta) {
   descInput.style.resize = 'vertical'
   descInput.value = meta.autoDescription || generateDescriptionFromMeta(meta)
 
+  // AI 설명 생성 버튼
+  const aiBtn = document.createElement('button')
+  aiBtn.type = 'button'
+  aiBtn.className = 'login-modal-submit'
+  aiBtn.style.cssText = 'background:#6366f1;font-size:0.8rem;padding:0.4rem 0.8rem;margin-top:-0.25rem;'
+  aiBtn.textContent = 'AI 설명 생성'
+  if (!isDescriptorAvailable()) aiBtn.style.display = 'none'
+
+  aiBtn.addEventListener('click', async () => {
+    aiBtn.disabled = true
+    aiBtn.textContent = 'AI 분석 중...'
+    errorMsg.textContent = ''
+
+    try {
+      let coordinates = null
+      if (meta.bbox && meta.bbox.length >= 4) {
+        coordinates = [(meta.bbox[0] + meta.bbox[2]) / 2, (meta.bbox[1] + meta.bbox[3]) / 2]
+      }
+
+      const result = await describeImage({
+        thumbnail: thumbnailUrl || undefined,
+        coordinates,
+        captured_at: capturedInput.value ? new Date(capturedInput.value).toISOString() : (meta.captured_at || undefined),
+        bbox: meta.bbox || undefined
+      })
+
+      if (result.description) descInput.value = result.description
+      if (result.location?.place_name) regionInput.value = result.location.place_name
+      if (result.land_cover?.classes?.length) {
+        const existing = parseTags(tagsInput.value)
+        const aiTags = result.land_cover.classes.map(c => c.label).filter(Boolean)
+        const merged = [...new Set([...existing, ...aiTags])]
+        tagsInput.value = merged.map(t => `#${t}`).join(' ')
+      }
+      if (result.context) meta._aiContext = result.context
+    } catch (err) {
+      errorMsg.textContent = err.message
+    } finally {
+      aiBtn.disabled = false
+      aiBtn.textContent = 'AI 설명 생성'
+    }
+  })
+
   // 촬영일시
   const capturedLabel = createLabel('촬영일시 (선택)')
   const capturedInput = document.createElement('input')
@@ -158,6 +202,7 @@ function openRegisterModal(meta) {
   form.appendChild(thumbPreview)
   form.appendChild(titleInput)
   form.appendChild(descInput)
+  form.appendChild(aiBtn)
   form.appendChild(capturedLabel)
   form.appendChild(capturedInput)
   form.appendChild(regionInput)
@@ -192,7 +237,8 @@ function openRegisterModal(meta) {
       sensor: sensorInput.value.trim() || null,
       tags,
       thumbnail_url: thumbnailUrl,
-      source_type: meta.source_type || 'manual'
+      source_type: meta.source_type || 'manual',
+      metadata_json: meta._aiContext ? { ai_context: meta._aiContext } : null
     })
 
     if (error) {
