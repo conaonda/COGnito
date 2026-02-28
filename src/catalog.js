@@ -1,5 +1,39 @@
 import { supabase } from './supabase.js'
-import { detectBands } from './cogLayer.js'
+import { detectBands } from '@conaonda/ol-cog-layers'
+
+/**
+ * data URL 썸네일을 Supabase Storage에 업로드하고 public URL 반환
+ * @param {string} dataUrl - base64 data URL
+ * @returns {Promise<string|null>} public URL 또는 실패 시 null
+ */
+export async function uploadThumbnail(dataUrl) {
+  if (!supabase) return null
+
+  try {
+    const res = await fetch(dataUrl)
+    const blob = await res.blob()
+    const ext = blob.type === 'image/png' ? 'png' : 'jpg'
+    const path = `${crypto.randomUUID()}.${ext}`
+
+    const { error } = await supabase.storage
+      .from('cog-thumbnails')
+      .upload(path, blob, { contentType: blob.type })
+
+    if (error) {
+      console.warn('썸네일 업로드 실패:', error.message)
+      return null
+    }
+
+    const { data } = supabase.storage
+      .from('cog-thumbnails')
+      .getPublicUrl(path)
+
+    return data.publicUrl
+  } catch (err) {
+    console.warn('썸네일 업로드 실패:', err)
+    return null
+  }
+}
 
 /**
  * URL에서 자동 제목 생성

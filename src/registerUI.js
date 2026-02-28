@@ -1,6 +1,6 @@
 import { supabase } from './supabase.js'
 import { getSession } from './auth.js'
-import { saveCogImage, generateTitleFromUrl, generateDescriptionFromMeta, generateThumbnail } from './catalog.js'
+import { saveCogImage, generateTitleFromUrl, generateDescriptionFromMeta, generateThumbnail, uploadThumbnail } from './catalog.js'
 import { describeImage, isAvailable as isDescriptorAvailable } from './imageDescriptor.js'
 
 /**
@@ -122,8 +122,15 @@ function openRegisterModal(meta) {
         coordinates = [(meta.bbox[0] + meta.bbox[2]) / 2, (meta.bbox[1] + meta.bbox[3]) / 2]
       }
 
+      // data URL이면 Supabase Storage에 업로드하여 HTTP URL로 변환
+      let thumbParam = thumbnailUrl || undefined
+      if (thumbParam && thumbParam.startsWith('data:')) {
+        const uploaded = await uploadThumbnail(thumbParam)
+        thumbParam = uploaded || undefined
+      }
+
       const result = await describeImage({
-        thumbnail: thumbnailUrl || undefined,
+        thumbnail: thumbParam,
         coordinates,
         captured_at: capturedInput.value ? new Date(capturedInput.value).toISOString() : (meta.captured_at || undefined),
         bbox: meta.bbox || undefined

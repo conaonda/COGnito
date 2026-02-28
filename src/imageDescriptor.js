@@ -18,7 +18,7 @@ export async function describeImage({ thumbnail, coordinates, captured_at, bbox 
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${API_KEY}`
+      'X-API-Key': API_KEY
     },
     body: JSON.stringify({ thumbnail, coordinates, captured_at, bbox })
   })
