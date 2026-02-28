@@ -3,44 +3,24 @@ import LayerGroup from 'ol/layer/Group'
 import { apply } from 'ol-mapbox-style'
 import { defaults as defaultControls } from 'ol/control'
 import { transform } from 'ol/proj'
-import { createCOGLayer } from './cogLayer.js'
-import { createCOGImageLayer } from './cogImageLayer.js'
+import { createCOGLayer, buildStyle, getTotalBands, getMinMaxFromOverview, createCOGSource, buildStyleWithColormap } from '@conaonda/ol-cog-layers'
+import { createCOGImageLayer } from '@conaonda/ol-cog-layers'
 import { extractCogMetadata } from './catalog.js'
 import { initAuthUI } from './authUI.js'
 import { consumePreLoginState } from './auth.js'
+import { proxyCogUrl } from './proxy.js'
 import { initRegisterUI, openRegisterModalWithMeta } from './registerUI.js'
 import { initCatalogUI } from './catalogUI.js'
 import { initStacUI } from './stacUI.js'
 import { initWatchlistUI } from './watchlistUI.js'
 import { updateViewerMeta } from './viewerMeta.js'
 import { initViewerControls, updateControlsForCog, getCurrentStyle } from './viewerControls.js'
-import { buildStyle, getTotalBands, getMinMaxFromOverview, createCOGSource } from './cogLayer.js'
-import { buildStyleWithColormap } from './colormap.js'
 import 'ol/ol.css'
 
 document.getElementById('app-version').textContent = 'v' + __APP_VERSION__
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register(import.meta.env.BASE_URL + 'sw.js')
-}
-
-const CORS_PROXY_URL = import.meta.env.VITE_CORS_PROXY_URL || ''
-
-const PROXY_HOSTS = [
-  'sentinel-cogs.s3.us-west-2.amazonaws.com',
-  'e84-earth-search-sentinel-data.s3.us-west-2.amazonaws.com',
-  'sentinel-s2-l2a-cogs.s3.us-west-2.amazonaws.com',
-]
-
-function proxyCogUrl(url) {
-  if (!CORS_PROXY_URL) return url
-  try {
-    const { hostname } = new URL(url)
-    if (!PROXY_HOSTS.some((h) => hostname === h)) return url
-    return `${CORS_PROXY_URL}?url=${encodeURIComponent(url)}`
-  } catch {
-    return url
-  }
 }
 
 const DEFAULT_COG_URL = 'https://storage.googleapis.com/pdd-stac/disasters/hurricane-harvey/0831/SkySat_20170831T195552Z_RGB.tif'
@@ -251,7 +231,7 @@ const loadCOG = async (rawUrl, catalogMeta = null, overrideBandInfo = null) => {
 
       // 메타데이터 추출 및 저장
       try {
-        const cogMeta = await extractCogMetadata(tiff)
+        const cogMeta = await extractCogMetadata(tiff, rawUrl)
         if (thisLoad !== _loadVersion) return
         cogMeta.url = rawUrl
         window.currentCogMeta = cogMeta
