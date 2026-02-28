@@ -73,9 +73,7 @@ jobs:
               - 'index.html'
               - 'vite.config.js'
             cog:
-              - 'src/cogLayer.js'
-              - 'src/cogImageLayer.js'
-              - 'src/AffineTileLayer.js'
+              - 'src/proxy.js'
             stac:
               - 'src/stac.js'
               - 'src/stacUI.js'
@@ -93,6 +91,7 @@ jobs:
               - '.github/workflows/**'
               - 'playwright.config.js'
               - 'playwright.auth.config.js'
+              - 'vitest.config.js'
 
       - run: npm ci
 
@@ -126,12 +125,6 @@ jobs:
       - name: Run all tests
         if: steps.changes.outputs.core == 'true' || steps.changes.outputs.ci == 'true'
         run: npx playwright test
-        env:
-          CI: true
-
-      - name: Run COG rendering tests only
-        if: steps.changes.outputs.core != 'true' && steps.changes.outputs.ci != 'true' && steps.changes.outputs.cog == 'true'
-        run: npx playwright test --project=cog-rendering
         env:
           CI: true
 
