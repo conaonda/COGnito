@@ -104,7 +104,12 @@ function openRegisterModal(meta) {
   aiBtn.className = 'login-modal-submit'
   aiBtn.style.cssText = 'background:#6366f1;font-size:0.8rem;padding:0.4rem 0.8rem;margin-top:-0.25rem;'
   aiBtn.textContent = 'AI 설명 생성'
-  if (!isDescriptorAvailable()) aiBtn.style.display = 'none'
+  if (!isDescriptorAvailable()) {
+    aiBtn.disabled = true
+    aiBtn.title = '환경변수 미설정 (VITE_IMAGE_DESCRIPTOR_URL)'
+    aiBtn.style.opacity = '0.5'
+    aiBtn.style.cursor = 'not-allowed'
+  }
 
   aiBtn.addEventListener('click', async () => {
     aiBtn.disabled = true
@@ -124,20 +129,25 @@ function openRegisterModal(meta) {
         bbox: meta.bbox || undefined
       })
 
-      if (result.description) descInput.value = result.description
-      if (result.location?.place_name) regionInput.value = result.location.place_name
+      const aiFilledInputs = []
+      if (result.description) { descInput.value = result.description; aiFilledInputs.push(descInput) }
+      if (result.location?.place_name) { regionInput.value = result.location.place_name; aiFilledInputs.push(regionInput) }
       if (result.land_cover?.classes?.length) {
         const existing = parseTags(tagsInput.value)
         const aiTags = result.land_cover.classes.map(c => c.label).filter(Boolean)
         const merged = [...new Set([...existing, ...aiTags])]
         tagsInput.value = merged.map(t => `#${t}`).join(' ')
+        aiFilledInputs.push(tagsInput)
       }
       if (result.context) meta._aiContext = result.context
+
+      aiFilledInputs.forEach(input => { input.style.borderLeft = '3px solid #6366f1' })
+      aiBtn.textContent = 'AI 설명 적용됨 ✓'
+      setTimeout(() => { aiBtn.textContent = 'AI 설명 생성' }, 3000)
     } catch (err) {
       errorMsg.textContent = err.message
     } finally {
       aiBtn.disabled = false
-      aiBtn.textContent = 'AI 설명 생성'
     }
   })
 
