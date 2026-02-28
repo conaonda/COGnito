@@ -188,6 +188,7 @@ describe('extractCogMetadata', () => {
       getBoundingBox: () => [100, 200, 300, 400],
       getWidth: () => 4096,
       getHeight: () => 2048,
+      getFileDirectory: () => ({}),
     }
     const mockTiff = { getImage: vi.fn().mockResolvedValue(mockImage) }
     mockDetectBands.mockResolvedValue({ type: 'rgb', bands: [1, 2, 3] })
@@ -207,6 +208,7 @@ describe('extractCogMetadata', () => {
       getBoundingBox: () => [0, 0, 1, 1],
       getWidth: () => 256,
       getHeight: () => 256,
+      getFileDirectory: () => ({}),
     }
     const mockTiff = { getImage: vi.fn().mockResolvedValue(mockImage) }
     mockDetectBands.mockResolvedValue({ type: 'gray', bands: [1] })
@@ -221,6 +223,7 @@ describe('extractCogMetadata', () => {
       getBoundingBox: () => [0, 0, 1, 1],
       getWidth: () => 256,
       getHeight: () => 256,
+      getFileDirectory: () => ({}),
     }
     const mockTiff = { getImage: vi.fn().mockResolvedValue(mockImage) }
     mockDetectBands.mockResolvedValue({ type: 'gray', bands: [1] })
