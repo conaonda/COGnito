@@ -18,7 +18,7 @@
     "setup": "bash scripts/setup-supabase.sh"
   },
   "dependencies": {
-    "@conaonda/ol-cog-layers": "^0.1.0",
+    "@conaonda/ol-cog-layers": "^0.3.2",
     "@supabase/supabase-js": "^2.97.0",
     "ol": "^10.8.0",
     "ol-mapbox-style": "^13.2.1"
