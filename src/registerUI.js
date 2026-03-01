@@ -2,6 +2,7 @@ import { supabase } from './supabase.js'
 import { getSession } from './auth.js'
 import { saveCogImage, generateTitleFromUrl, generateDescriptionFromMeta, generateThumbnail, uploadThumbnail } from './catalog.js'
 import { describeImage, isAvailable as isDescriptorAvailable } from './imageDescriptor.js'
+import { toLonLat } from 'ol/proj'
 
 /**
  * COG 등록 UI 초기화
@@ -119,21 +120,30 @@ function openRegisterModal(meta) {
     try {
       let coordinates = null
       if (meta.bbox && meta.bbox.length >= 4) {
-        coordinates = [(meta.bbox[0] + meta.bbox[2]) / 2, (meta.bbox[1] + meta.bbox[3]) / 2]
+        const center = [(meta.bbox[0] + meta.bbox[2]) / 2, (meta.bbox[1] + meta.bbox[3]) / 2]
+        const lonLat = meta.crs && meta.crs !== 'EPSG:4326'
+          ? toLonLat(center, meta.crs)
+          : center
+        coordinates = [lonLat[0], lonLat[1]]
       }
 
       // data URL이면 Supabase Storage에 업로드하여 HTTP URL로 변환
       let thumbParam = thumbnailUrl || undefined
       if (thumbParam && thumbParam.startsWith('data:')) {
         const uploaded = await uploadThumbnail(thumbParam)
-        thumbParam = uploaded || undefined
+        if (!uploaded) {
+          throw new Error('썸네일 업로드 실패: AI 설명 생성에 썸네일이 필요합니다')
+        }
+        thumbParam = uploaded
       }
 
       const result = await describeImage({
         thumbnail: thumbParam,
         coordinates,
         captured_at: capturedInput.value ? new Date(capturedInput.value).toISOString() : (meta.captured_at || undefined),
-        bbox: meta.bbox || undefined
+        bbox: meta.bbox && meta.crs && meta.crs !== 'EPSG:4326'
+          ? [...toLonLat([meta.bbox[0], meta.bbox[1]], meta.crs), ...toLonLat([meta.bbox[2], meta.bbox[3]], meta.crs)]
+          : (meta.bbox || undefined)
       })
 
       const aiFilledInputs = []
