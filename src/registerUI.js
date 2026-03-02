@@ -48,8 +48,10 @@ function openRegisterModal(meta) {
   const overlay = document.createElement('div')
   overlay.id = 'register-modal-overlay'
   overlay.className = 'login-modal-overlay'
+  let mouseDownTarget = null
+  overlay.addEventListener('mousedown', (e) => { mouseDownTarget = e.target })
   overlay.addEventListener('click', (e) => {
-    if (e.target === overlay) overlay.remove()
+    if (e.target === overlay && mouseDownTarget === overlay) overlay.remove()
   })
 
   const modal = document.createElement('div')
