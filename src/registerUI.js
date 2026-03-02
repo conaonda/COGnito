@@ -228,13 +228,19 @@ function openRegisterModal(meta) {
   form.appendChild(metaInfo)
   form.appendChild(thumbPreview)
   form.appendChild(titleInput)
+  form.appendChild(createHint('카탈로그에 표시될 영상 이름'))
   form.appendChild(descInput)
+  form.appendChild(createHint('영상의 용도, 배경, 특징 등을 자유롭게 기술'))
   form.appendChild(aiBtn)
   form.appendChild(capturedLabel)
   form.appendChild(capturedInput)
+  form.appendChild(createHint('영상이 촬영된 날짜 (메타데이터에서 자동 추출 시 미리 채워짐)'))
   form.appendChild(regionInput)
+  form.appendChild(createHint('영상이 촬영된 지역명'))
   form.appendChild(sensorInput)
+  form.appendChild(createHint('영상을 촬영한 위성 또는 센서명'))
   form.appendChild(tagsInput)
+  form.appendChild(createHint('검색에 사용될 키워드. 공백으로 구분'))
   form.appendChild(errorMsg)
   form.appendChild(submitBtn)
   modal.appendChild(form)
@@ -307,6 +313,13 @@ function createLabel(text) {
   label.style.cssText = 'font-size:0.75rem;color:#666;margin-bottom:-0.5rem;'
   label.textContent = text
   return label
+}
+
+function createHint(text) {
+  const hint = document.createElement('div')
+  hint.style.cssText = 'font-size:0.7rem;color:#999;margin-top:-0.25rem;margin-bottom:0.25rem;'
+  hint.textContent = text
+  return hint
 }
 
 function parseTags(input) {
