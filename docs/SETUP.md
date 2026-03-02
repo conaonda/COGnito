@@ -101,7 +101,15 @@ Supabase Dashboard → **Settings → Custom Domains**:
 - 유료 플랜에서 커스텀 도메인 설정 가능
 - DNS CNAME 레코드 추가 필요
 
-## 7. CORS 프록시 설정 (선택사항)
+## 7. Supabase Storage 버킷 설정
+
+AI 이미지 설명 기능을 사용하려면 `cog-thumbnails` Storage 버킷이 필요합니다.
+
+마이그레이션 파일(`supabase/migrations/00004_cog_thumbnails_storage.sql`)이 자동으로 생성하지만, 수동으로 설정하려면:
+
+Supabase Dashboard → **Storage → New bucket** → 이름: `cog-thumbnails`, **Public bucket** 체크 → Create
+
+## 8. CORS 프록시 설정 (선택사항)
 
 외부 COG 서버가 CORS를 허용하지 않을 때 Cloudflare Worker 프록시를 사용합니다.
 
@@ -121,7 +129,7 @@ VITE_CORS_PROXY_URL=https://your-worker-name.workers.dev
 
 > 프록시 없이도 CORS를 허용하는 COG 서버의 영상은 정상 로드됩니다.
 
-## 8. 로컬 개발 실행
+## 9. 로컬 개발 실행
 
 ```bash
 npm run dev
@@ -129,7 +137,7 @@ npm run dev
 
 브라우저에서 `http://localhost:5173/COGnito/` 로 접속합니다.
 
-## 9. GitHub Pages 배포
+## 10. GitHub Pages 배포
 
 ### 9-1. GitHub Secrets 등록
 
@@ -152,7 +160,7 @@ Repository → **Settings → Pages**:
 
 `main` 브랜치에 push하면 `.github/workflows/deploy.yml`이 자동으로 빌드 및 배포합니다.
 
-## 10. 트러블슈팅
+## 11. 트러블슈팅
 
 ### `.env` 파일이 없다는 에러
 
@@ -177,7 +185,7 @@ cp .env.example .env
 ### COG 영상 로드 실패 (CORS 에러)
 
 - 브라우저 개발자 도구 → Network 탭에서 CORS 에러 확인
-- CORS 프록시가 설정되어 있는지 확인 (7번 참조)
+- CORS 프록시가 설정되어 있는지 확인 (8번 참조)
 - 프록시 Worker가 정상 배포되었는지 `curl` 등으로 확인
 
 ### 빌드 실패
