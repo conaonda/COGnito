@@ -1,5 +1,39 @@
 import { supabase } from './supabase.js'
-import { detectBands } from './cogLayer.js'
+import { detectBands } from '@conaonda/ol-cog-layers'
+
+/**
+ * data URL 썸네일을 Supabase Storage에 업로드하고 public URL 반환
+ * @param {string} dataUrl - base64 data URL
+ * @returns {Promise<string|null>} public URL 또는 실패 시 null
+ */
+export async function uploadThumbnail(dataUrl) {
+  if (!supabase) return null
+
+  try {
+    const res = await fetch(dataUrl)
+    const blob = await res.blob()
+    const ext = blob.type === 'image/png' ? 'png' : 'jpg'
+    const path = `${crypto.randomUUID()}.${ext}`
+
+    const { error } = await supabase.storage
+      .from('cog-thumbnails')
+      .upload(path, blob, { contentType: blob.type })
+
+    if (error) {
+      console.warn('썸네일 업로드 실패:', error.message)
+      return null
+    }
+
+    const { data } = supabase.storage
+      .from('cog-thumbnails')
+      .getPublicUrl(path)
+
+    return data.publicUrl
+  } catch (err) {
+    console.warn('썸네일 업로드 실패:', err)
+    return null
+  }
+}
 
 /**
  * URL에서 자동 제목 생성
@@ -129,10 +163,33 @@ export async function deleteCogImage(id) {
     .eq('id', id)
 }
 
+function parseTiffDate(str) {
+  const m = str.match(/(\d{4})[:\-](\d{2})[:\-](\d{2})/)
+  if (!m) return null
+  const d = new Date(`${m[1]}-${m[2]}-${m[3]}`)
+  return isNaN(d) ? null : d.toISOString()
+}
+
+function extractDateFromUrl(url) {
+  const path = url.split('?')[0]
+  // YYYY-MM-DD or YYYY_MM_DD
+  let m = path.match(/(\d{4})[-_](\d{2})[-_](\d{2})/)
+  // YYYYMMDD (8자리, 단어 경계)
+  if (!m) {
+    const m8 = path.match(/(?:^|[^0-9])(\d{4})(\d{2})(\d{2})(?:$|[^0-9])/)
+    if (m8) m = m8
+  }
+  if (!m) return null
+  const y = parseInt(m[1]), mo = parseInt(m[2]), d = parseInt(m[3])
+  if (y < 1970 || y > new Date().getFullYear() + 1 || mo < 1 || mo > 12 || d < 1 || d > 31) return null
+  const date = new Date(`${m[1]}-${m[2]}-${m[3]}`)
+  return isNaN(date) ? null : date.toISOString()
+}
+
 /**
  * GeoTIFF 객체에서 CRS/bands/bbox 메타데이터 추출
  */
-export async function extractCogMetadata(tiff) {
+export async function extractCogMetadata(tiff, url) {
   const image = await tiff.getImage(0)
 
   // CRS
@@ -146,13 +203,35 @@ export async function extractCogMetadata(tiff) {
   // BBox
   const bbox = image.getBoundingBox()
 
+  // Date extraction
+  let captured_at = null
+
+  // (a) TIFF tags
+  const fd = image.getFileDirectory()
+  if (fd.GDAL_METADATA) {
+    const match = fd.GDAL_METADATA.match(/TIFFTAG_DATETIME[^>]*>([^<]+)</)
+      || fd.GDAL_METADATA.match(/ACQUISITIONDATETIME[^>]*>([^<]+)</)
+    if (match) {
+      captured_at = parseTiffDate(match[1])
+    }
+  }
+  if (!captured_at && fd.DateTime) {
+    captured_at = parseTiffDate(fd.DateTime)
+  }
+
+  // (b) URL fallback
+  if (!captured_at && url) {
+    captured_at = extractDateFromUrl(url)
+  }
+
   return {
     crs,
     bands: bandInfo.bands,
     bandType: bandInfo.type,
     bbox: [bbox[0], bbox[1], bbox[2], bbox[3]],
     width: image.getWidth(),
-    height: image.getHeight()
+    height: image.getHeight(),
+    captured_at
   }
 }
 

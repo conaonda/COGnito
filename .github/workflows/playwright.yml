@@ -50,6 +50,8 @@ jobs:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
           VITE_CORS_PROXY_URL: https://cog-cors-proxy.conaonda.workers.dev
+          VITE_IMAGE_DESCRIPTOR_URL: ${{ secrets.VITE_IMAGE_DESCRIPTOR_URL }}
+          VITE_IMAGE_DESCRIPTOR_API_KEY: ${{ secrets.VITE_IMAGE_DESCRIPTOR_API_KEY }}
 
       - name: Run unit tests
         run: npx vitest run

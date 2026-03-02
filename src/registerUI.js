@@ -1,6 +1,8 @@
 import { supabase } from './supabase.js'
 import { getSession } from './auth.js'
-import { saveCogImage, generateTitleFromUrl, generateDescriptionFromMeta, generateThumbnail } from './catalog.js'
+import { saveCogImage, generateTitleFromUrl, generateDescriptionFromMeta, generateThumbnail, uploadThumbnail } from './catalog.js'
+import { describeImage, isAvailable as isDescriptorAvailable } from './imageDescriptor.js'
+import { toLonLat } from 'ol/proj'
 
 /**
  * COG 등록 UI 초기화
@@ -46,8 +48,10 @@ function openRegisterModal(meta) {
   const overlay = document.createElement('div')
   overlay.id = 'register-modal-overlay'
   overlay.className = 'login-modal-overlay'
+  let mouseDownTarget = null
+  overlay.addEventListener('mousedown', (e) => { mouseDownTarget = e.target })
   overlay.addEventListener('click', (e) => {
-    if (e.target === overlay) overlay.remove()
+    if (e.target === overlay && mouseDownTarget === overlay) overlay.remove()
   })
 
   const modal = document.createElement('div')
@@ -96,6 +100,75 @@ function openRegisterModal(meta) {
   descInput.rows = 2
   descInput.style.resize = 'vertical'
   descInput.value = meta.autoDescription || generateDescriptionFromMeta(meta)
+
+  // AI 설명 생성 버튼
+  const aiBtn = document.createElement('button')
+  aiBtn.type = 'button'
+  aiBtn.className = 'login-modal-submit'
+  aiBtn.style.cssText = 'background:#6366f1;font-size:0.8rem;padding:0.4rem 0.8rem;margin-top:-0.25rem;'
+  aiBtn.textContent = 'AI 설명 생성'
+  if (!isDescriptorAvailable()) {
+    aiBtn.disabled = true
+    aiBtn.title = '환경변수 미설정 (VITE_IMAGE_DESCRIPTOR_URL)'
+    aiBtn.style.opacity = '0.5'
+    aiBtn.style.cursor = 'not-allowed'
+  }
+
+  aiBtn.addEventListener('click', async () => {
+    aiBtn.disabled = true
+    aiBtn.textContent = 'AI 분석 중...'
+    errorMsg.textContent = ''
+
+    try {
+      let coordinates = null
+      if (meta.bbox && meta.bbox.length >= 4) {
+        const center = [(meta.bbox[0] + meta.bbox[2]) / 2, (meta.bbox[1] + meta.bbox[3]) / 2]
+        const lonLat = meta.crs && meta.crs !== 'EPSG:4326'
+          ? toLonLat(center, meta.crs)
+          : center
+        coordinates = [lonLat[0], lonLat[1]]
+      }
+
+      // data URL이면 Supabase Storage에 업로드하여 HTTP URL로 변환
+      let thumbParam = thumbnailUrl || undefined
+      if (thumbParam && thumbParam.startsWith('data:')) {
+        const uploaded = await uploadThumbnail(thumbParam)
+        if (!uploaded) {
+          throw new Error('썸네일 업로드 실패: AI 설명 생성에 썸네일이 필요합니다')
+        }
+        thumbParam = uploaded
+      }
+
+      const result = await describeImage({
+        thumbnail: thumbParam,
+        coordinates,
+        captured_at: capturedInput.value ? new Date(capturedInput.value).toISOString() : (meta.captured_at || undefined),
+        bbox: meta.bbox && meta.crs && meta.crs !== 'EPSG:4326'
+          ? [...toLonLat([meta.bbox[0], meta.bbox[1]], meta.crs), ...toLonLat([meta.bbox[2], meta.bbox[3]], meta.crs)]
+          : (meta.bbox || undefined)
+      })
+
+      const aiFilledInputs = []
+      if (result.description) { descInput.value = result.description; aiFilledInputs.push(descInput) }
+      if (result.location?.place_name) { regionInput.value = result.location.place_name; aiFilledInputs.push(regionInput) }
+      if (result.land_cover?.classes?.length) {
+        const existing = parseTags(tagsInput.value)
+        const aiTags = result.land_cover.classes.map(c => c.label).filter(Boolean)
+        const merged = [...new Set([...existing, ...aiTags])]
+        tagsInput.value = merged.map(t => `#${t}`).join(' ')
+        aiFilledInputs.push(tagsInput)
+      }
+      if (result.context) meta._aiContext = result.context
+
+      aiFilledInputs.forEach(input => { input.style.borderLeft = '3px solid #6366f1' })
+      aiBtn.textContent = 'AI 설명 적용됨 ✓'
+      setTimeout(() => { aiBtn.textContent = 'AI 설명 생성' }, 3000)
+    } catch (err) {
+      errorMsg.textContent = err.message
+    } finally {
+      aiBtn.disabled = false
+    }
+  })
 
   // 촬영일시
   const capturedLabel = createLabel('촬영일시 (선택)')
@@ -157,12 +230,19 @@ function openRegisterModal(meta) {
   form.appendChild(metaInfo)
   form.appendChild(thumbPreview)
   form.appendChild(titleInput)
+  form.appendChild(createHint('카탈로그에 표시될 영상 이름'))
   form.appendChild(descInput)
+  form.appendChild(createHint('영상의 용도, 배경, 특징 등을 자유롭게 기술'))
+  form.appendChild(aiBtn)
   form.appendChild(capturedLabel)
   form.appendChild(capturedInput)
+  form.appendChild(createHint('영상이 촬영된 날짜 (메타데이터에서 자동 추출 시 미리 채워짐)'))
   form.appendChild(regionInput)
+  form.appendChild(createHint('영상이 촬영된 지역명'))
   form.appendChild(sensorInput)
+  form.appendChild(createHint('영상을 촬영한 위성 또는 센서명'))
   form.appendChild(tagsInput)
+  form.appendChild(createHint('검색에 사용될 키워드. 공백으로 구분'))
   form.appendChild(errorMsg)
   form.appendChild(submitBtn)
   modal.appendChild(form)
@@ -192,7 +272,8 @@ function openRegisterModal(meta) {
       sensor: sensorInput.value.trim() || null,
       tags,
       thumbnail_url: thumbnailUrl,
-      source_type: meta.source_type || 'manual'
+      source_type: meta.source_type || 'manual',
+      metadata_json: meta._aiContext ? { ai_context: meta._aiContext } : null
     })
 
     if (error) {
@@ -234,6 +315,13 @@ function createLabel(text) {
   label.style.cssText = 'font-size:0.75rem;color:#666;margin-bottom:-0.5rem;'
   label.textContent = text
   return label
+}
+
+function createHint(text) {
+  const hint = document.createElement('div')
+  hint.style.cssText = 'font-size:0.7rem;color:#999;margin-top:-0.25rem;margin-bottom:0.25rem;'
+  hint.textContent = text
+  return hint
 }
 
 function parseTags(input) {
