@@ -3,6 +3,7 @@ import { getSession } from './auth.js'
 import { saveCogImage, generateTitleFromUrl, generateDescriptionFromMeta, generateThumbnail, uploadThumbnail } from './catalog.js'
 import { describeImage, isAvailable as isDescriptorAvailable } from './imageDescriptor.js'
 import { toLonLat } from 'ol/proj'
+import { parseTags } from './tags.js'
 
 /**
  * COG 등록 UI 초기화
@@ -324,4 +325,4 @@ function createHint(text) {
   return hint
 }
 
-export { parseTags } from './tags.js'
+export { parseTags }
