@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.5.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.4.0...COGnito-v1.5.0) (2026-03-05)
+
+
+### Features
+
+* 밴드 선택 UI 기능 완성 및 UX 개선 ([#116](https://github.com/conaonda/COGnito/issues/116)) ([#126](https://github.com/conaonda/COGnito/issues/126)) ([d05e751](https://github.com/conaonda/COGnito/commit/d05e751ecd4f0d40525f1910fbdfa17fee28f27d))
+
+
+### Performance Improvements
+
+* 코드 스플리팅으로 초기 번들 51% 감소 ([#117](https://github.com/conaonda/COGnito/issues/117)) ([#127](https://github.com/conaonda/COGnito/issues/127)) ([0ebe88c](https://github.com/conaonda/COGnito/commit/0ebe88cfd0e54361da4e9d9d4ea6549c7340b614))
+
 ## [1.4.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.3.0...COGnito-v1.4.0) (2026-03-05)
 
 
