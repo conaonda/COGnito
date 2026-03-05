@@ -149,6 +149,26 @@
     .error.active {
       display: block;
     }
+
+    .offline-banner {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: #f59e0b;
+      color: #000;
+      text-align: center;
+      padding: 0.5rem 1rem;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      z-index: 1000;
+      transform: translateY(-100%);
+      transition: transform 0.3s ease;
+    }
+
+    .offline-banner.active {
+      transform: translateY(0);
+    }
     
     .controls {
       position: absolute;
@@ -1359,6 +1379,7 @@
     <div id="map" role="application" aria-label="COG 영상 지도 뷰어"></div>
     <div id="loading" class="loading" role="status" aria-live="polite">영상 로딩 중...</div>
     <div id="error" class="error" role="alert" aria-live="assertive"></div>
+    <div id="offline-banner" class="offline-banner" role="alert" aria-live="assertive">오프라인 상태입니다. 일부 기능이 제한될 수 있습니다.</div>
     <div class="controls">
       <h3 id="controls-title">영상 정보</h3>
       <p id="controls-info">-</p>
