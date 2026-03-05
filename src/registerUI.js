@@ -324,10 +324,4 @@ function createHint(text) {
   return hint
 }
 
-function parseTags(input) {
-  if (!input) return []
-  return input
-    .split(/[\s,]+/)
-    .map(t => t.replace(/^#/, '').trim())
-    .filter(Boolean)
-}
+export { parseTags } from './tags.js'
