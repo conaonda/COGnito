@@ -11,6 +11,7 @@
     "test:performance:ui": "npx playwright test --ui",
     "test:performance:headed": "npx playwright test --headed",
     "test:auth": "npx playwright test --config=playwright.auth.config.js",
+    "test:viewer": "npx playwright test --config=playwright.viewer.config.js",
     "test:unit": "vitest run",
     "test:unit:coverage": "vitest run --coverage",
     "setup": "bash scripts/setup-supabase.sh"
