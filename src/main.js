@@ -15,6 +15,7 @@ import { initStacUI } from './stacUI.js'
 import { initWatchlistUI } from './watchlistUI.js'
 import { updateViewerMeta } from './viewerMeta.js'
 import { initViewerControls, updateControlsForCog, getCurrentStyle } from './viewerControls.js'
+import './colormaps.js'
 import 'ol/ol.css'
 
 document.getElementById('app-version').textContent = 'v' + __APP_VERSION__
