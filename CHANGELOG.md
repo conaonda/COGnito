@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.3.0...COGnito-v1.4.0) (2026-03-05)
+
+
+### Features
+
+* 밴드별 독립 Min/Max 스트레치 슬라이더 ([#123](https://github.com/conaonda/COGnito/issues/123)) ([#124](https://github.com/conaonda/COGnito/issues/124)) ([4ae938c](https://github.com/conaonda/COGnito/commit/4ae938cf8478cf7e7895023c289f0551c4661bbf))
+
 ## [1.3.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.2.0...COGnito-v1.3.0) (2026-03-05)
 
 
