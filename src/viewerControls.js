@@ -15,7 +15,7 @@ export function initViewerControls(onStyleChange, onProjectionChange) {
   const panel = document.getElementById('viewer-controls-panel')
   if (!panel) return
 
-  // Min/Max 슬라이더 이벤트
+  // Min/Max 슬라이더 이벤트 (일괄)
   const minSlider = document.getElementById('vc-min-slider')
   const maxSlider = document.getElementById('vc-max-slider')
   const minVal = document.getElementById('vc-min-value')
@@ -34,13 +34,35 @@ export function initViewerControls(onStyleChange, onProjectionChange) {
       emitStyleChange()
     })
   }
+
+  // 밴드별 슬라이더 이벤트 (개별)
+  const perbandChannels = document.querySelectorAll('.vc-perband-channel')
+  perbandChannels.forEach(ch => {
+    const pMin = ch.querySelector('.vc-perband-min')
+    const pMax = ch.querySelector('.vc-perband-max')
+    const pMinVal = ch.querySelector('.vc-perband-min-value')
+    const pMaxVal = ch.querySelector('.vc-perband-max-value')
+    if (pMin) pMin.addEventListener('input', () => { pMinVal.textContent = Number(pMin.value).toFixed(1); emitStyleChange() })
+    if (pMax) pMax.addEventListener('input', () => { pMaxVal.textContent = Number(pMax.value).toFixed(1); emitStyleChange() })
+  })
+
+  // 스트레치 모드 토글 (일괄/개별)
+  const stretchModeRadios = document.querySelectorAll('input[name="vc-stretch-mode"]')
+  const batchGroup = document.getElementById('vc-stretch-batch')
+  const perbandGroup = document.getElementById('vc-stretch-perband')
+  stretchModeRadios.forEach(radio => {
+    radio.addEventListener('change', () => {
+      const isPerband = radio.value === 'perband' && radio.checked
+      if (batchGroup) batchGroup.style.display = isPerband ? 'none' : ''
+      if (perbandGroup) perbandGroup.style.display = isPerband ? '' : 'none'
+      emitStyleChange()
+    })
+  })
+
   if (resetBtn) {
     resetBtn.addEventListener('click', () => {
       if (!currentStats) return
-      minSlider.value = currentStats[0].min
-      maxSlider.value = currentStats[0].max
-      minVal.textContent = currentStats[0].min.toFixed(1)
-      maxVal.textContent = currentStats[0].max.toFixed(1)
+      resetSlidersToStats(currentStats)
       emitStyleChange()
     })
   }
@@ -123,6 +145,27 @@ export function updateControlsForCog(totalBands, bandInfo, stats, projectionMode
     minVal.textContent = s.min.toFixed(1)
     maxVal.textContent = s.max.toFixed(1)
   }
+
+  // 밴드별 슬라이더 초기화
+  const perbandChannels = document.querySelectorAll('.vc-perband-channel')
+  perbandChannels.forEach((ch, i) => {
+    const s = stats[i] || stats[0]
+    const pMin = ch.querySelector('.vc-perband-min')
+    const pMax = ch.querySelector('.vc-perband-max')
+    const pMinVal = ch.querySelector('.vc-perband-min-value')
+    const pMaxVal = ch.querySelector('.vc-perband-max-value')
+    if (pMin) {
+      pMin.min = s.min; pMin.max = s.max; pMin.step = (s.max - s.min) / 200; pMin.value = s.min
+      pMinVal.textContent = s.min.toFixed(1)
+    }
+    if (pMax) {
+      pMax.min = s.min; pMax.max = s.max; pMax.step = (s.max - s.min) / 200; pMax.value = s.max
+      pMaxVal.textContent = s.max.toFixed(1)
+    }
+  })
+
+  // 스트레치 모드: RGB일 때만 개별 선택 가능
+  updateStretchModeVisibility(bandInfo.type)
 
   // 밴드 드롭다운 옵션 생성
   populateBandOptions(totalBands, bandInfo)
@@ -219,12 +262,70 @@ export function getCurrentStyle() {
     bands = [Number(document.getElementById('vc-band-single')?.value || 1)]
   }
 
+  const stretchMode = document.querySelector('input[name="vc-stretch-mode"]:checked')
+  const isPerband = isRgb && stretchMode?.value === 'perband'
+
+  let stats
+  if (isPerband) {
+    const channels = document.querySelectorAll('.vc-perband-channel')
+    stats = Array.from(channels).map(ch => ({
+      min: Number(ch.querySelector('.vc-perband-min')?.value || 0),
+      max: Number(ch.querySelector('.vc-perband-max')?.value || 1)
+    }))
+  } else {
+    const min = Number(minSlider?.value || 0)
+    const max = Number(maxSlider?.value || 1)
+    stats = isRgb ? [{ min, max }, { min, max }, { min, max }] : [{ min, max }]
+  }
+
   return {
     bands,
     bandType: isRgb ? 'rgb' : 'gray',
     colormap: colormapSelect?.value || 'grayscale',
-    min: Number(minSlider?.value || 0),
-    max: Number(maxSlider?.value || 1)
+    min: stats[0].min,
+    max: stats[0].max,
+    stats
+  }
+}
+
+function resetSlidersToStats(stats) {
+  const minSlider = document.getElementById('vc-min-slider')
+  const maxSlider = document.getElementById('vc-max-slider')
+  const minVal = document.getElementById('vc-min-value')
+  const maxVal = document.getElementById('vc-max-value')
+
+  if (minSlider && stats.length > 0) {
+    minSlider.value = stats[0].min
+    maxSlider.value = stats[0].max
+    minVal.textContent = stats[0].min.toFixed(1)
+    maxVal.textContent = stats[0].max.toFixed(1)
+  }
+
+  const channels = document.querySelectorAll('.vc-perband-channel')
+  channels.forEach((ch, i) => {
+    const s = stats[i] || stats[0]
+    const pMin = ch.querySelector('.vc-perband-min')
+    const pMax = ch.querySelector('.vc-perband-max')
+    if (pMin) { pMin.value = s.min; ch.querySelector('.vc-perband-min-value').textContent = s.min.toFixed(1) }
+    if (pMax) { pMax.value = s.max; ch.querySelector('.vc-perband-max-value').textContent = s.max.toFixed(1) }
+  })
+}
+
+function updateStretchModeVisibility(bandType) {
+  const stretchModeDiv = document.querySelector('.vc-stretch-mode')
+  if (stretchModeDiv) {
+    stretchModeDiv.style.display = bandType === 'rgb' ? 'flex' : 'none'
+  }
+  // 단일밴드면 일괄 모드로 강제 전환
+  if (bandType !== 'rgb') {
+    const batchRadio = document.querySelector('input[name="vc-stretch-mode"][value="batch"]')
+    if (batchRadio) {
+      batchRadio.checked = true
+      const batchGroup = document.getElementById('vc-stretch-batch')
+      const perbandGroup = document.getElementById('vc-stretch-perband')
+      if (batchGroup) batchGroup.style.display = ''
+      if (perbandGroup) perbandGroup.style.display = 'none'
+    }
   }
 }
 
