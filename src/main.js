@@ -19,7 +19,7 @@ if ('serviceWorker' in navigator) {
 const DEFAULT_COG_URL = 'https://storage.googleapis.com/pdd-stac/disasters/hurricane-harvey/0831/SkySat_20170831T195552Z_RGB.tif'
 
 // consumePreLoginState 인라인 (auth.js의 supabase 의존성 지연 로드를 위해)
-const PRE_LOGIN_STATE_KEY = 'cognito-pre-login-state'
+import { PRE_LOGIN_STATE_KEY } from './constants.js'
 const preLoginState = (() => {
   const raw = sessionStorage.getItem(PRE_LOGIN_STATE_KEY)
   if (!raw) return null
