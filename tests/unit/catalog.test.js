@@ -231,6 +231,100 @@ describe('extractCogMetadata', () => {
     const result = await extractCogMetadata(mockTiff)
     expect(result.crs).toBe('EPSG:4326')
   })
+
+  it('extracts date from GDAL_METADATA TIFFTAG_DATETIME', async () => {
+    const mockImage = {
+      getGeoKeys: () => ({}),
+      getBoundingBox: () => [0, 0, 1, 1],
+      getWidth: () => 256,
+      getHeight: () => 256,
+      getFileDirectory: () => ({
+        GDAL_METADATA: '<Item name="TIFFTAG_DATETIME">2023:06:15 10:30:00</Item>',
+      }),
+    }
+    const mockTiff = { getImage: vi.fn().mockResolvedValue(mockImage) }
+    mockDetectBands.mockResolvedValue({ type: 'gray', bands: [1] })
+
+    const result = await extractCogMetadata(mockTiff)
+    expect(result.captured_at).toBe('2023-06-15T00:00:00.000Z')
+  })
+
+  it('extracts date from GDAL_METADATA ACQUISITIONDATETIME', async () => {
+    const mockImage = {
+      getGeoKeys: () => ({}),
+      getBoundingBox: () => [0, 0, 1, 1],
+      getWidth: () => 256,
+      getHeight: () => 256,
+      getFileDirectory: () => ({
+        GDAL_METADATA: '<Item name="ACQUISITIONDATETIME">2024-03-20T12:00:00</Item>',
+      }),
+    }
+    const mockTiff = { getImage: vi.fn().mockResolvedValue(mockImage) }
+    mockDetectBands.mockResolvedValue({ type: 'gray', bands: [1] })
+
+    const result = await extractCogMetadata(mockTiff)
+    expect(result.captured_at).toBe('2024-03-20T00:00:00.000Z')
+  })
+
+  it('extracts date from FileDirectory DateTime', async () => {
+    const mockImage = {
+      getGeoKeys: () => ({}),
+      getBoundingBox: () => [0, 0, 1, 1],
+      getWidth: () => 256,
+      getHeight: () => 256,
+      getFileDirectory: () => ({ DateTime: '2022:11:05 08:00:00' }),
+    }
+    const mockTiff = { getImage: vi.fn().mockResolvedValue(mockImage) }
+    mockDetectBands.mockResolvedValue({ type: 'gray', bands: [1] })
+
+    const result = await extractCogMetadata(mockTiff)
+    expect(result.captured_at).toBe('2022-11-05T00:00:00.000Z')
+  })
+
+  it('extracts date from URL as fallback', async () => {
+    const mockImage = {
+      getGeoKeys: () => ({}),
+      getBoundingBox: () => [0, 0, 1, 1],
+      getWidth: () => 256,
+      getHeight: () => 256,
+      getFileDirectory: () => ({}),
+    }
+    const mockTiff = { getImage: vi.fn().mockResolvedValue(mockImage) }
+    mockDetectBands.mockResolvedValue({ type: 'gray', bands: [1] })
+
+    const result = await extractCogMetadata(mockTiff, 'https://example.com/2023-08-15_scene.tif')
+    expect(result.captured_at).toBe('2023-08-15T00:00:00.000Z')
+  })
+
+  it('extracts YYYYMMDD date from URL', async () => {
+    const mockImage = {
+      getGeoKeys: () => ({}),
+      getBoundingBox: () => [0, 0, 1, 1],
+      getWidth: () => 256,
+      getHeight: () => 256,
+      getFileDirectory: () => ({}),
+    }
+    const mockTiff = { getImage: vi.fn().mockResolvedValue(mockImage) }
+    mockDetectBands.mockResolvedValue({ type: 'gray', bands: [1] })
+
+    const result = await extractCogMetadata(mockTiff, 'https://example.com/T32TQM_20230615_B04.tif')
+    expect(result.captured_at).toBe('2023-06-15T00:00:00.000Z')
+  })
+
+  it('returns null captured_at when no date found', async () => {
+    const mockImage = {
+      getGeoKeys: () => ({}),
+      getBoundingBox: () => [0, 0, 1, 1],
+      getWidth: () => 256,
+      getHeight: () => 256,
+      getFileDirectory: () => ({}),
+    }
+    const mockTiff = { getImage: vi.fn().mockResolvedValue(mockImage) }
+    mockDetectBands.mockResolvedValue({ type: 'gray', bands: [1] })
+
+    const result = await extractCogMetadata(mockTiff, 'https://example.com/scene.tif')
+    expect(result.captured_at).toBeNull()
+  })
 })
 
 describe('generateThumbnail', () => {
