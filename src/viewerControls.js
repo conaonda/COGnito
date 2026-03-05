@@ -167,7 +167,9 @@ export function updateControlsForCog(totalBands, bandInfo, stats, projectionMode
   // 스트레치 모드: RGB일 때만 개별 선택 가능
   updateStretchModeVisibility(bandInfo.type)
 
-  // 밴드 드롭다운 옵션 생성
+  setControlsEnabled(true)
+
+  // 밴드 드롭다운 옵션 생성 (setControlsEnabled 이후 호출하여 disabled 상태 유지)
   populateBandOptions(totalBands, bandInfo)
 
   // 투영 모드 반영
@@ -183,8 +185,6 @@ export function updateControlsForCog(totalBands, bandInfo, stats, projectionMode
   if (colormapSelect) {
     colormapSelect.value = 'grayscale'
   }
-
-  setControlsEnabled(true)
 }
 
 function populateBandOptions(totalBands, bandInfo) {
