@@ -1,13 +1,11 @@
 import { test, expect } from '@playwright/test'
 
 /**
- * COG 로딩 완료 대기 (로딩 스피너가 사라질 때까지)
+ * COG 로딩 및 뷰어 컨트롤 초기화 완료 대기
+ * window._viewerControlsReady 플래그를 사용하여 실제 앱 로직 완료 확인
  */
 async function waitForCogReady(page) {
-  await page.waitForFunction(() => {
-    const loadingEl = document.getElementById('loading')
-    return loadingEl && !loadingEl.classList.contains('active')
-  }, { timeout: 30000 })
+  await page.waitForFunction(() => window._viewerControlsReady === true, { timeout: 30000 })
 }
 
 test.describe('밴드 선택 UI', () => {
@@ -46,37 +44,25 @@ test.describe('밴드 선택 UI', () => {
     await expect(page.locator('#vc-colormap')).toBeEnabled()
   })
 
-  test('드롭다운 선택 시 스타일 변경 콜백 호출', async ({ page }) => {
+  test('드롭다운 선택 시 앱 상태(bandInfo) 반영', async ({ page }) => {
     await page.goto('')
     await waitForCogReady(page)
 
     await page.locator('#vc-toggle-btn').click()
 
-    // 스타일 변경 감지를 위해 window에 플래그 설정
-    await page.evaluate(() => {
-      window.__styleChangeCount = 0
-      const origCb = window.__onStyleChange
-      // viewerControls는 onStyleChange 콜백을 통해 변경을 전파함
-      // getCurrentStyle()의 반환값이 바뀌는지 확인
-      window.__lastStyle = null
-    })
-
     const bandMode = page.locator('#vc-band-mode')
     const currentMode = await bandMode.inputValue()
 
-    // 모드를 토글하여 변경 확인
+    // 모드를 토글
     const newMode = currentMode === 'rgb' ? 'single' : 'rgb'
     await bandMode.selectOption(newMode)
 
-    // getCurrentStyle()이 올바른 bandType을 반환하는지 확인
-    const style = await page.evaluate(() => {
-      const { getCurrentStyle } = window.__viewerControls || {}
-      // getCurrentStyle이 전역에 노출되어 있지 않을 수 있으므로 DOM 직접 확인
-      const bandMode = document.getElementById('vc-band-mode')
-      return bandMode ? bandMode.value : null
-    })
+    // 앱이 새 스타일로 COG를 다시 로드할 때까지 대기
+    await page.waitForFunction(() => window._viewerControlsReady === true, { timeout: 30000 })
 
-    expect(style).toBe(newMode)
+    // window._currentViewerState.bandInfo.type이 새 모드를 반영하는지 확인
+    const stateType = await page.evaluate(() => window._currentViewerState?.bandInfo?.type)
+    expect(stateType).toBe(newMode)
   })
 })
 
@@ -98,18 +84,19 @@ test.describe('컬러맵 변경', () => {
     await colormapSelect.selectOption('viridis')
     expect(await colormapSelect.inputValue()).toBe('viridis')
 
+    // olMap이 초기화되어 있는지 확인 (앱 로딩이 완료되면 window.olMap이 설정됨)
+    const hasMap = await page.evaluate(() => !!window.olMap)
+    expect(hasMap).toBe(true)
+
     // rendercomplete 이벤트 대기하여 렌더링 반영 확인
     const rendered = await page.evaluate(() => {
       return new Promise(resolve => {
-        if (!window.olMap) return resolve(false)
         window.olMap.once('rendercomplete', () => resolve(true))
         window.olMap.renderSync()
         setTimeout(() => resolve(false), 5000)
       })
     })
-
-    // 렌더링이 완료되었거나 맵이 존재하면 통과
-    expect(rendered).toBeTruthy()
+    expect(rendered).toBe(true)
   })
 })
 
