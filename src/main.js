@@ -54,7 +54,7 @@ const showError = (message) => {
 }
 
 const initMap = async () => {
-  import('./authUI.js').then(m => m.initAuthUI())
+  import('./authUI.js').then(m => m.initAuthUI()).catch(console.error)
   const viewProjection = 'EPSG:3857'
   let currentCogLayer = null
 
@@ -82,7 +82,7 @@ const initMap = async () => {
     })
   })
 
-  import('ol-mapbox-style').then(m => m.apply(baseGroup, './style.json'))
+  import('ol-mapbox-style').then(m => m.apply(baseGroup, './style.json')).catch(console.error)
 
   const coordDisplay = document.createElement('div')
   coordDisplay.id = 'coordinate-display'
@@ -398,7 +398,7 @@ const loadCOG = async (rawUrl, catalogMeta = null, overrideBandInfo = null, { sk
     loadCOG(urlInput.value.trim() || COG_URL)
   })
 
-  import('./registerUI.js').then(m => m.initRegisterUI())
+  import('./registerUI.js').then(m => m.initRegisterUI()).catch(console.error)
 
   // 패널 토글
   const vcToggleBtn = document.getElementById('vc-toggle-btn')
@@ -411,8 +411,8 @@ const loadCOG = async (rawUrl, catalogMeta = null, overrideBandInfo = null, { sk
     vcCloseBtn.addEventListener('click', () => vcPanel.classList.remove('open'))
   }
 
-  import('./catalogUI.js').then(m => m.initCatalogUI((url, catalogItem) => loadCOG(url, catalogItem)))
-  import('./watchlistUI.js').then(m => m.initWatchlistUI((url, catalogItem) => loadCOG(url, catalogItem)))
+  import('./catalogUI.js').then(m => m.initCatalogUI((url, catalogItem) => loadCOG(url, catalogItem))).catch(console.error)
+  import('./watchlistUI.js').then(m => m.initWatchlistUI((url, catalogItem) => loadCOG(url, catalogItem))).catch(console.error)
 
   // STAC UI 초기화
   import('./stacUI.js').then(m => m.initStacUI(
@@ -431,7 +431,7 @@ const loadCOG = async (rawUrl, catalogMeta = null, overrideBandInfo = null, { sk
       return [bl[0], bl[1], tr[0], tr[1]]
     },
     map
-  ))
+  )).catch(console.error)
 
   console.log('Map initialized successfully')
   window.olMap = map
