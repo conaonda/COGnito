@@ -169,7 +169,7 @@ const initMap = async () => {
 
 let _loadVersion = 0
 
-const loadCOG = async (rawUrl, catalogMeta = null, overrideBandInfo = null) => {
+const loadCOG = async (rawUrl, catalogMeta = null, overrideBandInfo = null, { skipFit = false } = {}) => {
     const thisLoad = ++_loadVersion
     const url = proxyCogUrl(rawUrl)
     showLoading()
@@ -263,7 +263,7 @@ const loadCOG = async (rawUrl, catalogMeta = null, overrideBandInfo = null) => {
         window.currentCogMeta = null
       }
 
-      if (extent) {
+      if (extent && !skipFit) {
         const pad = window.innerWidth <= 768 ? 20 : 50
         map.getView().fit(extent, {
           padding: [pad, pad, pad, pad],
@@ -295,7 +295,7 @@ const loadCOG = async (rawUrl, catalogMeta = null, overrideBandInfo = null) => {
       const bandsChanged = JSON.stringify(style.bands) !== JSON.stringify(state.bandInfo.bands)
 
       if (bandsChanged) {
-        loadCOG(state.url, state.catalogMeta, newBandInfo)
+        loadCOG(state.url, state.catalogMeta, newBandInfo, { skipFit: true })
         return
       }
 
