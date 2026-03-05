@@ -53,8 +53,8 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 720 } },
     },
     {
-      name: 'state',
-      testMatch: /04-detailed-state/,
+      name: 'cog-rendering',
+      testMatch: /0[5678]-/,
       use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 720 } },
     },
   ],
