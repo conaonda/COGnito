@@ -8,6 +8,7 @@ import { proxyCogUrl } from './proxy.js'
 import { updateViewerMeta } from './viewerMeta.js'
 import { initViewerControls, updateControlsForCog, getCurrentStyle } from './viewerControls.js'
 import './colormaps.js'
+import './offline.js'
 import 'ol/ol.css'
 
 document.getElementById('app-version').textContent = 'v' + __APP_VERSION__
@@ -273,7 +274,7 @@ const loadCOG = async (rawUrl, catalogMeta = null, overrideBandInfo = null, { sk
     } catch (error) {
       if (thisLoad !== _loadVersion) return
       console.error('COG load error:', error)
-      showError(`COG 로드 실패: ${error.message}`)
+      showError(!navigator.onLine ? '오프라인 상태입니다. 네트워크 연결을 확인해 주세요.' : `COG 로드 실패: ${error.message}`)
       window.currentCogMeta = null
       window.currentTiff = null
       window._currentViewerState = null
