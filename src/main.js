@@ -1,18 +1,10 @@
 import { Map, View } from 'ol'
 import LayerGroup from 'ol/layer/Group'
-import { apply } from 'ol-mapbox-style'
 import { defaults as defaultControls } from 'ol/control'
 import { transform } from 'ol/proj'
 import { createCOGLayer, buildStyle, getTotalBands, getMinMaxFromOverview, createCOGSource, buildStyleWithColormap } from '@conaonda/ol-cog-layers'
 import { createCOGImageLayer } from '@conaonda/ol-cog-layers'
-import { extractCogMetadata } from './catalog.js'
-import { initAuthUI } from './authUI.js'
-import { consumePreLoginState } from './auth.js'
 import { proxyCogUrl } from './proxy.js'
-import { initRegisterUI, openRegisterModalWithMeta } from './registerUI.js'
-import { initCatalogUI } from './catalogUI.js'
-import { initStacUI } from './stacUI.js'
-import { initWatchlistUI } from './watchlistUI.js'
 import { updateViewerMeta } from './viewerMeta.js'
 import { initViewerControls, updateControlsForCog, getCurrentStyle } from './viewerControls.js'
 import './colormaps.js'
@@ -26,7 +18,14 @@ if ('serviceWorker' in navigator) {
 
 const DEFAULT_COG_URL = 'https://storage.googleapis.com/pdd-stac/disasters/hurricane-harvey/0831/SkySat_20170831T195552Z_RGB.tif'
 
-const preLoginState = consumePreLoginState()
+// consumePreLoginState 인라인 (auth.js의 supabase 의존성 지연 로드를 위해)
+const PRE_LOGIN_STATE_KEY = 'cognito-pre-login-state'
+const preLoginState = (() => {
+  const raw = sessionStorage.getItem(PRE_LOGIN_STATE_KEY)
+  if (!raw) return null
+  sessionStorage.removeItem(PRE_LOGIN_STATE_KEY)
+  try { return JSON.parse(raw) } catch { return null }
+})()
 
 const urlParams = new URLSearchParams(window.location.search)
 const COG_URL = urlParams.get('url') || preLoginState?.cogUrl || DEFAULT_COG_URL
@@ -55,7 +54,7 @@ const showError = (message) => {
 }
 
 const initMap = async () => {
-  initAuthUI()
+  import('./authUI.js').then(m => m.initAuthUI())
   const viewProjection = 'EPSG:3857'
   let currentCogLayer = null
 
@@ -83,7 +82,7 @@ const initMap = async () => {
     })
   })
 
-  apply(baseGroup, './style.json')
+  import('ol-mapbox-style').then(m => m.apply(baseGroup, './style.json'))
 
   const coordDisplay = document.createElement('div')
   coordDisplay.id = 'coordinate-display'
@@ -232,6 +231,7 @@ const loadCOG = async (rawUrl, catalogMeta = null, overrideBandInfo = null) => {
 
       // 메타데이터 추출 및 저장
       try {
+        const { extractCogMetadata } = await import('./catalog.js')
         const cogMeta = await extractCogMetadata(tiff, rawUrl)
         if (thisLoad !== _loadVersion) return
         cogMeta.url = rawUrl
@@ -398,7 +398,7 @@ const loadCOG = async (rawUrl, catalogMeta = null, overrideBandInfo = null) => {
     loadCOG(urlInput.value.trim() || COG_URL)
   })
 
-  initRegisterUI()
+  import('./registerUI.js').then(m => m.initRegisterUI())
 
   // 패널 토글
   const vcToggleBtn = document.getElementById('vc-toggle-btn')
@@ -411,17 +411,17 @@ const loadCOG = async (rawUrl, catalogMeta = null, overrideBandInfo = null) => {
     vcCloseBtn.addEventListener('click', () => vcPanel.classList.remove('open'))
   }
 
-  initCatalogUI((url, catalogItem) => loadCOG(url, catalogItem))
-  initWatchlistUI((url, catalogItem) => loadCOG(url, catalogItem))
+  import('./catalogUI.js').then(m => m.initCatalogUI((url, catalogItem) => loadCOG(url, catalogItem)))
+  import('./watchlistUI.js').then(m => m.initWatchlistUI((url, catalogItem) => loadCOG(url, catalogItem)))
 
   // STAC UI 초기화
-  initStacUI(
+  import('./stacUI.js').then(m => m.initStacUI(
     (url) => loadCOG(url),
-    (stacMeta) => {
+    async (stacMeta) => {
       if (stacMeta.cogUrl) {
-        loadCOG(stacMeta.cogUrl).then(() => {
-          openRegisterModalWithMeta(stacMeta)
-        })
+        await loadCOG(stacMeta.cogUrl)
+        const { openRegisterModalWithMeta } = await import('./registerUI.js')
+        openRegisterModalWithMeta(stacMeta)
       }
     },
     () => {
@@ -431,7 +431,7 @@ const loadCOG = async (rawUrl, catalogMeta = null, overrideBandInfo = null) => {
       return [bl[0], bl[1], tr[0], tr[1]]
     },
     map
-  )
+  ))
 
   console.log('Map initialized successfully')
   window.olMap = map
