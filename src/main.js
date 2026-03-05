@@ -290,9 +290,7 @@ const loadCOG = async (rawUrl, catalogMeta = null, overrideBandInfo = null) => {
       if (!state || !currentCogLayer) return
 
       const newBandInfo = { type: style.bandType, bands: style.bands }
-      const newStats = style.bandType === 'rgb'
-        ? state.stats.map(() => ({ min: style.min, max: style.max }))
-        : [{ min: style.min, max: style.max }]
+      const newStats = style.stats
 
       const bandsChanged = JSON.stringify(style.bands) !== JSON.stringify(state.bandInfo.bands)
 
