@@ -1,5 +1,28 @@
 # Changelog
 
+## [1.3.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.2.0...COGnito-v1.3.0) (2026-03-05)
+
+
+### Features
+
+* add hint text below registration form input fields ([fb92ff8](https://github.com/conaonda/COGnito/commit/fb92ff87546a42dcc926c8b255b427c936024a7c))
+* auto-extract captured_at from TIFF tags and URL patterns ([21d6f5b](https://github.com/conaonda/COGnito/commit/21d6f5bcb723bdc9492edc6ba5857d3ec090568d))
+* ImageDescriptor API 연동 — AI 설명 생성 ([258d8c5](https://github.com/conaonda/COGnito/commit/258d8c594be25b80e4f01a8da3cffad6e14a01f6))
+* integrate ImageDescriptor API for AI-powered image description ([71d5121](https://github.com/conaonda/COGnito/commit/71d5121106373e10ef7e7ee8c9b236bb13c9744e))
+* 컬러맵 Magma 추가 및 기존 컬러맵 기능 검증 ([#121](https://github.com/conaonda/COGnito/issues/121)) ([fa49713](https://github.com/conaonda/COGnito/commit/fa49713b83a3d810d74700fe52c404fd3f36d3d4))
+
+
+### Bug Fixes
+
+* add getFileDirectory mock to extractCogMetadata tests ([88aa4de](https://github.com/conaonda/COGnito/commit/88aa4de89b5f4f8a519ff582ce4c19a64d1ff781))
+* add missing proxy.js extracted in refactor ([c684d5b](https://github.com/conaonda/COGnito/commit/c684d5b8c601c65e4abf30d520f86e02ec640ece))
+* convert projected coordinates to WGS84 before ImageDescriptor API call ([3a82c96](https://github.com/conaonda/COGnito/commit/3a82c96e9f873cd1b323247f649fc19c7cd2dc13))
+* prevent image stretching at low zoom levels ([#109](https://github.com/conaonda/COGnito/issues/109)) ([5c2bdc9](https://github.com/conaonda/COGnito/commit/5c2bdc9dcd3272df31657882fe907064646c265d))
+* prevent modal close when drag ends outside modal ([c318339](https://github.com/conaonda/COGnito/commit/c318339e17641ed3a95b3da346e4a2ef7b31110c))
+* restore cogLayer.js import in catalog.js ([491a675](https://github.com/conaonda/COGnito/commit/491a675e4f65ba23c1324ca8aa019bb5a6a9ce40))
+* upgrade @conaonda/ol-cog-layers to 0.3.2 ([db801e8](https://github.com/conaonda/COGnito/commit/db801e8bc3ee70c858fe37491ee8841766094fb0))
+* use X-API-Key header and upload thumbnail to Supabase Storage ([1c7232d](https://github.com/conaonda/COGnito/commit/1c7232d7dd1c5d89738b8934494b8720f970885d))
+
 ## [1.2.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.1.0...COGnito-v1.2.0) (2026-02-27)
 
 
