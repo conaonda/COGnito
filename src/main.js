@@ -9,6 +9,7 @@ import { updateViewerMeta } from './viewerMeta.js'
 import { initViewerControls, updateControlsForCog, getCurrentStyle } from './viewerControls.js'
 import './colormaps.js'
 import './offline.js'
+import './installPrompt.js'
 import 'ol/ol.css'
 
 document.getElementById('app-version').textContent = 'v' + __APP_VERSION__
