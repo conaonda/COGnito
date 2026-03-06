@@ -9,7 +9,7 @@ self.addEventListener('activate', (e) => {
     caches.keys().then((keys) =>
       Promise.all(
         keys
-          .filter((k) => k.startsWith('cog-tile-') && k !== CACHE_NAME)
+          .filter((k) => (k.startsWith('cog-tile-') || k.startsWith('cog-range-')) && k !== CACHE_NAME)
           .map((k) => caches.delete(k))
       )
     ).then(() => self.clients.claim())
