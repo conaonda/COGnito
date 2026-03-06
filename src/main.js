@@ -2,12 +2,13 @@ import { Map, View } from 'ol'
 import LayerGroup from 'ol/layer/Group'
 import { defaults as defaultControls } from 'ol/control'
 import { transform } from 'ol/proj'
-import { createCOGLayer, buildStyle, getTotalBands, getMinMaxFromOverview, createCOGSource, buildStyleWithColormap } from '@conaonda/ol-cog-layers'
-import { createCOGImageLayer } from '@conaonda/ol-cog-layers'
+// @conaonda/ol-cog-layers: 동적 import로 초기 번들에서 제외
+const _cogLayers = () => import('@conaonda/ol-cog-layers')
 import { proxyCogUrl } from './proxy.js'
-import { updateViewerMeta } from './viewerMeta.js'
-import { initViewerControls, updateControlsForCog, getCurrentStyle } from './viewerControls.js'
-import './colormaps.js'
+const _viewerMeta = () => import('./viewerMeta.js')
+// viewerControls: 동적 import로 초기 번들에서 제외
+const _viewerControls = () => import('./viewerControls.js')
+import { registerColormaps } from './colormaps.js'
 import './offline.js'
 import './installPrompt.js'
 import 'ol/ol.css'
@@ -174,6 +175,7 @@ const loadCOG = async (rawUrl, catalogMeta = null, overrideBandInfo = null, { sk
     const thisLoad = ++_loadVersion
     const url = proxyCogUrl(rawUrl)
     showLoading()
+    window._viewerControlsReady = false
     errorEl.classList.remove('active')
 
     try {
@@ -183,6 +185,8 @@ const loadCOG = async (rawUrl, catalogMeta = null, overrideBandInfo = null, { sk
       let cogLayer, cogSource, extent, tiff
 
       const pipeline = RENDER_PIPELINE === 'tile' && (isMobile() || !supportsWebGLFloat()) ? 'image' : RENDER_PIPELINE
+
+      const [{ createCOGLayer, createCOGImageLayer, getTotalBands, getMinMaxFromOverview, buildStyleWithColormap }] = await Promise.all([_cogLayers(), registerColormaps()])
 
       if (pipeline === 'image') {
         const resolutionMultiplier = isMobile() && !mobileHighQuality ? MOBILE_RES_MULTIPLIER : 1
@@ -246,13 +250,14 @@ const loadCOG = async (rawUrl, catalogMeta = null, overrideBandInfo = null, { sk
         const displayMeta = catalogMeta
           ? { title: catalogMeta.title, description: catalogMeta.description, crs: cogMeta.crs, bands: cogMeta.bands, filename }
           : { title: null, crs: cogMeta.crs, bands: cogMeta.bands, filename }
-        updateViewerMeta(displayMeta)
+        _viewerMeta().then(m => m.updateViewerMeta(displayMeta))
 
         // 뷰어 컨트롤 갱신
         try {
           const totalBands = await getTotalBands(tiff)
           const activeBandInfo = overrideBandInfo || { type: cogMeta.bandType, bands: cogMeta.bands }
           const stats = (await getMinMaxFromOverview(tiff, activeBandInfo.bands)).stats
+          const { updateControlsForCog } = await _viewerControls()
           updateControlsForCog(totalBands, activeBandInfo, stats, PROJECTION_MODE)
           window._currentViewerState = { url: rawUrl, catalogMeta, stats, bandInfo: activeBandInfo }
           window._viewerControlsReady = true
@@ -280,11 +285,12 @@ const loadCOG = async (rawUrl, catalogMeta = null, overrideBandInfo = null, { sk
       window.currentTiff = null
       window._currentViewerState = null
       window._viewerControlsReady = false
-      updateViewerMeta({ title: null, crs: null, bands: null, filename: null })
+      _viewerMeta().then(m => m.updateViewerMeta({ title: null, crs: null, bands: null, filename: null }))
     }
   }
 
   // 뷰어 컨트롤 초기화 (loadCOG 전에 호출해야 updateControlsForCog가 정상 동작)
+  const { initViewerControls } = await _viewerControls()
   initViewerControls(
     (style) => {
       // 스타일 변경 핸들러 (min/max, 밴드, 컬러맵)
@@ -303,7 +309,9 @@ const loadCOG = async (rawUrl, catalogMeta = null, overrideBandInfo = null, { sk
 
       // WebGL 파이프라인: setStyle로 실시간 반영
       if (currentCogLayer.setStyle) {
-        currentCogLayer.setStyle(buildStyleWithColormap(newBandInfo, newStats, style.colormap))
+        _cogLayers().then(({ buildStyleWithColormap }) => {
+          currentCogLayer.setStyle(buildStyleWithColormap(newBandInfo, newStats, style.colormap))
+        })
       }
       // Canvas 파이프라인: setStats + setColormap로 실시간 반영
       if (window._currentImageResult?.setStats) {

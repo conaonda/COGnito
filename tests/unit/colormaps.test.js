@@ -10,7 +10,8 @@ describe('colormaps', () => {
   beforeEach(async () => {
     vi.resetModules()
     Object.keys(mockColormaps).forEach((k) => delete mockColormaps[k])
-    await import('../../src/colormaps.js')
+    const { registerColormaps } = await import('../../src/colormaps.js')
+    await registerColormaps()
   })
 
   it('COLORMAPS에 magma가 등록된다', () => {

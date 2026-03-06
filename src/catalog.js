@@ -1,5 +1,9 @@
 import { supabase } from './supabase.js'
-import { detectBands } from '@conaonda/ol-cog-layers'
+// detectBands: 동적 import로 초기 번들에서 제외
+const _detectBands = async (tiff) => {
+  const { detectBands } = await import('@conaonda/ol-cog-layers')
+  return detectBands(tiff)
+}
 
 /**
  * data URL 썸네일을 Supabase Storage에 업로드하고 public URL 반환
@@ -198,7 +202,7 @@ export async function extractCogMetadata(tiff, url) {
   const crs = `EPSG:${epsgCode}`
 
   // Bands
-  const bandInfo = await detectBands(tiff)
+  const bandInfo = await _detectBands(tiff)
 
   // BBox
   const bbox = image.getBoundingBox()

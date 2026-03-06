@@ -1,5 +1,3 @@
-import { COLORMAPS } from '@conaonda/ol-cog-layers'
-
 // Magma 16-step keypoints (matplotlib 기준)
 const MAGMA_KEYS = [
   [0, 0, 4], [10, 7, 46], [28, 12, 84], [53, 13, 106],
@@ -24,4 +22,7 @@ function interpolateLUT(keypoints) {
   return lut
 }
 
-COLORMAPS.magma = interpolateLUT(MAGMA_KEYS)
+export async function registerColormaps() {
+  const { COLORMAPS } = await import('@conaonda/ol-cog-layers')
+  COLORMAPS.magma = interpolateLUT(MAGMA_KEYS)
+}
