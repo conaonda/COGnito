@@ -37,6 +37,7 @@ const RENDER_PIPELINE = urlParams.get('render') || 'tile'    // 'tile' | 'image'
 const TARGET_TILE_SIZE = parseInt(urlParams.get('tileSize'), 10) || 256
 const SHARED_CENTER = urlParams.get('center')  // 'lon,lat'
 const SHARED_ZOOM = urlParams.get('zoom')
+const SHARED_BANDS = urlParams.get('bands')  // '1,2,3' (RGB) or '4' (single)
 
 const MOBILE_MAX_ZOOM = 16
 const DEFAULT_MAX_ZOOM = 20
@@ -327,8 +328,14 @@ const loadCOG = async (rawUrl, catalogMeta = null, overrideBandInfo = null, { sk
     }
   )
 
-  // 초기 COG 로드
-  await loadCOG(COG_URL)
+  // 초기 COG 로드 (URL 밴드 파라미터 적용)
+  const initialBandInfo = (() => {
+    if (!SHARED_BANDS) return null
+    const bands = SHARED_BANDS.split(',').map(Number)
+    if (bands.some(b => !Number.isInteger(b) || b < 1)) return null
+    return { type: bands.length >= 3 ? 'rgb' : 'gray', bands }
+  })()
+  await loadCOG(COG_URL, null, initialBandInfo)
 
   // 공유 URL의 center/zoom 복원
   if (SHARED_CENTER && SHARED_ZOOM) {
@@ -367,6 +374,8 @@ const loadCOG = async (rawUrl, catalogMeta = null, overrideBandInfo = null, { sk
     params.set('url', cogUrl)
     params.set('center', `${lonLat[0].toFixed(6)},${lonLat[1].toFixed(6)}`)
     params.set('zoom', zoom.toFixed(1))
+    const activeBands = window._currentViewerState?.bandInfo?.bands
+    if (activeBands) params.set('bands', activeBands.join(','))
     const shareUrl = `${window.location.origin}${window.location.pathname}?${params}`
     navigator.clipboard.writeText(shareUrl).then(() => {
       const btn = document.getElementById('cog-share-btn')

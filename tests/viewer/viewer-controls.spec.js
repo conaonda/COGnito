@@ -163,6 +163,54 @@ test.describe('Min/Max 스트레치 슬라이더', () => {
   })
 })
 
+test.describe('밴드 URL 파라미터 공유/복원', () => {
+
+  test('공유 URL에 bands 파라미터가 포함됨', async ({ page }) => {
+    await page.goto('')
+    await waitForCogReady(page)
+
+    // clipboardData를 캡처하기 위해 clipboard API를 모킹
+    let copiedUrl = ''
+    await page.evaluate(() => {
+      navigator.clipboard.writeText = async (text) => { window._copiedUrl = text }
+    })
+
+    await page.locator('#cog-share-btn').click()
+
+    copiedUrl = await page.evaluate(() => window._copiedUrl)
+    const params = new URL(copiedUrl).searchParams
+    expect(params.get('bands')).toBeTruthy()
+
+    // bands 파라미터가 쉼표로 구분된 숫자 형식인지 확인
+    const bands = params.get('bands').split(',').map(Number)
+    expect(bands.length).toBeGreaterThan(0)
+    expect(bands.every(b => Number.isInteger(b) && b >= 1)).toBe(true)
+  })
+
+  test('bands URL 파라미터로 밴드 설정 복원', async ({ page }) => {
+    // bands=3,2,1로 접속 (역순 RGB)
+    await page.goto('?bands=3,2,1')
+    await waitForCogReady(page)
+
+    // window._currentViewerState.bandInfo가 URL 파라미터를 반영하는지 확인
+    const bandInfo = await page.evaluate(() => window._currentViewerState?.bandInfo)
+    expect(bandInfo).toBeTruthy()
+    expect(bandInfo.bands).toEqual([3, 2, 1])
+    expect(bandInfo.type).toBe('rgb')
+  })
+
+  test('단일 밴드 bands 파라미터 복원', async ({ page }) => {
+    // bands=2로 접속 (단일 밴드)
+    await page.goto('?bands=2')
+    await waitForCogReady(page)
+
+    const bandInfo = await page.evaluate(() => window._currentViewerState?.bandInfo)
+    expect(bandInfo).toBeTruthy()
+    expect(bandInfo.bands).toEqual([2])
+    expect(bandInfo.type).toBe('gray')
+  })
+})
+
 test.describe('투영 모드 토글', () => {
 
   test('Affine ↔ Reproject 전환', async ({ page }) => {
