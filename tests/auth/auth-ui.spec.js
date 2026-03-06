@@ -67,9 +67,8 @@ test.describe('인증 UI 검증', () => {
       return loadingEl && !loadingEl.classList.contains('active')
     }, { timeout: 30000 })
 
-    // 지도가 초기화되었는지 확인
-    const mapExists = await page.evaluate(() => !!window.olMap)
-    expect(mapExists).toBe(true)
+    // 지도가 초기화되었는지 확인 (CI 환경에서 타이밍 이슈 방지)
+    await page.waitForFunction(() => !!window.olMap, { timeout: 30000 })
 
     // 에러가 표시되지 않는지 확인
     const errorEl = page.locator('#error')
