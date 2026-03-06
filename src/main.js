@@ -282,10 +282,15 @@ const loadCOG = async (rawUrl, catalogMeta = null, overrideBandInfo = null, { sk
       if (thisLoad !== _loadVersion) return
       console.error('COG load error:', error)
       showError(!navigator.onLine ? '오프라인 상태입니다. 네트워크 연결을 확인해 주세요.' : `COG 로드 실패: ${error.message}`)
-      window.currentCogMeta = null
-      window.currentTiff = null
-      window._currentViewerState = null
-      window._viewerControlsReady = false
+      if (skipFit) {
+        // 밴드 변경 재로드 실패: 기존 상태 보존 (이전 렌더링은 유효)
+        window._viewerControlsReady = true
+      } else {
+        window.currentCogMeta = null
+        window.currentTiff = null
+        window._currentViewerState = null
+        window._viewerControlsReady = false
+      }
       _viewerMeta().then(m => m.updateViewerMeta({ title: null, crs: null, bands: null, filename: null }))
     }
   }
@@ -304,7 +309,10 @@ const loadCOG = async (rawUrl, catalogMeta = null, overrideBandInfo = null, { sk
       const bandsChanged = JSON.stringify(style.bands) !== JSON.stringify(state.bandInfo.bands)
 
       if (bandsChanged) {
+        // 밴드 선택 의도를 즉시 반영 (공유 URL 등에서 참조)
+        window._currentViewerState = { ...state, bandInfo: newBandInfo }
         loadCOG(state.url, state.catalogMeta, newBandInfo, { skipFit: true })
+          .catch(() => {}) // loadCOG 내부에서 에러 처리됨
         return
       }
 

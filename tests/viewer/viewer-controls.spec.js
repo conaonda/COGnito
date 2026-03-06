@@ -57,12 +57,15 @@ test.describe('밴드 선택 UI', () => {
     const newMode = currentMode === 'rgb' ? 'single' : 'rgb'
     await bandMode.selectOption(newMode)
 
-    // 앱이 새 스타일로 COG를 다시 로드할 때까지 대기
-    await page.waitForFunction(() => window._viewerControlsReady === true, { timeout: 30000 })
+    // bandType 매핑: UI 'rgb' → state 'rgb', UI 'single' → state 'gray'
+    const expectedType = newMode === 'rgb' ? 'rgb' : 'gray'
 
-    // window._currentViewerState.bandInfo.type이 새 모드를 반영하는지 확인
-    const stateType = await page.evaluate(() => window._currentViewerState?.bandInfo?.type)
-    expect(stateType).toBe(newMode)
+    // 밴드 모드 변경이 앱 상태에 즉시 반영되는지 확인
+    await page.waitForFunction(
+      (expected) => window._currentViewerState?.bandInfo?.type === expected,
+      expectedType,
+      { timeout: 10000 }
+    )
   })
 })
 
