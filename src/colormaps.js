@@ -22,6 +22,7 @@ function interpolateLUT(keypoints) {
   return lut
 }
 
-import('@conaonda/ol-cog-layers').then(({ COLORMAPS }) => {
+export async function registerColormaps() {
+  const { COLORMAPS } = await import('@conaonda/ol-cog-layers')
   COLORMAPS.magma = interpolateLUT(MAGMA_KEYS)
-})
+}

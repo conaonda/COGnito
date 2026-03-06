@@ -8,7 +8,7 @@ import { proxyCogUrl } from './proxy.js'
 const _viewerMeta = () => import('./viewerMeta.js')
 // viewerControls: 동적 import로 초기 번들에서 제외
 const _viewerControls = () => import('./viewerControls.js')
-import './colormaps.js'
+import { registerColormaps } from './colormaps.js'
 import './offline.js'
 import './installPrompt.js'
 import 'ol/ol.css'
@@ -186,7 +186,7 @@ const loadCOG = async (rawUrl, catalogMeta = null, overrideBandInfo = null, { sk
 
       const pipeline = RENDER_PIPELINE === 'tile' && (isMobile() || !supportsWebGLFloat()) ? 'image' : RENDER_PIPELINE
 
-      const { createCOGLayer, createCOGImageLayer, getTotalBands, getMinMaxFromOverview, buildStyleWithColormap } = await _cogLayers()
+      const [{ createCOGLayer, createCOGImageLayer, getTotalBands, getMinMaxFromOverview, buildStyleWithColormap }] = await Promise.all([_cogLayers(), registerColormaps()])
 
       if (pipeline === 'image') {
         const resolutionMultiplier = isMobile() && !mobileHighQuality ? MOBILE_RES_MULTIPLIER : 1
