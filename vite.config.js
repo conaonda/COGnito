@@ -29,8 +29,10 @@ export default defineConfig({
     sourcemap: true,
     rollupOptions: {
       output: {
-        manualChunks: {
-          vendor: ['ol']
+        manualChunks(id) {
+          if (id.includes('node_modules/ol/')) {
+            return 'vendor'
+          }
         }
       }
     }
