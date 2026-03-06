@@ -223,6 +223,11 @@
     .offline-banner.active {
       transform: translateY(0);
     }
+
+    [data-requires-network][disabled] {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
     
     .controls {
       position: absolute;
@@ -1412,7 +1417,7 @@
       }
     }
   </style>
-  <script type="module" crossorigin src="/COGnito/assets/index-BEtctc3E.js"></script>
+  <script type="module" crossorigin src="/COGnito/assets/index-DoR8LU_s.js"></script>
   <link rel="modulepreload" crossorigin href="/COGnito/assets/vendor-DihzboRh.js">
   <link rel="stylesheet" crossorigin href="/COGnito/assets/vendor-BtPuoxOl.css">
 </head>
@@ -1428,9 +1433,9 @@
       <div class="header-url">
         <label for="cog-url-input" class="sr-only">COG URL</label>
         <input type="text" id="cog-url-input" placeholder="COG URL 입력" aria-label="COG 영상 URL 입력">
-        <button id="cog-url-load" aria-label="COG 영상 로드">로드</button>
+        <button id="cog-url-load" aria-label="COG 영상 로드" data-requires-network>로드</button>
         <button id="cog-share-btn" title="현재 뷰 공유" aria-label="현재 뷰 공유 URL 복사">공유</button>
-        <button id="cog-register-btn" style="display:none" aria-label="카탈로그에 COG 등록">등록</button>
+        <button id="cog-register-btn" style="display:none" aria-label="카탈로그에 COG 등록" data-requires-network>등록</button>
       </div>
     </header>
     <div id="map" role="application" aria-label="COG 영상 지도 뷰어"></div>
@@ -1606,7 +1611,7 @@
           <input type="date" id="stac-date-from" title="시작일">
           <input type="date" id="stac-date-to" title="종료일">
         </div>
-        <button id="stac-search-btn" class="stac-search-btn">검색</button>
+        <button id="stac-search-btn" class="stac-search-btn" data-requires-network>검색</button>
       </div>
       <div id="stac-status" class="stac-status"></div>
       <div id="stac-results" class="stac-results"></div>
