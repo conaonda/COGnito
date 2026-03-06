@@ -105,6 +105,18 @@ describe('offline.js', () => {
     expect(btn1.title).toBe('')
   })
 
+  it('기존 title이 있는 버튼은 온라인 복귀 시 원래 title 복원', async () => {
+    const btn1 = document.getElementById('btn1')
+    btn1.title = '데이터 로드'
+
+    await loadOffline()
+    window.dispatchEvent(new Event('offline'))
+    expect(btn1.title).toBe('오프라인 상태에서는 사용할 수 없습니다')
+
+    window.dispatchEvent(new Event('online'))
+    expect(btn1.title).toBe('데이터 로드')
+  })
+
   it('원래 disabled 상태였던 버튼은 온라인 복귀 후에도 disabled 유지', async () => {
     await loadOffline()
     const btn1 = document.getElementById('btn1')
