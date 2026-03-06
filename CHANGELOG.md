@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.7.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.6.0...COGnito-v1.7.0) (2026-03-06)
+
+
+### Features
+
+* 밴드 선택 URL 파라미터 공유/복원 ([#153](https://github.com/conaonda/COGnito/issues/153)) ([#156](https://github.com/conaonda/COGnito/issues/156)) ([622b9ae](https://github.com/conaonda/COGnito/commit/622b9ae7b0ae109447c90414075dfd3f3d2d5394))
+* 오프라인 상태 감지 및 폴백 UI ([#162](https://github.com/conaonda/COGnito/issues/162)) ([f2a3f40](https://github.com/conaonda/COGnito/commit/f2a3f409b08565932ef7cc744064536413201ccb)), closes [#161](https://github.com/conaonda/COGnito/issues/161)
+
+
+### Bug Fixes
+
+* 드롭다운 선택 시 앱 상태 반영 E2E 테스트 flaky 수정 ([#159](https://github.com/conaonda/COGnito/issues/159)) ([8703a37](https://github.com/conaonda/COGnito/commit/8703a37b1debe5721b67dd6f766316c6391d9bf6)), closes [#158](https://github.com/conaonda/COGnito/issues/158)
+
 ## [1.6.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.5.0...COGnito-v1.6.0) (2026-03-06)
 
 
