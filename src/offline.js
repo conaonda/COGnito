@@ -14,14 +14,16 @@ function updateNetworkDependentUI() {
   elements.forEach(el => {
     if (offline) {
       el.dataset.offlineDisabled = el.disabled ? 'was-disabled' : 'was-enabled'
+      el.dataset.offlineTitle = el.title
       el.disabled = true
       el.title = '오프라인 상태에서는 사용할 수 없습니다'
     } else {
       if (el.dataset.offlineDisabled === 'was-enabled') {
         el.disabled = false
       }
+      el.title = el.dataset.offlineTitle ?? ''
       delete el.dataset.offlineDisabled
-      el.title = ''
+      delete el.dataset.offlineTitle
     }
   })
 }
