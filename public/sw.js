@@ -1,7 +1,20 @@
-const CACHE_NAME = 'cog-range-v1'
+const CACHE_VERSION = 1
+const CACHE_NAME = `cog-tile-v${CACHE_VERSION}`
+const MAX_ENTRIES = 200
 
 self.addEventListener('install', () => self.skipWaiting())
-self.addEventListener('activate', (e) => e.waitUntil(self.clients.claim()))
+
+self.addEventListener('activate', (e) => {
+  e.waitUntil(
+    caches.keys().then((keys) =>
+      Promise.all(
+        keys
+          .filter((k) => k.startsWith('cog-tile-') && k !== CACHE_NAME)
+          .map((k) => caches.delete(k))
+      )
+    ).then(() => self.clients.claim())
+  )
+})
 
 self.addEventListener('fetch', (event) => {
   const { request } = event
@@ -10,10 +23,9 @@ self.addEventListener('fetch', (event) => {
 })
 
 function isCOGRequest(request) {
-  // cross-origin 요청은 인터셉트하지 않음 (CORS 모드가 깨질 수 있음)
-  if (new URL(request.url).origin !== self.location.origin) return false
-  return request.headers.has('range') &&
-    (request.url.includes('.tif') || request.url.includes('.tiff'))
+  const url = request.url
+  if (!request.headers.has('range')) return false
+  return url.includes('.tif') || url.includes('.tiff')
 }
 
 function getCacheKey(request) {
@@ -29,13 +41,29 @@ async function cacheFirst(request) {
   if (cached) return cached
 
   const response = await fetch(request)
-  // Cache API는 206 Partial Response를 지원하지 않으므로 200만 캐시
-  if (response.ok && response.status === 200) {
+
+  if (response.ok) {
     try {
-      cache.put(key, response.clone())
-    } catch (e) {
-      // 캐시 실패는 무시 — 응답은 정상 반환
+      const body = await response.clone().arrayBuffer()
+      const headers = new Headers(response.headers)
+      const cachedResponse = new Response(body, { status: 200, headers })
+      await cache.put(key, cachedResponse)
+      evictIfNeeded(cache)
+    } catch {
+      // cache failure is non-fatal
     }
   }
+
   return response
+}
+
+async function evictIfNeeded(cache) {
+  try {
+    const keys = await cache.keys()
+    if (keys.length <= MAX_ENTRIES) return
+    const toDelete = keys.slice(0, keys.length - MAX_ENTRIES)
+    await Promise.all(toDelete.map((k) => cache.delete(k)))
+  } catch {
+    // eviction failure is non-fatal
+  }
 }
