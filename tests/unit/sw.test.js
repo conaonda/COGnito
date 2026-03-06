@@ -205,5 +205,21 @@ describe('sw.js 로직', () => {
       expect(globalThis.caches.delete).not.toHaveBeenCalledWith('cog-tile-v1')
       expect(globalThis.caches.delete).not.toHaveBeenCalledWith('other-cache')
     })
+
+    it('이전 이름(cog-range-v*)의 캐시도 삭제함', async () => {
+      globalThis.caches.keys.mockResolvedValue(['cog-range-v1', 'cog-tile-v0', 'cog-tile-v1', 'other-cache'])
+      await loadSW()
+
+      const event = {
+        waitUntil: vi.fn((p) => p),
+      }
+      listeners.activate(event)
+      await event.waitUntil.mock.calls[0][0]
+
+      expect(globalThis.caches.delete).toHaveBeenCalledWith('cog-range-v1')
+      expect(globalThis.caches.delete).toHaveBeenCalledWith('cog-tile-v0')
+      expect(globalThis.caches.delete).not.toHaveBeenCalledWith('cog-tile-v1')
+      expect(globalThis.caches.delete).not.toHaveBeenCalledWith('other-cache')
+    })
   })
 })
