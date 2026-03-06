@@ -27,9 +27,12 @@ window.addEventListener('beforeinstallprompt', (e) => {
   document.getElementById('install-btn').addEventListener('click', async () => {
     if (!deferredPrompt) return
     deferredPrompt.prompt()
-    await deferredPrompt.userChoice
+    const { outcome } = await deferredPrompt.userChoice
     deferredPrompt = null
     banner.classList.remove('active')
+    if (outcome === 'dismissed') {
+      sessionStorage.setItem(DISMISS_KEY, '1')
+    }
   })
 
   document.getElementById('install-dismiss').addEventListener('click', () => {
