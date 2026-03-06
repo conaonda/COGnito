@@ -1,5 +1,27 @@
 # Changelog
 
+## [1.6.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.5.0...COGnito-v1.6.0) (2026-03-06)
+
+
+### Features
+
+* PWA 설치 가능성 개선 (manifest, 아이콘, install prompt) ([#141](https://github.com/conaonda/COGnito/issues/141)) ([ef1e57e](https://github.com/conaonda/COGnito/commit/ef1e57e10f11fe7cc6af14f87b2a34813804b4b6))
+* Service Worker 타일 캐싱 고도화 ([#148](https://github.com/conaonda/COGnito/issues/148)) ([c4d4216](https://github.com/conaonda/COGnito/commit/c4d4216d0b24f535fb4711f1bbd2301b44a0d601))
+* 오프라인 상태 감지 및 폴백 UI ([#137](https://github.com/conaonda/COGnito/issues/137)) ([24ba171](https://github.com/conaonda/COGnito/commit/24ba17126504d64ada62359eaf0a21019e20aed6))
+
+
+### Bug Fixes
+
+* PWA 설치 프롬프트 취소 시 배너 재표시 방지 ([#144](https://github.com/conaonda/COGnito/issues/144)) ([3e05edd](https://github.com/conaonda/COGnito/commit/3e05eddc10f5ef448bb5960f8f2cf6400269ced0)), closes [#142](https://github.com/conaonda/COGnito/issues/142)
+* window.olMap 타이밍 의존 E2E 테스트 flaky 수정 ([#150](https://github.com/conaonda/COGnito/issues/150)) ([3700d00](https://github.com/conaonda/COGnito/commit/3700d00bcb40b6d607267a80e66f70ae50b53545)), closes [#149](https://github.com/conaonda/COGnito/issues/149)
+* 동적 import에 .catch(console.error) 추가 ([#130](https://github.com/conaonda/COGnito/issues/130)) ([#131](https://github.com/conaonda/COGnito/issues/131)) ([5abe7da](https://github.com/conaonda/COGnito/commit/5abe7da727c8680c781f946c23ac19c2a4af8f10))
+
+
+### Performance Improvements
+
+* preconnect/preload 힌트 및 리소스 로딩 최적화 ([#155](https://github.com/conaonda/COGnito/issues/155)) ([58262b7](https://github.com/conaonda/COGnito/commit/58262b7b6a271f86c6a793f3b744b818b228a162))
+* 동적 import로 초기 번들 크기 97% 감소 ([#154](https://github.com/conaonda/COGnito/issues/154)) ([e8b4042](https://github.com/conaonda/COGnito/commit/e8b4042cd052473b1580084a5206b4698ce5f281))
+
 ## [1.5.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.4.0...COGnito-v1.5.0) (2026-03-05)
 
 
