@@ -52,6 +52,21 @@ describe('installPrompt.js', () => {
     expect(sessionStorage.getItem('cognito-install-dismissed')).toBe('1')
   })
 
+  it('네이티브 프롬프트 취소 시 sessionStorage에 dismiss 저장', async () => {
+    await loadInstallPrompt()
+
+    const mockEvent = {
+      preventDefault: vi.fn(),
+      prompt: vi.fn(),
+      userChoice: Promise.resolve({ outcome: 'dismissed' }),
+    }
+    window.dispatchEvent(Object.assign(new Event('beforeinstallprompt'), mockEvent))
+
+    document.getElementById('install-btn').click()
+    await mockEvent.userChoice
+    expect(sessionStorage.getItem('cognito-install-dismissed')).toBe('1')
+  })
+
   it('설치 버튼 클릭 시 prompt() 호출됨', async () => {
     await loadInstallPrompt()
 
