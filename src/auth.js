@@ -1,4 +1,5 @@
 import { supabase } from './supabase.js'
+import { PRE_LOGIN_STATE_KEY } from './constants.js'
 
 /**
  * OAuth 로그인
@@ -48,7 +49,6 @@ export async function signUpWithEmail(email, password) {
   })
 }
 
-const STATE_KEY = 'cognito-pre-login-state'
 
 function savePreLoginState() {
   const state = {}
@@ -58,16 +58,16 @@ function savePreLoginState() {
     state.center = view.getCenter()
     state.zoom = view.getZoom()
   }
-  sessionStorage.setItem(STATE_KEY, JSON.stringify(state))
+  sessionStorage.setItem(PRE_LOGIN_STATE_KEY, JSON.stringify(state))
 }
 
 /**
  * 로그인 전 저장된 앱 상태 복원 (1회성)
  */
 export function consumePreLoginState() {
-  const raw = sessionStorage.getItem(STATE_KEY)
+  const raw = sessionStorage.getItem(PRE_LOGIN_STATE_KEY)
   if (!raw) return null
-  sessionStorage.removeItem(STATE_KEY)
+  sessionStorage.removeItem(PRE_LOGIN_STATE_KEY)
   try { return JSON.parse(raw) } catch { return null }
 }
 
