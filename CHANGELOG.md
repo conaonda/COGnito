@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.7.1](https://github.com/conaonda/COGnito/compare/COGnito-v1.7.0...COGnito-v1.7.1) (2026-03-07)
+
+
+### Bug Fixes
+
+* 오프라인 복귀 시 data-requires-network 버튼의 기존 title 복원 ([#164](https://github.com/conaonda/COGnito/issues/164)) ([fd27a92](https://github.com/conaonda/COGnito/commit/fd27a92aec5c3bdd883f127402c03689293e5bf7)), closes [#163](https://github.com/conaonda/COGnito/issues/163)
+
 ## [1.7.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.6.0...COGnito-v1.7.0) (2026-03-06)
 
 
