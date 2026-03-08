@@ -101,6 +101,15 @@ export async function saveCogImage(data) {
 
 /**
  * COG 영상 목록 조회
+ * @param {object} [options]
+ * @param {string} [options.search] - 제목/설명 키워드 검색
+ * @param {string} [options.tag] - 태그 필터
+ * @param {string} [options.sensor] - 센서 필터
+ * @param {string} [options.region] - 지역 필터
+ * @param {string} [options.sourceType] - 등록 출처 필터 ('stac' 또는 'manual', 빈 문자열이면 전체)
+ * @param {string} [options.sortBy] - 정렬 기준 ('created_at' 또는 'like_count')
+ * @param {number} [options.limit] - 페이지당 결과 수
+ * @param {number} [options.offset] - 페이지네이션 오프셋
  */
 export async function getCogImages({ search = '', tag = '', sensor = '', region = '', sourceType = '', sortBy = 'created_at', limit = 20, offset = 0 } = {}) {
   if (!supabase) return { data: [], error: null }
