@@ -1,0 +1,10 @@
+{
+  "role": "orchestrator-end",
+  "sprint": 47,
+  "status": "success",
+  "merged_prs": [220],
+  "closed_issues": [221],
+  "new_issues_created": [],
+  "released": false,
+  "next_action": "스프린트 47 구현 없음 — 이슈 #221은 기존 구현 완료 확인으로 닫힘, PR #220 머지 완료, 다음 스프린트는 agent/developer 라벨 이슈 사전 준비 필요"
+}
