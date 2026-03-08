@@ -107,7 +107,7 @@ export async function saveCogImage(data) {
  * @param {string} [options.sensor] - 센서 필터
  * @param {string} [options.region] - 지역 필터
  * @param {string} [options.sourceType] - 등록 출처 필터 ('stac' 또는 'manual', 빈 문자열이면 전체)
- * @param {string} [options.sortBy] - 정렬 기준 ('created_at' 또는 'like_count')
+ * @param {string} [options.sortBy] - 정렬 기준 ('created_at', 'like_count' 또는 'view_count')
  * @param {string} [options.userId] - 특정 사용자의 영상만 필터 (user_id 기준)
  * @param {number} [options.limit] - 페이지당 결과 수
  * @param {number} [options.offset] - 페이지네이션 오프셋
@@ -153,6 +153,11 @@ export async function getCogImages({ search = '', tag = '', sensor = '', region 
       const countB = b.likes?.[0]?.count || 0
       return countB - countA
     })
+  }
+
+  // 조회수순 정렬: view_count 기준 내림차순 (클라이언트 사이드)
+  if (sortBy === 'view_count' && result.data) {
+    result.data.sort((a, b) => (b.view_count || 0) - (a.view_count || 0))
   }
 
   return result

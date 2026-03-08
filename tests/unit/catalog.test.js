@@ -255,6 +255,30 @@ describe('getCogImages', () => {
     const result = await getCogImages({ sortBy: 'like_count' })
     expect(result.data[0].id).toBe('2')
   })
+
+  it('sorts by view_count client-side', async () => {
+    const q = createQueryMock([
+      { id: '1', view_count: 3 },
+      { id: '2', view_count: 10 },
+      { id: '3', view_count: 0 },
+    ])
+    setMockQuery(q)
+    const result = await getCogImages({ sortBy: 'view_count' })
+    expect(result.data[0].id).toBe('2')
+    expect(result.data[1].id).toBe('1')
+    expect(result.data[2].id).toBe('3')
+  })
+
+  it('sorts by view_count treats missing view_count as 0', async () => {
+    const q = createQueryMock([
+      { id: '1' },
+      { id: '2', view_count: 5 },
+    ])
+    setMockQuery(q)
+    const result = await getCogImages({ sortBy: 'view_count' })
+    expect(result.data[0].id).toBe('2')
+    expect(result.data[1].id).toBe('1')
+  })
 })
 
 describe('getCogImage', () => {
