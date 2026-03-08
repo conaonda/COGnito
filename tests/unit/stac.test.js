@@ -101,6 +101,23 @@ describe('extractStacItemMeta', () => {
     const item = { ...baseItem, assets: {} }
     expect(extractStacItemMeta(item).cogUrl).toBeNull()
   })
+
+  it('handles item without assets property (defaults to {})', () => {
+    const item = { id: 'no-assets', properties: {} }
+    const meta = extractStacItemMeta(item)
+    expect(meta.cogUrl).toBeNull()
+    expect(meta.thumbnail_url).toBeNull()
+  })
+
+  it('handles asset with undefined href via toHttpUrl', () => {
+    const item = {
+      ...baseItem,
+      assets: { visual: { href: undefined }, thumbnail: { href: undefined } },
+    }
+    const meta = extractStacItemMeta(item)
+    expect(meta.cogUrl).toBeNull()
+    expect(meta.thumbnail_url).toBeNull()
+  })
 })
 
 describe('searchStac', () => {
@@ -134,6 +151,13 @@ describe('searchStac', () => {
     const body = JSON.parse(fetch.mock.calls[0][1].body)
     expect(body.intersects).toEqual(geo)
     expect(body.bbox).toBeUndefined()
+  })
+
+  it('includes datetime when provided', async () => {
+    globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve({}) })
+    await searchStac({ apiUrl: 'https://api.example.com', datetime: '2024-01-01/2024-12-31' })
+    const body = JSON.parse(fetch.mock.calls[0][1].body)
+    expect(body.datetime).toBe('2024-01-01/2024-12-31')
   })
 
   it('throws on non-ok response', async () => {
