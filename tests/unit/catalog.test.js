@@ -395,6 +395,128 @@ describe('extractCogMetadata', () => {
   })
 })
 
+describe('supabase null guards', () => {
+  let nullMod
+  beforeEach(async () => {
+    vi.doMock('../../src/supabase.js', () => ({ supabase: null }))
+    vi.resetModules()
+    nullMod = await import('../../src/catalog.js')
+  })
+
+  it('uploadThumbnail returns null', async () => {
+    expect(await nullMod.uploadThumbnail('data:image/png;base64,abc')).toBeNull()
+  })
+
+  it('saveCogImage returns error', async () => {
+    const result = await nullMod.saveCogImage({ url: 'test' })
+    expect(result.error.message).toBe('Supabase 미설정')
+  })
+
+  it('getCogImages returns empty array', async () => {
+    const result = await nullMod.getCogImages()
+    expect(result).toEqual({ data: [], error: null })
+  })
+
+  it('getCogImage returns null data', async () => {
+    const result = await nullMod.getCogImage('123')
+    expect(result).toEqual({ data: null, error: null })
+  })
+
+  it('deleteCogImage returns error', async () => {
+    const result = await nullMod.deleteCogImage('123')
+    expect(result.error.message).toBe('Supabase 미설정')
+  })
+})
+
+describe('saveCogImage — field defaults', () => {
+  it('uses default values for optional fields', async () => {
+    const q = createQueryMock({ id: '1', url: 'test' })
+    setMockQuery(q)
+    await saveCogImage({ url: 'test' })
+    const insertArg = q.insert.mock.calls[0][0]
+    expect(insertArg.title).toBeNull()
+    expect(insertArg.tags).toEqual([])
+    expect(insertArg.source_type).toBe('manual')
+  })
+})
+
+describe('getCogImages — like_count sort edge cases', () => {
+  it('handles items with missing likes array', async () => {
+    const q = createQueryMock([
+      { id: '1', likes: null },
+      { id: '2', likes: [{ count: 3 }] },
+      { id: '3' },
+    ])
+    setMockQuery(q)
+    const result = await getCogImages({ sortBy: 'like_count' })
+    expect(result.data[0].id).toBe('2')
+  })
+})
+
+describe('extractCogMetadata — date edge cases', () => {
+  it('returns null for invalid date range in URL', async () => {
+    const mockImage = {
+      getGeoKeys: () => ({}),
+      getBoundingBox: () => [0, 0, 1, 1],
+      getWidth: () => 256,
+      getHeight: () => 256,
+      getFileDirectory: () => ({}),
+    }
+    const mockTiff = { getImage: vi.fn().mockResolvedValue(mockImage) }
+    mockDetectBands.mockResolvedValue({ type: 'gray', bands: [1] })
+
+    // Month 13 is invalid
+    const result = await extractCogMetadata(mockTiff, 'https://example.com/1990-13-01_scene.tif')
+    expect(result.captured_at).toBeNull()
+  })
+
+  it('returns null for parseTiffDate when date is invalid (NaN)', async () => {
+    const mockImage = {
+      getGeoKeys: () => ({}),
+      getBoundingBox: () => [0, 0, 1, 1],
+      getWidth: () => 256,
+      getHeight: () => 256,
+      getFileDirectory: () => ({ GDAL_METADATA: '<Item name="TIFFTAG_DATETIME">2023:00:00 00:00:00</Item>' }),
+    }
+    const mockTiff = { getImage: vi.fn().mockResolvedValue(mockImage) }
+    mockDetectBands.mockResolvedValue({ type: 'gray', bands: [1] })
+
+    const result = await extractCogMetadata(mockTiff)
+    // Month 00 creates an invalid date — parseTiffDate returns null, falls through
+    expect(result.captured_at).toBeNull()
+  })
+
+  it('returns null for URL date with year < 1970', async () => {
+    const mockImage = {
+      getGeoKeys: () => ({}),
+      getBoundingBox: () => [0, 0, 1, 1],
+      getWidth: () => 256,
+      getHeight: () => 256,
+      getFileDirectory: () => ({}),
+    }
+    const mockTiff = { getImage: vi.fn().mockResolvedValue(mockImage) }
+    mockDetectBands.mockResolvedValue({ type: 'gray', bands: [1] })
+
+    const result = await extractCogMetadata(mockTiff, 'https://example.com/1960-06-15_scene.tif')
+    expect(result.captured_at).toBeNull()
+  })
+
+  it('returns null for parseTiffDate with non-matching string', async () => {
+    const mockImage = {
+      getGeoKeys: () => ({}),
+      getBoundingBox: () => [0, 0, 1, 1],
+      getWidth: () => 256,
+      getHeight: () => 256,
+      getFileDirectory: () => ({ GDAL_METADATA: '<Item name="TIFFTAG_DATETIME">not-a-date</Item>' }),
+    }
+    const mockTiff = { getImage: vi.fn().mockResolvedValue(mockImage) }
+    mockDetectBands.mockResolvedValue({ type: 'gray', bands: [1] })
+
+    const result = await extractCogMetadata(mockTiff)
+    expect(result.captured_at).toBeNull()
+  })
+})
+
 describe('generateThumbnail', () => {
   function mockCanvas() {
     const imgData = { data: new Uint8ClampedArray(128 * 128 * 4) }
@@ -459,6 +581,44 @@ describe('generateThumbnail', () => {
     }
     const result = await generateThumbnail(mockTiff)
     expect(result).toBeNull()
+  })
+
+  it('handles constant-value bands (max === min)', async () => {
+    mockCanvas()
+    const rasters = [
+      new Float32Array([50, 50, 50, 50]),
+      new Float32Array([50, 50, 50, 50]),
+      new Float32Array([50, 50, 50, 50]),
+    ]
+    const mockImage = {
+      getWidth: () => 2,
+      getHeight: () => 2,
+      readRasters: vi.fn().mockResolvedValue(rasters),
+    }
+    const mockTiff = {
+      getImageCount: vi.fn().mockResolvedValue(1),
+      getImage: vi.fn().mockResolvedValue(mockImage),
+    }
+
+    const result = await generateThumbnail(mockTiff)
+    expect(result).toBe('data:image/png;base64,fake')
+  })
+
+  it('handles constant-value grayscale band (max === min)', async () => {
+    mockCanvas()
+    const rasters = [new Float32Array([42, 42, 42, 42])]
+    const mockImage = {
+      getWidth: () => 2,
+      getHeight: () => 2,
+      readRasters: vi.fn().mockResolvedValue(rasters),
+    }
+    const mockTiff = {
+      getImageCount: vi.fn().mockResolvedValue(1),
+      getImage: vi.fn().mockResolvedValue(mockImage),
+    }
+
+    const result = await generateThumbnail(mockTiff)
+    expect(result).toBe('data:image/png;base64,fake')
   })
 
   it('handles grayscale (single band) tiff', async () => {

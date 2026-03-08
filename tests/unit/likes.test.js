@@ -139,6 +139,55 @@ describe('isLiked', () => {
   })
 })
 
+describe('supabase null guard', () => {
+  let nullMod
+  beforeEach(async () => {
+    vi.doMock('../../src/supabase.js', () => ({ supabase: null }))
+    vi.resetModules()
+    nullMod = await import('../../src/likes.js')
+  })
+
+  it('toggleLike returns error when supabase is null', async () => {
+    const result = await nullMod.toggleLike('img-1')
+    expect(result).toEqual({ liked: false, error: { message: 'Supabase 미설정' } })
+  })
+
+  it('getLikeCount returns 0 when supabase is null', async () => {
+    expect(await nullMod.getLikeCount('img-1')).toBe(0)
+  })
+
+  it('isLiked returns false when supabase is null', async () => {
+    expect(await nullMod.isLiked('img-1')).toBe(false)
+  })
+})
+
+describe('getLikeStates — null data fallback', () => {
+  it('handles null likes data gracefully', async () => {
+    mockSession(testSession)
+
+    const likesQ = {
+      select: vi.fn().mockReturnThis(),
+      in: vi.fn().mockReturnThis(),
+      then: (resolve) => resolve({ data: null }),
+    }
+    const userLikesQ = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      in: vi.fn().mockReturnThis(),
+      then: (resolve) => resolve({ data: null }),
+    }
+
+    let callCount = 0
+    mockSupabase.from = vi.fn(() => {
+      callCount++
+      return callCount === 1 ? likesQ : userLikesQ
+    })
+
+    const result = await getLikeStates(['img-1'])
+    expect(result.get('img-1')).toEqual({ count: 0, liked: false })
+  })
+})
+
 describe('getLikeStates', () => {
   it('returns empty map for empty ids', async () => {
     const result = await getLikeStates([])

@@ -342,6 +342,149 @@ describe('viewerControls', () => {
     })
   })
 
+  describe('edge cases — missing DOM elements', () => {
+    it('initViewerControls returns early when panel is missing', () => {
+      document.body.innerHTML = ''
+      expect(() => initViewerControls(vi.fn(), vi.fn())).not.toThrow()
+    })
+
+    it('reset button does nothing when currentStats is null', () => {
+      const onStyleChange = vi.fn()
+      initViewerControls(onStyleChange, vi.fn())
+      // No updateControlsForCog called, so currentStats is null
+      onStyleChange.mockClear()
+      document.getElementById('vc-reset-btn').dispatchEvent(new Event('click'))
+      expect(onStyleChange).not.toHaveBeenCalled()
+    })
+
+    it('getCurrentStyle falls back when band selectors are missing', () => {
+      initViewerControls(vi.fn(), vi.fn())
+      // Remove band selectors
+      document.getElementById('vc-band-r')?.remove()
+      document.getElementById('vc-band-g')?.remove()
+      document.getElementById('vc-band-b')?.remove()
+      const bandMode = document.getElementById('vc-band-mode')
+      bandMode.value = 'rgb'
+
+      const style = getCurrentStyle()
+      expect(style.bands).toEqual([1, 2, 3])
+    })
+
+    it('getCurrentStyle falls back when single band selector is missing', () => {
+      initViewerControls(vi.fn(), vi.fn())
+      document.getElementById('vc-band-single')?.remove()
+      const bandMode = document.getElementById('vc-band-mode')
+      bandMode.value = 'single'
+
+      const style = getCurrentStyle()
+      expect(style.bands).toEqual([1])
+    })
+
+    it('getCurrentStyle falls back when sliders are missing', () => {
+      initViewerControls(vi.fn(), vi.fn())
+      document.getElementById('vc-min-slider')?.remove()
+      document.getElementById('vc-max-slider')?.remove()
+      const bandMode = document.getElementById('vc-band-mode')
+      bandMode.value = 'single'
+
+      const style = getCurrentStyle()
+      expect(style.min).toBe(0)
+      expect(style.max).toBe(1)
+    })
+
+    it('getCurrentStyle falls back when colormap is missing', () => {
+      initViewerControls(vi.fn(), vi.fn())
+      document.getElementById('vc-colormap')?.remove()
+
+      const style = getCurrentStyle()
+      expect(style.colormap).toBe('grayscale')
+    })
+
+    it('getCurrentStyle perband falls back when perband inputs are missing', () => {
+      initViewerControls(vi.fn(), vi.fn())
+      updateControlsForCog(3, { type: 'rgb', bands: [1, 2, 3] }, [
+        { min: 0, max: 100 }, { min: 0, max: 100 }, { min: 0, max: 100 }
+      ], 'affine')
+
+      // Switch to perband
+      const perbandRadio = document.querySelector('input[name="vc-stretch-mode"][value="perband"]')
+      perbandRadio.checked = true
+      perbandRadio.dispatchEvent(new Event('change'))
+
+      // Remove perband inputs
+      document.querySelectorAll('.vc-perband-min').forEach(el => el.remove())
+      document.querySelectorAll('.vc-perband-max').forEach(el => el.remove())
+
+      const style = getCurrentStyle()
+      expect(style.stats[0].min).toBe(0)
+      expect(style.stats[0].max).toBe(1)
+    })
+
+    it('updateBandSelectors returns early when bandMode is missing', () => {
+      initViewerControls(vi.fn(), vi.fn())
+      // Set up band options first, then remove bandMode
+      updateControlsForCog(3, { type: 'rgb', bands: [1, 2, 3] }, [
+        { min: 0, max: 1 }, { min: 0, max: 1 }, { min: 0, max: 1 }
+      ], 'affine')
+      document.getElementById('vc-band-mode').remove()
+      // Trigger bandMode change on a band selector — this calls emitStyleChange which calls getCurrentStyle
+      // but updateBandSelectors is called from populateBandOptions, test the early return
+      const selR = document.getElementById('vc-band-r')
+      if (selR) {
+        expect(() => selR.dispatchEvent(new Event('change'))).not.toThrow()
+      }
+    })
+
+    it('stretch mode change handles missing batch/perband groups', () => {
+      // Set up DOM without vc-stretch-batch and vc-stretch-perband containers
+      const panel = document.getElementById('viewer-controls-panel')
+      document.getElementById('vc-stretch-batch')?.remove()
+      document.getElementById('vc-stretch-perband')?.remove()
+
+      initViewerControls(vi.fn(), vi.fn())
+      updateControlsForCog(3, { type: 'rgb', bands: [1, 2, 3] }, [
+        { min: 0, max: 100 }, { min: 0, max: 100 }, { min: 0, max: 100 }
+      ], 'affine')
+
+      // batch radio change — batchGroup and perbandGroup are null
+      const batchRadio = document.querySelector('input[name="vc-stretch-mode"][value="batch"]')
+      batchRadio.checked = true
+      expect(() => batchRadio.dispatchEvent(new Event('change'))).not.toThrow()
+    })
+
+    it('populateBandOptions skips missing selectors', () => {
+      initViewerControls(vi.fn(), vi.fn())
+      // Remove one selector before populating
+      document.getElementById('vc-band-r')?.remove()
+      expect(() => updateControlsForCog(3, { type: 'rgb', bands: [1, 2, 3] }, [
+        { min: 0, max: 1 }, { min: 0, max: 1 }, { min: 0, max: 1 }
+      ], 'affine')).not.toThrow()
+    })
+
+    it('setControlsEnabled returns early when panel is missing', () => {
+      initViewerControls(vi.fn(), vi.fn())
+      // Remove panel and call updateControlsForCog which calls setControlsEnabled
+      const panel = document.getElementById('viewer-controls-panel')
+      panel.id = 'removed'
+      expect(() => updateControlsForCog(3, { type: 'rgb', bands: [1, 2, 3] }, [
+        { min: 0, max: 1 }, { min: 0, max: 1 }, { min: 0, max: 1 }
+      ], 'affine')).not.toThrow()
+    })
+
+    it('resetSlidersToStats uses stats[0] fallback for excess channels', () => {
+      const onStyleChange = vi.fn()
+      initViewerControls(onStyleChange, vi.fn())
+      // Provide only 1 stat but 3 perband channels exist
+      updateControlsForCog(3, { type: 'rgb', bands: [1, 2, 3] }, [
+        { min: 10, max: 90 }
+      ], 'affine')
+
+      onStyleChange.mockClear()
+      document.getElementById('vc-reset-btn').dispatchEvent(new Event('click'))
+      expect(onStyleChange).toHaveBeenCalled()
+    })
+  })
+
   describe('updateStretchModeVisibility', () => {
     it('RGB일 때 스트레치 모드 선택 표시', () => {
       initViewerControls(vi.fn(), vi.fn())
