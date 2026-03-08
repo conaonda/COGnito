@@ -452,6 +452,30 @@ describe('viewerControls', () => {
       expect(() => batchRadio.dispatchEvent(new Event('change'))).not.toThrow()
     })
 
+    it('batch stretch mode radio change sets groups visible (isPerband=false)', () => {
+      initViewerControls(vi.fn(), vi.fn())
+      updateControlsForCog(3, { type: 'rgb', bands: [1, 2, 3] }, [
+        { min: 0, max: 100 }, { min: 0, max: 100 }, { min: 0, max: 100 }
+      ], 'affine')
+
+      const batchRadio = document.querySelector('input[name="vc-stretch-mode"][value="batch"]')
+      batchRadio.checked = true
+      batchRadio.dispatchEvent(new Event('change'))
+
+      const batchGroup = document.getElementById('vc-stretch-batch')
+      const perbandGroup = document.getElementById('vc-stretch-perband')
+      expect(batchGroup.style.display).toBe('')
+      expect(perbandGroup.style.display).toBe('none')
+    })
+
+    it('updateControlsForCog works when bandMode element is missing', () => {
+      initViewerControls(vi.fn(), vi.fn())
+      document.getElementById('vc-band-mode')?.remove()
+      expect(() => updateControlsForCog(3, { type: 'rgb', bands: [1, 2, 3] }, [
+        { min: 0, max: 1 }, { min: 0, max: 1 }, { min: 0, max: 1 }
+      ], 'affine')).not.toThrow()
+    })
+
     it('populateBandOptions skips missing selectors', () => {
       initViewerControls(vi.fn(), vi.fn())
       // Remove one selector before populating
