@@ -17,7 +17,7 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'html'],
-      include: ['src/catalog.js', 'src/stac.js', 'src/auth.js', 'src/proxy.js', 'src/tags.js'],
+      include: ['src/catalog.js', 'src/stac.js', 'src/auth.js', 'src/proxy.js', 'src/tags.js', 'src/viewerControls.js'],
     }
   }
 })
