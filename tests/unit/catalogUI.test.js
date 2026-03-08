@@ -648,6 +648,65 @@ describe('catalogUI interactions', () => {
     expect(document.querySelector('.catalog-share-btn')).not.toBeNull()
   })
 
+  it('shows only-mine checkbox when logged in', async () => {
+    await initAndOpen([{ id: '1', title: 'T', tags: [], created_at: '2026-01-01' }])
+
+    const onlyMineContainer = document.querySelector('.catalog-only-mine')
+    expect(onlyMineContainer).not.toBeNull()
+    expect(onlyMineContainer.style.display).toBe('')
+  })
+
+  it('hides only-mine checkbox when not logged in', async () => {
+    mockGetSession.mockResolvedValue(null)
+    mockGetCogImages.mockResolvedValue({ data: [], error: null })
+
+    initCatalogUI(vi.fn())
+    await vi.advanceTimersByTimeAsync(10)
+
+    const onlyMineContainer = document.querySelector('.catalog-only-mine')
+    expect(onlyMineContainer.style.display).toBe('none')
+  })
+
+  it('only-mine checkbox passes userId to getCogImages', async () => {
+    await initAndOpen([{ id: '1', title: 'T', tags: [], created_at: '2026-01-01' }])
+    mockGetCogImages.mockClear()
+    mockGetCogImages.mockResolvedValue({ data: [], error: null })
+
+    const checkbox = document.getElementById('catalog-filter-only-mine')
+    checkbox.checked = true
+    checkbox.dispatchEvent(new Event('change'))
+    await vi.advanceTimersByTimeAsync(10)
+
+    expect(mockGetCogImages).toHaveBeenCalledWith(expect.objectContaining({ userId: TEST_USER_ID }))
+  })
+
+  it('unchecking only-mine checkbox passes empty userId', async () => {
+    await initAndOpen([{ id: '1', title: 'T', tags: [], created_at: '2026-01-01' }])
+    mockGetCogImages.mockClear()
+    mockGetCogImages.mockResolvedValue({ data: [], error: null })
+
+    const checkbox = document.getElementById('catalog-filter-only-mine')
+    checkbox.checked = false
+    checkbox.dispatchEvent(new Event('change'))
+    await vi.advanceTimersByTimeAsync(10)
+
+    expect(mockGetCogImages).toHaveBeenCalledWith(expect.objectContaining({ userId: '' }))
+  })
+
+  it('hides only-mine checkbox and unchecks on logout', async () => {
+    await initAndOpen([{ id: '1', title: 'T', tags: [], created_at: '2026-01-01' }])
+
+    const checkbox = document.getElementById('catalog-filter-only-mine')
+    checkbox.checked = true
+
+    const authCallback = mockOnAuthStateChange.mock.calls[0][0]
+    authCallback('SIGNED_OUT', null)
+
+    const onlyMineContainer = document.querySelector('.catalog-only-mine')
+    expect(onlyMineContainer.style.display).toBe('none')
+    expect(checkbox.checked).toBe(false)
+  })
+
   it('like button handles NaN count gracefully', async () => {
     mockToggleLike.mockResolvedValue({ liked: true, error: null })
     mockGetLikeStates.mockResolvedValue(new Map([['1', { count: 0, liked: false }]]))
