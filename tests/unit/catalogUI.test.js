@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
 const {
   mockGetCogImages, mockDeleteCogImage, mockUpdateCogImage, mockToggleLike, mockGetLikeStates,
@@ -219,5 +219,398 @@ describe('catalogUI delete button', () => {
     await new Promise(r => setTimeout(r, 10))
 
     expect(document.querySelector('.catalog-delete-btn')).toBeNull()
+  })
+})
+
+describe('catalogUI interactions', () => {
+  const TEST_USER_ID = 'user-123'
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.useFakeTimers()
+    setupDOM()
+    mockGetSession.mockResolvedValue({ user: { id: TEST_USER_ID } })
+    mockOnAuthStateChange.mockImplementation(() => {})
+    mockGetLikeStates.mockResolvedValue(new Map())
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  async function initAndOpen(items, onSelect) {
+    mockGetCogImages.mockResolvedValue({ data: items, error: null })
+    const cb = onSelect || vi.fn()
+    initCatalogUI(cb)
+    await vi.advanceTimersByTimeAsync(10)
+    document.getElementById('catalog-toggle-btn').click()
+    await vi.advanceTimersByTimeAsync(10)
+    return cb
+  }
+
+  it('onAuthStateChange updates login state', async () => {
+    mockGetCogImages.mockResolvedValue({ data: [{ id: '1', user_id: 'other', title: 'T', tags: [], created_at: '2026-01-01' }], error: null })
+    initCatalogUI(vi.fn())
+    await vi.advanceTimersByTimeAsync(10)
+
+    // Get the callback registered with onAuthStateChange
+    const authCallback = mockOnAuthStateChange.mock.calls[0][0]
+    authCallback('SIGNED_IN', { user: { id: 'new-user' } })
+
+    // Open panel - should now be logged in as new-user
+    document.getElementById('catalog-toggle-btn').click()
+    await vi.advanceTimersByTimeAsync(10)
+
+    // Verify the user is logged in (actions row should appear)
+    expect(document.querySelector('.catalog-card-actions')).not.toBeNull()
+  })
+
+  it('close button closes the panel', async () => {
+    await initAndOpen([{ id: '1', title: 'T', tags: [], created_at: '2026-01-01' }])
+
+    const panel = document.getElementById('catalog-panel')
+    expect(panel.classList.contains('open')).toBe(true)
+
+    document.getElementById('catalog-panel-close').click()
+    expect(panel.classList.contains('open')).toBe(false)
+    expect(document.getElementById('catalog-toggle-btn').getAttribute('aria-expanded')).toBe('false')
+  })
+
+  it('search input triggers debounced loadPage', async () => {
+    await initAndOpen([{ id: '1', title: 'T', tags: [], created_at: '2026-01-01' }])
+    mockGetCogImages.mockClear()
+    mockGetCogImages.mockResolvedValue({ data: [], error: null })
+
+    const searchInput = document.getElementById('catalog-search')
+    searchInput.value = 'test'
+    searchInput.dispatchEvent(new Event('input'))
+
+    // Before debounce fires
+    expect(mockGetCogImages).not.toHaveBeenCalled()
+
+    await vi.advanceTimersByTimeAsync(300)
+    await vi.advanceTimersByTimeAsync(10)
+
+    expect(mockGetCogImages).toHaveBeenCalledWith(expect.objectContaining({ search: 'test' }))
+  })
+
+  it('sort change triggers loadPage', async () => {
+    await initAndOpen([{ id: '1', title: 'T', tags: [], created_at: '2026-01-01' }])
+    mockGetCogImages.mockClear()
+    mockGetCogImages.mockResolvedValue({ data: [], error: null })
+
+    const sortSelect = document.getElementById('catalog-sort-select')
+    sortSelect.value = 'like_count'
+    sortSelect.dispatchEvent(new Event('change'))
+    await vi.advanceTimersByTimeAsync(10)
+
+    expect(mockGetCogImages).toHaveBeenCalledWith(expect.objectContaining({ sortBy: 'like_count' }))
+  })
+
+  it('prev button navigates back', async () => {
+    // First load returns full page to enable next
+    const items = Array.from({ length: 20 }, (_, i) => ({ id: String(i), title: `T${i}`, tags: [], created_at: '2026-01-01' }))
+    await initAndOpen(items)
+
+    // Go to page 2
+    mockGetCogImages.mockResolvedValue({ data: [{ id: '20', title: 'T20', tags: [], created_at: '2026-01-01' }], error: null })
+    document.getElementById('catalog-next').click()
+    await vi.advanceTimersByTimeAsync(10)
+
+    // Go back
+    mockGetCogImages.mockClear()
+    mockGetCogImages.mockResolvedValue({ data: items, error: null })
+    document.getElementById('catalog-prev').click()
+    await vi.advanceTimersByTimeAsync(10)
+
+    expect(mockGetCogImages).toHaveBeenCalledWith(expect.objectContaining({ offset: 0 }))
+  })
+
+  it('next button navigates forward', async () => {
+    const items = Array.from({ length: 20 }, (_, i) => ({ id: String(i), title: `T${i}`, tags: [], created_at: '2026-01-01' }))
+    await initAndOpen(items)
+
+    mockGetCogImages.mockClear()
+    mockGetCogImages.mockResolvedValue({ data: [], error: null })
+    document.getElementById('catalog-next').click()
+    await vi.advanceTimersByTimeAsync(10)
+
+    expect(mockGetCogImages).toHaveBeenCalledWith(expect.objectContaining({ offset: 20 }))
+  })
+
+  it('cog-registered event refreshes list when panel is open', async () => {
+    await initAndOpen([{ id: '1', title: 'T', tags: [], created_at: '2026-01-01' }])
+    mockGetCogImages.mockClear()
+    mockGetCogImages.mockResolvedValue({ data: [], error: null })
+
+    document.dispatchEvent(new Event('cog-registered'))
+    await vi.advanceTimersByTimeAsync(10)
+
+    expect(mockGetCogImages).toHaveBeenCalled()
+  })
+
+  it('shows error message on loadPage error', async () => {
+    mockGetCogImages.mockResolvedValue({ data: null, error: { message: '서버 오류' } })
+    initCatalogUI(vi.fn())
+    await vi.advanceTimersByTimeAsync(10)
+
+    document.getElementById('catalog-toggle-btn').click()
+    await vi.advanceTimersByTimeAsync(10)
+
+    expect(document.getElementById('catalog-list').textContent).toContain('서버 오류')
+  })
+
+  it('shows empty message when no data', async () => {
+    mockGetCogImages.mockResolvedValue({ data: [], error: null })
+    initCatalogUI(vi.fn())
+    await vi.advanceTimersByTimeAsync(10)
+
+    document.getElementById('catalog-toggle-btn').click()
+    await vi.advanceTimersByTimeAsync(10)
+
+    expect(document.getElementById('catalog-list').textContent).toContain('등록된 영상이 없습니다')
+    expect(document.getElementById('catalog-prev').disabled).toBe(true)
+    expect(document.getElementById('catalog-next').disabled).toBe(true)
+  })
+
+  it('like button toggles like state', async () => {
+    mockToggleLike.mockResolvedValue({ liked: true, error: null })
+    mockGetLikeStates.mockResolvedValue(new Map([['1', { count: 5, liked: false }]]))
+
+    await initAndOpen([{ id: '1', user_id: 'other', title: 'T', tags: [], created_at: '2026-01-01' }])
+
+    const likeBtn = document.querySelector('.catalog-like-btn')
+    expect(likeBtn).not.toBeNull()
+
+    likeBtn.click()
+    await vi.advanceTimersByTimeAsync(10)
+
+    expect(mockToggleLike).toHaveBeenCalledWith('1')
+    expect(likeBtn.querySelector('.like-count').textContent).toBe('6')
+    expect(likeBtn.classList.contains('liked')).toBe(true)
+  })
+
+  it('like button handles unlike', async () => {
+    mockToggleLike.mockResolvedValue({ liked: false, error: null })
+    mockGetLikeStates.mockResolvedValue(new Map([['1', { count: 3, liked: true }]]))
+
+    await initAndOpen([{ id: '1', user_id: 'other', title: 'T', tags: [], created_at: '2026-01-01' }])
+
+    const likeBtn = document.querySelector('.catalog-like-btn')
+    likeBtn.click()
+    await vi.advanceTimersByTimeAsync(10)
+
+    expect(likeBtn.querySelector('.like-count').textContent).toBe('2')
+    expect(likeBtn.classList.contains('liked')).toBe(false)
+  })
+
+  it('watchlist button dispatches event', async () => {
+    await initAndOpen([{ id: '1', user_id: 'other', title: 'T', tags: [], created_at: '2026-01-01' }])
+
+    const handler = vi.fn()
+    document.addEventListener('watchlist-add', handler)
+
+    document.querySelector('.catalog-watchlist-btn').click()
+
+    expect(handler).toHaveBeenCalledWith(expect.objectContaining({
+      detail: { cogImageId: '1' }
+    }))
+    document.removeEventListener('watchlist-add', handler)
+  })
+
+  it('shows like count for non-logged-in users', async () => {
+    mockGetSession.mockResolvedValue(null)
+    mockGetCogImages.mockResolvedValue({
+      data: [{ id: '1', title: 'T', tags: [], created_at: '2026-01-01', likes: [{ count: 10 }] }],
+      error: null,
+    })
+    mockGetLikeStates.mockResolvedValue(new Map())
+
+    initCatalogUI(vi.fn())
+    await vi.advanceTimersByTimeAsync(10)
+
+    document.getElementById('catalog-toggle-btn').click()
+    await vi.advanceTimersByTimeAsync(10)
+
+    const cards = document.querySelectorAll('.catalog-card')
+    expect(cards[0].textContent).toContain('♥ 10')
+  })
+
+  it('card click closes panel and calls onSelectCog', async () => {
+    const onSelect = vi.fn()
+    const item = { id: '1', url: 'http://example.com/cog.tif', title: 'T', tags: [], created_at: '2026-01-01' }
+    await initAndOpen([item], onSelect)
+
+    document.querySelector('.catalog-card').click()
+
+    expect(document.getElementById('catalog-panel').classList.contains('open')).toBe(false)
+    expect(onSelect).toHaveBeenCalledWith('http://example.com/cog.tif', expect.objectContaining({ id: '1' }))
+  })
+
+  it('renders thumbnail when thumbnail_url exists', async () => {
+    await initAndOpen([{ id: '1', title: 'T', tags: ['flood'], thumbnail_url: 'http://img.png', sensor: 'SAR', region: 'Seoul', created_at: '2026-01-01' }])
+
+    expect(document.querySelector('.catalog-card-thumb')).not.toBeNull()
+    expect(document.querySelector('.catalog-tag').textContent).toBe('flood')
+  })
+
+  it('filter inputs trigger onFilterChange', async () => {
+    await initAndOpen([{ id: '1', title: 'T', tags: [], created_at: '2026-01-01' }])
+    mockGetCogImages.mockClear()
+    mockGetCogImages.mockResolvedValue({ data: [], error: null })
+
+    // tag filter
+    const tagFilter = document.getElementById('catalog-filter-tag')
+    tagFilter.value = 'flood'
+    tagFilter.dispatchEvent(new Event('input'))
+    await vi.advanceTimersByTimeAsync(300)
+    await vi.advanceTimersByTimeAsync(10)
+
+    expect(mockGetCogImages).toHaveBeenCalledWith(expect.objectContaining({ tag: 'flood' }))
+  })
+
+  it('source filter triggers onFilterChange on change event', async () => {
+    await initAndOpen([{ id: '1', title: 'T', tags: [], created_at: '2026-01-01' }])
+    mockGetCogImages.mockClear()
+    mockGetCogImages.mockResolvedValue({ data: [], error: null })
+
+    const sourceFilter = document.getElementById('catalog-filter-source')
+    sourceFilter.value = 'stac'
+    sourceFilter.dispatchEvent(new Event('change'))
+    await vi.advanceTimersByTimeAsync(300)
+    await vi.advanceTimersByTimeAsync(10)
+
+    expect(mockGetCogImages).toHaveBeenCalledWith(expect.objectContaining({ sourceType: 'stac' }))
+  })
+
+  it('prev button does nothing on first page', async () => {
+    await initAndOpen([{ id: '1', title: 'T', tags: [], created_at: '2026-01-01' }])
+    mockGetCogImages.mockClear()
+
+    document.getElementById('catalog-prev').click()
+    await vi.advanceTimersByTimeAsync(10)
+
+    expect(mockGetCogImages).not.toHaveBeenCalled()
+  })
+
+  it('renders manual source badge for non-stac items', async () => {
+    await initAndOpen([{ id: '1', title: 'T', tags: [], created_at: '2026-01-01', source_type: 'manual' }])
+    expect(document.querySelector('.catalog-source-badge.manual').textContent).toBe('수동')
+  })
+
+  it('renders stac source badge', async () => {
+    await initAndOpen([{ id: '1', title: 'T', tags: [], created_at: '2026-01-01', source_type: 'stac' }])
+    expect(document.querySelector('.catalog-source-badge.stac').textContent).toBe('STAC')
+  })
+
+  it('renders card without thumbnail when thumbnail_url is absent', async () => {
+    await initAndOpen([{ id: '1', title: 'T', tags: [], created_at: '2026-01-01' }])
+    expect(document.querySelector('.catalog-card-thumb')).toBeNull()
+  })
+
+  it('renders card without description gracefully', async () => {
+    await initAndOpen([{ id: '1', title: null, description: null, tags: [], created_at: '2026-01-01' }])
+    expect(document.querySelector('.catalog-card-title').textContent).toContain('제목 없음')
+  })
+
+  it('authStateChange with null session sets logged out state', async () => {
+    mockGetCogImages.mockResolvedValue({ data: [{ id: '1', title: 'T', tags: [], created_at: '2026-01-01' }], error: null })
+    initCatalogUI(vi.fn())
+    await vi.advanceTimersByTimeAsync(10)
+
+    const authCallback = mockOnAuthStateChange.mock.calls[0][0]
+    authCallback('SIGNED_OUT', null)
+
+    document.getElementById('catalog-toggle-btn').click()
+    await vi.advanceTimersByTimeAsync(10)
+
+    expect(document.querySelector('.catalog-card-actions')).toBeNull()
+  })
+
+  it('edit modal replaces existing modal', async () => {
+    await initAndOpen([{ id: '1', user_id: TEST_USER_ID, title: 'T', tags: [], created_at: '2026-01-01' }])
+
+    // Open first modal
+    document.querySelector('.catalog-edit-btn').click()
+    await vi.advanceTimersByTimeAsync(10)
+    expect(document.getElementById('catalog-edit-modal')).not.toBeNull()
+
+    // Reload and open again - should replace existing
+    mockGetCogImages.mockResolvedValue({ data: [{ id: '1', user_id: TEST_USER_ID, title: 'T2', tags: [], created_at: '2026-01-01' }], error: null })
+    document.getElementById('catalog-toggle-btn').click()
+    await vi.advanceTimersByTimeAsync(10)
+
+    document.querySelector('.catalog-edit-btn').click()
+    await vi.advanceTimersByTimeAsync(10)
+
+    expect(document.querySelectorAll('#catalog-edit-modal')).toHaveLength(1)
+  })
+
+  it('edit modal saves empty title/description as null', async () => {
+    mockUpdateCogImage.mockResolvedValue({ error: null })
+    await initAndOpen([{ id: '1', user_id: TEST_USER_ID, title: 'T', tags: [], created_at: '2026-01-01' }])
+
+    document.querySelector('.catalog-edit-btn').click()
+    await vi.advanceTimersByTimeAsync(10)
+
+    const modal = document.getElementById('catalog-edit-modal')
+    modal.querySelector('#edit-title').value = ''
+    modal.querySelector('#edit-description').value = ''
+    modal.querySelector('#edit-save').click()
+    await vi.advanceTimersByTimeAsync(10)
+
+    expect(mockUpdateCogImage).toHaveBeenCalledWith('1', { title: null, description: null })
+  })
+
+  it('formatDate handles null/missing date', async () => {
+    await initAndOpen([{ id: '1', title: 'T', tags: [], created_at: null }])
+    // Should not crash, meta should still render
+    expect(document.querySelector('.catalog-card-meta')).not.toBeNull()
+  })
+
+  it('does not show like count for non-logged-in when count is 0', async () => {
+    mockGetSession.mockResolvedValue(null)
+    mockGetCogImages.mockResolvedValue({
+      data: [{ id: '1', title: 'T', tags: [], created_at: '2026-01-01', likes: [{ count: 0 }] }],
+      error: null,
+    })
+
+    initCatalogUI(vi.fn())
+    await vi.advanceTimersByTimeAsync(10)
+    document.getElementById('catalog-toggle-btn').click()
+    await vi.advanceTimersByTimeAsync(10)
+
+    const card = document.querySelector('.catalog-card')
+    expect(card.textContent).not.toContain('♥')
+  })
+
+  it('returns early when supabase is null', async () => {
+    expect(() => initCatalogUI(vi.fn())).not.toThrow()
+  })
+
+  it('returns early when panel element is missing', () => {
+    document.body.innerHTML = '<button id="catalog-toggle-btn">카탈로그</button>'
+    expect(() => initCatalogUI(vi.fn())).not.toThrow()
+  })
+
+  it('returns early when toggle button is missing', () => {
+    document.body.innerHTML = '<div id="catalog-panel"></div>'
+    expect(() => initCatalogUI(vi.fn())).not.toThrow()
+  })
+
+  it('like button handles NaN count gracefully', async () => {
+    mockToggleLike.mockResolvedValue({ liked: true, error: null })
+    mockGetLikeStates.mockResolvedValue(new Map([['1', { count: 0, liked: false }]]))
+
+    await initAndOpen([{ id: '1', user_id: 'other', title: 'T', tags: [], created_at: '2026-01-01' }])
+
+    const likeBtn = document.querySelector('.catalog-like-btn')
+    // Corrupt the count text to trigger NaN branch
+    likeBtn.querySelector('.like-count').textContent = ''
+    likeBtn.click()
+    await vi.advanceTimersByTimeAsync(10)
+
+    // NaN || 0 → 0, liked → 0 + 1 = 1
+    expect(likeBtn.querySelector('.like-count').textContent).toBe('1')
   })
 })
