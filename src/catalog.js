@@ -186,6 +186,17 @@ export async function updateCogImage(id, data) {
 }
 
 /**
+ * COG 영상 조회수 1 증가 (비로그인 사용자도 호출 가능)
+ * @param {string} id - 영상 ID
+ */
+export async function incrementViewCount(id) {
+  if (!supabase) return { error: { message: 'Supabase 미설정' } }
+
+  const { error } = await supabase.rpc('increment_view_count', { image_id: id })
+  return { error: error || null }
+}
+
+/**
  * COG 영상 삭제 (RLS가 소유자 체크)
  */
 export async function deleteCogImage(id) {

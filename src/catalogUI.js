@@ -1,5 +1,5 @@
 import { supabase } from './supabase.js'
-import { getCogImages, deleteCogImage, updateCogImage } from './catalog.js'
+import { getCogImages, deleteCogImage, updateCogImage, incrementViewCount } from './catalog.js'
 import { toggleLike, getLikeStates } from './likes.js'
 import { getSession } from './auth.js'
 
@@ -306,8 +306,15 @@ export function initCatalogUI(onSelectCog) {
       })
       card.appendChild(shareBtn)
 
+      // 조회수 표시
+      const viewCountEl = document.createElement('span')
+      viewCountEl.className = 'catalog-view-count'
+      viewCountEl.textContent = `👁 ${item.view_count || 0}`
+      card.appendChild(viewCountEl)
+
       card.addEventListener('click', () => {
         panel.classList.remove('open')
+        incrementViewCount(item.id)
         onSelectCog(item.url, item)
       })
       listEl.appendChild(card)

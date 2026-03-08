@@ -2,7 +2,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
 const {
-  mockGetCogImages, mockDeleteCogImage, mockUpdateCogImage, mockToggleLike, mockGetLikeStates,
+  mockGetCogImages, mockDeleteCogImage, mockUpdateCogImage, mockIncrementViewCount, mockToggleLike, mockGetLikeStates,
   mockGetSession, mockOnAuthStateChange, mockSupabase,
 } = vi.hoisted(() => {
   const mockOnAuthStateChange = vi.fn()
@@ -10,6 +10,7 @@ const {
     mockGetCogImages: vi.fn(),
     mockDeleteCogImage: vi.fn(),
     mockUpdateCogImage: vi.fn(),
+    mockIncrementViewCount: vi.fn().mockResolvedValue({ error: null }),
     mockToggleLike: vi.fn(),
     mockGetLikeStates: vi.fn(),
     mockGetSession: vi.fn(),
@@ -23,6 +24,7 @@ vi.mock('../../src/catalog.js', () => ({
   getCogImages: mockGetCogImages,
   deleteCogImage: mockDeleteCogImage,
   updateCogImage: mockUpdateCogImage,
+  incrementViewCount: mockIncrementViewCount,
 }))
 vi.mock('../../src/likes.js', () => ({
   toggleLike: mockToggleLike,
@@ -436,7 +438,7 @@ describe('catalogUI interactions', () => {
     expect(cards[0].textContent).toContain('♥ 10')
   })
 
-  it('card click closes panel and calls onSelectCog', async () => {
+  it('card click closes panel, calls onSelectCog and incrementViewCount', async () => {
     const onSelect = vi.fn()
     const item = { id: '1', url: 'http://example.com/cog.tif', title: 'T', tags: [], created_at: '2026-01-01' }
     await initAndOpen([item], onSelect)
@@ -445,6 +447,22 @@ describe('catalogUI interactions', () => {
 
     expect(document.getElementById('catalog-panel').classList.contains('open')).toBe(false)
     expect(onSelect).toHaveBeenCalledWith('http://example.com/cog.tif', expect.objectContaining({ id: '1' }))
+    expect(mockIncrementViewCount).toHaveBeenCalledWith('1')
+  })
+
+  it('renders view count on card', async () => {
+    await initAndOpen([{ id: '1', title: 'T', tags: [], created_at: '2026-01-01', view_count: 42 }])
+
+    const viewCount = document.querySelector('.catalog-view-count')
+    expect(viewCount).not.toBeNull()
+    expect(viewCount.textContent).toBe('👁 42')
+  })
+
+  it('renders view count as 0 when missing', async () => {
+    await initAndOpen([{ id: '1', title: 'T', tags: [], created_at: '2026-01-01' }])
+
+    const viewCount = document.querySelector('.catalog-view-count')
+    expect(viewCount.textContent).toBe('👁 0')
   })
 
   it('renders thumbnail when thumbnail_url exists', async () => {
