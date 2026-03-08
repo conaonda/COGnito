@@ -214,6 +214,134 @@ describe('viewerControls', () => {
     })
   })
 
+  describe('slider events', () => {
+    it('min 슬라이더 input 이벤트가 onStyleChange를 호출', () => {
+      const onStyleChange = vi.fn()
+      initViewerControls(onStyleChange, vi.fn())
+      updateControlsForCog(3, { type: 'rgb', bands: [1, 2, 3] }, [
+        { min: 0, max: 100 }, { min: 0, max: 100 }, { min: 0, max: 100 }
+      ], 'affine')
+
+      onStyleChange.mockClear()
+      const minSlider = document.getElementById('vc-min-slider')
+      minSlider.value = '10'
+      minSlider.dispatchEvent(new Event('input'))
+
+      expect(onStyleChange).toHaveBeenCalledTimes(1)
+      const minVal = document.getElementById('vc-min-value')
+      expect(minVal.textContent).toBe('10.0')
+    })
+
+    it('max 슬라이더 input 이벤트가 onStyleChange를 호출', () => {
+      const onStyleChange = vi.fn()
+      initViewerControls(onStyleChange, vi.fn())
+      updateControlsForCog(3, { type: 'rgb', bands: [1, 2, 3] }, [
+        { min: 0, max: 100 }, { min: 0, max: 100 }, { min: 0, max: 100 }
+      ], 'affine')
+
+      onStyleChange.mockClear()
+      const maxSlider = document.getElementById('vc-max-slider')
+      maxSlider.value = '90'
+      maxSlider.dispatchEvent(new Event('input'))
+
+      expect(onStyleChange).toHaveBeenCalledTimes(1)
+      const maxVal = document.getElementById('vc-max-value')
+      expect(maxVal.textContent).toBe('90.0')
+    })
+
+    it('스트레치 모드 라디오 변경 시 batch/perband 그룹 가시성 전환', () => {
+      initViewerControls(vi.fn(), vi.fn())
+      updateControlsForCog(3, { type: 'rgb', bands: [1, 2, 3] }, [
+        { min: 0, max: 1 }, { min: 0, max: 1 }, { min: 0, max: 1 }
+      ], 'affine')
+
+      const perbandRadio = document.querySelector('input[name="vc-stretch-mode"][value="perband"]')
+      perbandRadio.checked = true
+      perbandRadio.dispatchEvent(new Event('change'))
+
+      const batchGroup = document.getElementById('vc-stretch-batch')
+      const perbandGroup = document.getElementById('vc-stretch-perband')
+      expect(batchGroup.style.display).toBe('none')
+      expect(perbandGroup.style.display).toBe('')
+    })
+
+    it('리셋 버튼 클릭 시 슬라이더가 currentStats로 초기화', () => {
+      const onStyleChange = vi.fn()
+      initViewerControls(onStyleChange, vi.fn())
+      updateControlsForCog(3, { type: 'rgb', bands: [1, 2, 3] }, [
+        { min: 20, max: 180 }, { min: 20, max: 180 }, { min: 20, max: 180 }
+      ], 'affine')
+
+      // 슬라이더 값을 변경
+      const minSlider = document.getElementById('vc-min-slider')
+      minSlider.value = '50'
+
+      onStyleChange.mockClear()
+      document.getElementById('vc-reset-btn').dispatchEvent(new Event('click'))
+
+      expect(Number(minSlider.value)).toBe(20)
+      expect(onStyleChange).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  describe('projection buttons', () => {
+    it('affine 버튼 클릭 시 onProjectionChange("affine") 호출', () => {
+      const onProjectionChange = vi.fn()
+      initViewerControls(vi.fn(), onProjectionChange)
+      updateControlsForCog(3, { type: 'rgb', bands: [1, 2, 3] }, [
+        { min: 0, max: 1 }, { min: 0, max: 1 }, { min: 0, max: 1 }
+      ], 'reproject')
+
+      document.getElementById('vc-proj-affine').dispatchEvent(new Event('click'))
+      expect(onProjectionChange).toHaveBeenCalledWith('affine')
+    })
+
+    it('reproject 버튼 클릭 시 onProjectionChange("reproject") 호출', () => {
+      const onProjectionChange = vi.fn()
+      initViewerControls(vi.fn(), onProjectionChange)
+      updateControlsForCog(3, { type: 'rgb', bands: [1, 2, 3] }, [
+        { min: 0, max: 1 }, { min: 0, max: 1 }, { min: 0, max: 1 }
+      ], 'affine')
+
+      document.getElementById('vc-proj-reproject').dispatchEvent(new Event('click'))
+      expect(onProjectionChange).toHaveBeenCalledWith('reproject')
+    })
+
+    it('패널 토글 버튼 클릭 시 open 클래스 토글', () => {
+      initViewerControls(vi.fn(), vi.fn())
+      const panel = document.getElementById('viewer-controls-panel')
+
+      document.getElementById('vc-toggle-btn').dispatchEvent(new Event('click'))
+      expect(panel.classList.contains('open')).toBe(true)
+
+      document.getElementById('vc-toggle-btn').dispatchEvent(new Event('click'))
+      expect(panel.classList.contains('open')).toBe(false)
+    })
+  })
+
+  describe('getCurrentStyle (perband)', () => {
+    it('RGB perband 모드에서 채널별 stats 반환', () => {
+      initViewerControls(vi.fn(), vi.fn())
+      updateControlsForCog(3, { type: 'rgb', bands: [1, 2, 3] }, [
+        { min: 0, max: 100 }, { min: 0, max: 100 }, { min: 0, max: 100 }
+      ], 'affine')
+
+      // perband 라디오 선택
+      const perbandRadio = document.querySelector('input[name="vc-stretch-mode"][value="perband"]')
+      perbandRadio.checked = true
+      perbandRadio.dispatchEvent(new Event('change'))
+
+      // 첫 번째 채널 min 변경
+      const firstChannel = document.querySelector('.vc-perband-channel')
+      const pMin = firstChannel.querySelector('.vc-perband-min')
+      pMin.value = '5'
+
+      const style = getCurrentStyle()
+      expect(style.stats).toHaveLength(3)
+      expect(style.stats[0].min).toBe(5)
+    })
+  })
+
   describe('updateStretchModeVisibility', () => {
     it('RGB일 때 스트레치 모드 선택 표시', () => {
       initViewerControls(vi.fn(), vi.fn())
