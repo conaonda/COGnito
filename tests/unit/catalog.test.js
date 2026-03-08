@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 const { mockSupabase, setMockQuery, createQueryMock, mockDetectBands } = vi.hoisted(() => {
   let mockQuery
@@ -19,7 +19,13 @@ const { mockSupabase, setMockQuery, createQueryMock, mockDetectBands } = vi.hois
     }
     return chain
   }
-  const mockSupabase = { from: vi.fn(() => mockQuery) }
+  const mockStorage = {
+    from: vi.fn().mockReturnValue({
+      upload: vi.fn().mockResolvedValue({ error: null }),
+      getPublicUrl: vi.fn().mockReturnValue({ data: { publicUrl: 'https://cdn.example.com/thumb.png' } }),
+    }),
+  }
+  const mockSupabase = { from: vi.fn(() => mockQuery), storage: mockStorage }
   return {
     mockSupabase,
     setMockQuery: (q) => { mockQuery = q; mockSupabase.from = vi.fn(() => q) },
@@ -31,7 +37,64 @@ const { mockSupabase, setMockQuery, createQueryMock, mockDetectBands } = vi.hois
 vi.mock('../../src/supabase.js', () => ({ supabase: mockSupabase }))
 vi.mock('@conaonda/ol-cog-layers', () => ({ detectBands: mockDetectBands }))
 
-import { generateTitleFromUrl, generateDescriptionFromMeta, saveCogImage, getCogImages, getCogImage, deleteCogImage, extractCogMetadata, generateThumbnail } from '../../src/catalog.js'
+import { uploadThumbnail, generateTitleFromUrl, generateDescriptionFromMeta, saveCogImage, getCogImages, getCogImage, deleteCogImage, extractCogMetadata, generateThumbnail } from '../../src/catalog.js'
+
+describe('uploadThumbnail', () => {
+  beforeEach(() => {
+    // Reset storage mocks
+    const bucket = {
+      upload: vi.fn().mockResolvedValue({ error: null }),
+      getPublicUrl: vi.fn().mockReturnValue({ data: { publicUrl: 'https://cdn.example.com/thumb.png' } }),
+    }
+    mockSupabase.storage.from = vi.fn().mockReturnValue(bucket)
+
+    // Mock global fetch for data URL conversion
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      blob: () => Promise.resolve(new Blob(['fake'], { type: 'image/png' })),
+    })
+    // Mock crypto.randomUUID
+    vi.stubGlobal('crypto', { randomUUID: vi.fn().mockReturnValue('test-uuid') })
+  })
+
+  it('uploads thumbnail and returns public URL', async () => {
+    const result = await uploadThumbnail('data:image/png;base64,abc')
+    expect(mockSupabase.storage.from).toHaveBeenCalledWith('cog-thumbnails')
+    expect(result).toBe('https://cdn.example.com/thumb.png')
+  })
+
+  it('returns null on upload error', async () => {
+    const bucket = {
+      upload: vi.fn().mockResolvedValue({ error: { message: 'upload failed' } }),
+      getPublicUrl: vi.fn(),
+    }
+    mockSupabase.storage.from = vi.fn().mockReturnValue(bucket)
+
+    const result = await uploadThumbnail('data:image/png;base64,abc')
+    expect(result).toBeNull()
+  })
+
+  it('returns null on fetch error', async () => {
+    globalThis.fetch = vi.fn().mockRejectedValue(new Error('network error'))
+
+    const result = await uploadThumbnail('data:image/png;base64,abc')
+    expect(result).toBeNull()
+  })
+
+  it('uses jpg extension for non-png blobs', async () => {
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      blob: () => Promise.resolve(new Blob(['fake'], { type: 'image/jpeg' })),
+    })
+    const uploadFn = vi.fn().mockResolvedValue({ error: null })
+    const bucket = {
+      upload: uploadFn,
+      getPublicUrl: vi.fn().mockReturnValue({ data: { publicUrl: 'https://cdn.example.com/thumb.jpg' } }),
+    }
+    mockSupabase.storage.from = vi.fn().mockReturnValue(bucket)
+
+    await uploadThumbnail('data:image/jpeg;base64,abc')
+    expect(uploadFn).toHaveBeenCalledWith('test-uuid.jpg', expect.any(Blob), expect.any(Object))
+  })
+})
 
 describe('generateTitleFromUrl', () => {
   it('removes .tif extension and converts separators to spaces', () => {
@@ -56,6 +119,11 @@ describe('generateTitleFromUrl', () => {
 
   it('returns empty string for empty/invalid input', () => {
     expect(generateTitleFromUrl('')).toBe('')
+  })
+
+  it('returns empty string when URL causes an exception', () => {
+    // null.split() will throw
+    expect(generateTitleFromUrl(null)).toBe('')
   })
 
   it('handles URL with no extension', () => {

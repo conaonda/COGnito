@@ -71,6 +71,34 @@ describe('auth functions with mocked supabase', () => {
     }
   })
 
+  it('signIn logs error when signInWithOAuth fails', async () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    mockAuth.signInWithOAuth.mockResolvedValueOnce({ error: { message: 'OAuth error' } })
+
+    await signIn('google')
+    expect(consoleSpy).toHaveBeenCalledWith('Sign in error:', 'OAuth error')
+    consoleSpy.mockRestore()
+  })
+
+  it('signOut logs error when signOut fails', async () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    mockAuth.signOut.mockResolvedValueOnce({ error: { message: 'Sign out error' } })
+
+    await signOut()
+    expect(consoleSpy).toHaveBeenCalledWith('Sign out error:', 'Sign out error')
+    consoleSpy.mockRestore()
+  })
+
+  it('signIn saves state with cogUrl only (no olMap)', async () => {
+    globalThis.window.currentCogMeta = { url: 'https://example.com/test.tif' }
+    globalThis.window.olMap = undefined
+
+    await signIn('google')
+    const saved = JSON.parse(sessionStorage.getItem('cognito-pre-login-state'))
+    expect(saved.cogUrl).toBe('https://example.com/test.tif')
+    expect(saved.center).toBeUndefined()
+  })
+
   it('signIn calls signInWithOAuth and saves pre-login state', async () => {
     globalThis.window = globalThis.window || {}
     globalThis.window.currentCogMeta = { url: 'https://example.com/test.tif' }
