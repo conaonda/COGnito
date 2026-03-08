@@ -29,12 +29,18 @@ export function initCatalogUI(onSelectCog) {
     <input type="text" id="catalog-filter-tag" class="catalog-filter-input" placeholder="태그 필터 (예: flood)">
     <input type="text" id="catalog-filter-sensor" class="catalog-filter-input" placeholder="센서 필터">
     <input type="text" id="catalog-filter-region" class="catalog-filter-input" placeholder="지역 필터">
+    <select id="catalog-filter-source" class="catalog-filter-input" aria-label="등록 출처 필터">
+      <option value="">전체 출처</option>
+      <option value="manual">수동 등록</option>
+      <option value="stac">STAC 자동</option>
+    </select>
   `
   searchInput.parentNode.insertBefore(filterContainer, searchInput.nextSibling)
 
   const tagFilter = filterContainer.querySelector('#catalog-filter-tag')
   const sensorFilter = filterContainer.querySelector('#catalog-filter-sensor')
   const regionFilter = filterContainer.querySelector('#catalog-filter-region')
+  const sourceFilter = filterContainer.querySelector('#catalog-filter-source')
 
   // 정렬 드롭다운
   const sortContainer = document.createElement('div')
@@ -92,6 +98,7 @@ export function initCatalogUI(onSelectCog) {
   tagFilter.addEventListener('input', onFilterChange)
   sensorFilter.addEventListener('input', onFilterChange)
   regionFilter.addEventListener('input', onFilterChange)
+  sourceFilter.addEventListener('change', onFilterChange)
   sortSelect.addEventListener('change', () => {
     sortBy = sortSelect.value
     currentPage = 0
@@ -127,6 +134,7 @@ export function initCatalogUI(onSelectCog) {
       tag: tagFilter.value.trim(),
       sensor: sensorFilter.value.trim(),
       region: regionFilter.value.trim(),
+      sourceType: sourceFilter.value,
       sortBy,
       limit: PAGE_SIZE,
       offset
@@ -163,6 +171,10 @@ export function initCatalogUI(onSelectCog) {
         ? `<div class="catalog-card-tags">${item.tags.map(t => `<span class="catalog-tag">${escapeHtml(t)}</span>`).join('')}</div>`
         : ''
 
+      const sourceBadge = item.source_type === 'stac'
+        ? '<span class="catalog-source-badge stac">STAC</span>'
+        : '<span class="catalog-source-badge manual">수동</span>'
+
       const metaParts = [item.crs || '']
       if (item.sensor) metaParts.push(item.sensor)
       if (item.region) metaParts.push(item.region)
@@ -170,7 +182,7 @@ export function initCatalogUI(onSelectCog) {
 
       card.innerHTML = `
         ${thumbHtml}
-        <div class="catalog-card-title">${escapeHtml(item.title || '제목 없음')}</div>
+        <div class="catalog-card-title">${sourceBadge} ${escapeHtml(item.title || '제목 없음')}</div>
         <div class="catalog-card-desc">${escapeHtml(item.description || '')}</div>
         ${tagsHtml}
         <div class="catalog-card-meta">${metaParts.filter(Boolean).join(' | ')}</div>

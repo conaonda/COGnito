@@ -102,7 +102,7 @@ export async function saveCogImage(data) {
 /**
  * COG 영상 목록 조회
  */
-export async function getCogImages({ search = '', tag = '', sensor = '', region = '', sortBy = 'created_at', limit = 20, offset = 0 } = {}) {
+export async function getCogImages({ search = '', tag = '', sensor = '', region = '', sourceType = '', sortBy = 'created_at', limit = 20, offset = 0 } = {}) {
   if (!supabase) return { data: [], error: null }
 
   let query = supabase
@@ -126,6 +126,9 @@ export async function getCogImages({ search = '', tag = '', sensor = '', region 
   }
   if (region) {
     query = query.ilike('region', `%${region}%`)
+  }
+  if (sourceType) {
+    query = query.eq('source_type', sourceType)
   }
 
   const result = await query
