@@ -7,6 +7,7 @@ const { mockSupabase, setMockQuery, createQueryMock, mockDetectBands } = vi.hois
     const chain = {
       select: vi.fn().mockReturnThis(),
       insert: vi.fn().mockReturnThis(),
+      update: vi.fn().mockReturnThis(),
       delete: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
       or: vi.fn().mockReturnThis(),
@@ -37,7 +38,7 @@ const { mockSupabase, setMockQuery, createQueryMock, mockDetectBands } = vi.hois
 vi.mock('../../src/supabase.js', () => ({ supabase: mockSupabase }))
 vi.mock('@conaonda/ol-cog-layers', () => ({ detectBands: mockDetectBands }))
 
-import { uploadThumbnail, generateTitleFromUrl, generateDescriptionFromMeta, saveCogImage, getCogImages, getCogImage, deleteCogImage, extractCogMetadata, generateThumbnail } from '../../src/catalog.js'
+import { uploadThumbnail, generateTitleFromUrl, generateDescriptionFromMeta, saveCogImage, getCogImages, getCogImage, updateCogImage, deleteCogImage, extractCogMetadata, generateThumbnail } from '../../src/catalog.js'
 
 describe('uploadThumbnail', () => {
   beforeEach(() => {
@@ -252,6 +253,17 @@ describe('getCogImage', () => {
   })
 })
 
+describe('updateCogImage', () => {
+  it('updates cog_image by id', async () => {
+    const q = createQueryMock(null)
+    setMockQuery(q)
+    await updateCogImage('123', { title: 'New', description: 'Desc' })
+    expect(mockSupabase.from).toHaveBeenCalledWith('cog_images')
+    expect(q.update).toHaveBeenCalledWith({ title: 'New', description: 'Desc' })
+    expect(q.eq).toHaveBeenCalledWith('id', '123')
+  })
+})
+
 describe('deleteCogImage', () => {
   it('deletes cog_image by id', async () => {
     const q = createQueryMock(null)
@@ -434,6 +446,11 @@ describe('supabase null guards', () => {
   it('getCogImage returns null data', async () => {
     const result = await nullMod.getCogImage('123')
     expect(result).toEqual({ data: null, error: null })
+  })
+
+  it('updateCogImage returns error', async () => {
+    const result = await nullMod.updateCogImage('123', { title: 'x' })
+    expect(result.error.message).toBe('Supabase 미설정')
   })
 
   it('deleteCogImage returns error', async () => {

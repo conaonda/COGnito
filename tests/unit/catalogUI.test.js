@@ -2,13 +2,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 const {
-  mockGetCogImages, mockDeleteCogImage, mockToggleLike, mockGetLikeStates,
+  mockGetCogImages, mockDeleteCogImage, mockUpdateCogImage, mockToggleLike, mockGetLikeStates,
   mockGetSession, mockOnAuthStateChange, mockSupabase,
 } = vi.hoisted(() => {
   const mockOnAuthStateChange = vi.fn()
   return {
     mockGetCogImages: vi.fn(),
     mockDeleteCogImage: vi.fn(),
+    mockUpdateCogImage: vi.fn(),
     mockToggleLike: vi.fn(),
     mockGetLikeStates: vi.fn(),
     mockGetSession: vi.fn(),
@@ -21,6 +22,7 @@ vi.mock('../../src/supabase.js', () => ({ supabase: mockSupabase }))
 vi.mock('../../src/catalog.js', () => ({
   getCogImages: mockGetCogImages,
   deleteCogImage: mockDeleteCogImage,
+  updateCogImage: mockUpdateCogImage,
 }))
 vi.mock('../../src/likes.js', () => ({
   toggleLike: mockToggleLike,
@@ -124,6 +126,84 @@ describe('catalogUI delete button', () => {
     await new Promise(r => setTimeout(r, 10))
 
     expect(window.alert).toHaveBeenCalledWith('삭제 실패: 권한 없음')
+  })
+
+  it('shows edit button only for owner items', async () => {
+    await openPanelWithItems([
+      { id: '1', user_id: TEST_USER_ID, title: 'My Image', tags: [], created_at: '2026-01-01' },
+      { id: '2', user_id: 'other-user', title: 'Other Image', tags: [], created_at: '2026-01-01' },
+    ])
+
+    const cards = document.querySelectorAll('.catalog-card')
+    expect(cards[0].querySelector('.catalog-edit-btn')).not.toBeNull()
+    expect(cards[1].querySelector('.catalog-edit-btn')).toBeNull()
+  })
+
+  it('opens edit modal and saves successfully', async () => {
+    mockUpdateCogImage.mockResolvedValue({ error: null })
+
+    await openPanelWithItems([
+      { id: '1', user_id: TEST_USER_ID, title: 'Old Title', description: 'Old Desc', tags: [], created_at: '2026-01-01' },
+    ])
+
+    document.querySelector('.catalog-edit-btn').click()
+    await new Promise(r => setTimeout(r, 10))
+
+    const modal = document.getElementById('catalog-edit-modal')
+    expect(modal).not.toBeNull()
+
+    modal.querySelector('#edit-title').value = 'New Title'
+    modal.querySelector('#edit-description').value = 'New Desc'
+    modal.querySelector('#edit-save').click()
+    await new Promise(r => setTimeout(r, 10))
+
+    expect(mockUpdateCogImage).toHaveBeenCalledWith('1', { title: 'New Title', description: 'New Desc' })
+    expect(document.getElementById('catalog-edit-modal')).toBeNull()
+    expect(mockGetCogImages).toHaveBeenCalledTimes(2)
+  })
+
+  it('shows alert on edit save error', async () => {
+    mockUpdateCogImage.mockResolvedValue({ error: { message: '수정 실패' } })
+    window.alert = vi.fn()
+
+    await openPanelWithItems([
+      { id: '1', user_id: TEST_USER_ID, title: 'Title', tags: [], created_at: '2026-01-01' },
+    ])
+
+    document.querySelector('.catalog-edit-btn').click()
+    await new Promise(r => setTimeout(r, 10))
+
+    document.querySelector('#edit-save').click()
+    await new Promise(r => setTimeout(r, 10))
+
+    expect(window.alert).toHaveBeenCalledWith('수정 실패: 수정 실패')
+    expect(document.getElementById('catalog-edit-modal')).not.toBeNull()
+  })
+
+  it('closes edit modal on cancel button', async () => {
+    await openPanelWithItems([
+      { id: '1', user_id: TEST_USER_ID, title: 'Title', tags: [], created_at: '2026-01-01' },
+    ])
+
+    document.querySelector('.catalog-edit-btn').click()
+    await new Promise(r => setTimeout(r, 10))
+    expect(document.getElementById('catalog-edit-modal')).not.toBeNull()
+
+    document.querySelector('#edit-cancel').click()
+    expect(document.getElementById('catalog-edit-modal')).toBeNull()
+  })
+
+  it('closes edit modal on overlay click', async () => {
+    await openPanelWithItems([
+      { id: '1', user_id: TEST_USER_ID, title: 'Title', tags: [], created_at: '2026-01-01' },
+    ])
+
+    document.querySelector('.catalog-edit-btn').click()
+    await new Promise(r => setTimeout(r, 10))
+
+    const overlay = document.getElementById('catalog-edit-modal')
+    overlay.click()
+    expect(document.getElementById('catalog-edit-modal')).toBeNull()
   })
 
   it('does not show delete button when not logged in', async () => {

@@ -1005,6 +1005,91 @@
       color: #667eea;
     }
 
+    .catalog-edit-btn {
+      padding: 0.2rem 0.5rem;
+      border: 1px solid #93c5fd;
+      border-radius: 4px;
+      background: transparent;
+      color: #2563eb;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .catalog-edit-btn:hover {
+      background: #eff6ff;
+      border-color: #2563eb;
+    }
+
+    .catalog-edit-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .catalog-edit-dialog {
+      background: white;
+      border-radius: 8px;
+      padding: 1.5rem;
+      width: 320px;
+      max-width: 90vw;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+    }
+
+    .catalog-edit-dialog h3 {
+      margin: 0 0 1rem;
+      font-size: 1rem;
+    }
+
+    .catalog-edit-dialog label {
+      display: block;
+      font-size: 0.8rem;
+      color: #374151;
+      margin-bottom: 0.75rem;
+    }
+
+    .catalog-edit-dialog input,
+    .catalog-edit-dialog textarea {
+      display: block;
+      width: 100%;
+      margin-top: 0.25rem;
+      padding: 0.4rem 0.5rem;
+      border: 1px solid #d1d5db;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      font-family: inherit;
+    }
+
+    .catalog-edit-actions {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: flex-end;
+      margin-top: 1rem;
+    }
+
+    .catalog-edit-actions button {
+      padding: 0.4rem 1rem;
+      border-radius: 4px;
+      border: 1px solid #d1d5db;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+
+    .catalog-edit-actions #edit-save {
+      background: #667eea;
+      color: white;
+      border-color: #667eea;
+    }
+
+    .catalog-edit-actions #edit-save:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
     .catalog-delete-btn {
       padding: 0.2rem 0.5rem;
       border: 1px solid #fca5a5;
