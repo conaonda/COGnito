@@ -92,6 +92,7 @@ export function extractStacItemMeta(item) {
 
   const isUsableUrl = (url) => url && /^(https?|s3):\/\//.test(url)
   const toHttpUrl = (url) => {
+    /* v8 ignore next -- 방어 코드: isUsableUrl 통과 후 호출되므로 도달 불가 */
     if (!url) return url
     const s3Match = url.match(/^s3:\/\/([^/]+)\/(.+)$/)
     if (s3Match) return `https://${s3Match[1]}.s3.amazonaws.com/${s3Match[2]}`
