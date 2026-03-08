@@ -59,6 +59,7 @@ export function initCatalogUI(onSelectCog) {
     <select id="catalog-sort-select" class="catalog-filter-input" aria-label="정렬 기준">
       <option value="created_at">최신순</option>
       <option value="like_count">인기순</option>
+      <option value="view_count">조회수순</option>
     </select>
   `
   onlyMineContainer.parentNode.insertBefore(sortContainer, onlyMineContainer.nextSibling)
