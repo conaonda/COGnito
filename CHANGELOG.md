@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.9.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.8.0...COGnito-v1.9.0) (2026-03-08)
+
+
+### Features
+
+* 카탈로그 등록 이미지 메타데이터 편집 UI 추가 ([#203](https://github.com/conaonda/COGnito/issues/203)) ([8c0d261](https://github.com/conaonda/COGnito/commit/8c0d261a35e714ac7d491e272fda123469f92923)), closes [#202](https://github.com/conaonda/COGnito/issues/202)
+* 카탈로그 영상 조회수(view count) 기록 및 카드 표시 ([#213](https://github.com/conaonda/COGnito/issues/213)) ([#215](https://github.com/conaonda/COGnito/issues/215)) ([51727f0](https://github.com/conaonda/COGnito/commit/51727f04c71f2da85ff5ba671f88e2834245ce93))
+* 카탈로그 자동/수동 등록 출처 배지 및 필터 추가 ([#195](https://github.com/conaonda/COGnito/issues/195)) ([aac88d7](https://github.com/conaonda/COGnito/commit/aac88d790725a7696dbf824877b7f4203c4ef442))
+* 카탈로그 카드 공유 URL 복사 버튼 추가 ([#207](https://github.com/conaonda/COGnito/issues/207)) ([#208](https://github.com/conaonda/COGnito/issues/208)) ([280ce6f](https://github.com/conaonda/COGnito/commit/280ce6ff46208e90feed6a1196a5d2558e2876a4))
+* 카탈로그 카드에 소유자 전용 삭제 버튼 UI 추가 ([#201](https://github.com/conaonda/COGnito/issues/201)) ([485217d](https://github.com/conaonda/COGnito/commit/485217df7e0f00356abd6afa55bcb1646849279b)), closes [#200](https://github.com/conaonda/COGnito/issues/200)
+* 카탈로그 패널에 내 등록 영상만 보기 필터 추가 ([#210](https://github.com/conaonda/COGnito/issues/210)) ([#211](https://github.com/conaonda/COGnito/issues/211)) ([753a13a](https://github.com/conaonda/COGnito/commit/753a13a89f153ece94331ccfb8f713c06e3f2fae))
+
 ## [1.8.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.7.1...COGnito-v1.8.0) (2026-03-08)
 
 
