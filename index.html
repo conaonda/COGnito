@@ -1005,6 +1005,27 @@
       color: #667eea;
     }
 
+    .catalog-delete-btn {
+      padding: 0.2rem 0.5rem;
+      border: 1px solid #fca5a5;
+      border-radius: 4px;
+      background: transparent;
+      color: #dc2626;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .catalog-delete-btn:hover {
+      background: #fef2f2;
+      border-color: #dc2626;
+    }
+
+    .catalog-delete-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
     /* Watchlist Panel */
     .watchlist-toggle-btn {
       position: absolute;
