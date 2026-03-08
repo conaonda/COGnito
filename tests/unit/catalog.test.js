@@ -217,6 +217,20 @@ describe('getCogImages', () => {
     expect(q.ilike).toHaveBeenCalledWith('region', '%korea%')
   })
 
+  it('applies sourceType filter', async () => {
+    const q = createQueryMock([])
+    setMockQuery(q)
+    await getCogImages({ sourceType: 'stac' })
+    expect(q.eq).toHaveBeenCalledWith('source_type', 'stac')
+  })
+
+  it('does not apply sourceType filter when empty', async () => {
+    const q = createQueryMock([])
+    setMockQuery(q)
+    await getCogImages({ sourceType: '' })
+    expect(q.eq).not.toHaveBeenCalled()
+  })
+
   it('sorts by like_count client-side', async () => {
     const q = createQueryMock([
       { id: '1', likes: [{ count: 2 }] },
