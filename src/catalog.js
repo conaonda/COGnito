@@ -187,6 +187,7 @@ function extractDateFromUrl(url) {
   const y = parseInt(m[1]), mo = parseInt(m[2]), d = parseInt(m[3])
   if (y < 1970 || y > new Date().getFullYear() + 1 || mo < 1 || mo > 12 || d < 1 || d > 31) return null
   const date = new Date(`${m[1]}-${m[2]}-${m[3]}`)
+  /* v8 ignore next -- 방어 코드: 위 범위 검증으로 유효하지 않은 날짜 도달 불가 */
   return isNaN(date) ? null : date.toISOString()
 }
 

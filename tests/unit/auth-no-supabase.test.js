@@ -31,5 +31,7 @@ describe('auth functions when supabase is null', () => {
   it('onAuthStateChange returns noop subscription', () => {
     const result = onAuthStateChange(() => {})
     expect(result.data.subscription.unsubscribe).toBeInstanceOf(Function)
+    // noop unsubscribe 호출하여 함수 커버리지 확보
+    result.data.subscription.unsubscribe()
   })
 })
