@@ -598,6 +598,56 @@ describe('catalogUI interactions', () => {
     expect(() => initCatalogUI(vi.fn())).not.toThrow()
   })
 
+  it('share button copies URL to clipboard', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined)
+    Object.assign(navigator, { clipboard: { writeText } })
+
+    await initAndOpen([{ id: '1', url: 'http://example.com/cog.tif', title: 'T', tags: [], created_at: '2026-01-01' }])
+
+    const shareBtn = document.querySelector('.catalog-share-btn')
+    expect(shareBtn).not.toBeNull()
+    expect(shareBtn.textContent).toBe('🔗 공유')
+
+    shareBtn.click()
+    await vi.advanceTimersByTimeAsync(10)
+
+    expect(writeText).toHaveBeenCalledWith(expect.stringContaining('?url=http%3A%2F%2Fexample.com%2Fcog.tif'))
+    expect(shareBtn.textContent).toBe('✅ 복사됨')
+
+    await vi.advanceTimersByTimeAsync(2000)
+    expect(shareBtn.textContent).toBe('🔗 공유')
+  })
+
+  it('share button shows failure when clipboard fails', async () => {
+    Object.assign(navigator, { clipboard: { writeText: vi.fn().mockRejectedValue(new Error('denied')) } })
+
+    await initAndOpen([{ id: '1', url: 'http://example.com/cog.tif', title: 'T', tags: [], created_at: '2026-01-01' }])
+
+    const shareBtn = document.querySelector('.catalog-share-btn')
+    shareBtn.click()
+    await vi.advanceTimersByTimeAsync(10)
+
+    expect(shareBtn.textContent).toBe('❌ 실패')
+
+    await vi.advanceTimersByTimeAsync(2000)
+    expect(shareBtn.textContent).toBe('🔗 공유')
+  })
+
+  it('share button is shown for non-logged-in users', async () => {
+    mockGetSession.mockResolvedValue(null)
+    mockGetCogImages.mockResolvedValue({
+      data: [{ id: '1', url: 'http://example.com/cog.tif', title: 'T', tags: [], created_at: '2026-01-01' }],
+      error: null,
+    })
+
+    initCatalogUI(vi.fn())
+    await vi.advanceTimersByTimeAsync(10)
+    document.getElementById('catalog-toggle-btn').click()
+    await vi.advanceTimersByTimeAsync(10)
+
+    expect(document.querySelector('.catalog-share-btn')).not.toBeNull()
+  })
+
   it('like button handles NaN count gracefully', async () => {
     mockToggleLike.mockResolvedValue({ liked: true, error: null })
     mockGetLikeStates.mockResolvedValue(new Map([['1', { count: 0, liked: false }]]))
