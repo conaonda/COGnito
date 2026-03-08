@@ -38,7 +38,7 @@ const { mockSupabase, setMockQuery, createQueryMock, mockDetectBands } = vi.hois
 vi.mock('../../src/supabase.js', () => ({ supabase: mockSupabase }))
 vi.mock('@conaonda/ol-cog-layers', () => ({ detectBands: mockDetectBands }))
 
-import { uploadThumbnail, generateTitleFromUrl, generateDescriptionFromMeta, saveCogImage, getCogImages, getCogImage, updateCogImage, deleteCogImage, extractCogMetadata, generateThumbnail } from '../../src/catalog.js'
+import { uploadThumbnail, generateTitleFromUrl, generateDescriptionFromMeta, saveCogImage, getCogImages, getCogImage, updateCogImage, deleteCogImage, incrementViewCount, extractCogMetadata, generateThumbnail } from '../../src/catalog.js'
 
 describe('uploadThumbnail', () => {
   beforeEach(() => {
@@ -278,6 +278,21 @@ describe('updateCogImage', () => {
   })
 })
 
+describe('incrementViewCount', () => {
+  it('calls rpc to increment view count', async () => {
+    mockSupabase.rpc = vi.fn().mockResolvedValue({ error: null })
+    const result = await incrementViewCount('img-1')
+    expect(mockSupabase.rpc).toHaveBeenCalledWith('increment_view_count', { image_id: 'img-1' })
+    expect(result.error).toBeNull()
+  })
+
+  it('returns error on rpc failure', async () => {
+    mockSupabase.rpc = vi.fn().mockResolvedValue({ error: { message: 'fail' } })
+    const result = await incrementViewCount('img-1')
+    expect(result.error.message).toBe('fail')
+  })
+})
+
 describe('deleteCogImage', () => {
   it('deletes cog_image by id', async () => {
     const q = createQueryMock(null)
@@ -469,6 +484,11 @@ describe('supabase null guards', () => {
 
   it('deleteCogImage returns error', async () => {
     const result = await nullMod.deleteCogImage('123')
+    expect(result.error.message).toBe('Supabase 미설정')
+  })
+
+  it('incrementViewCount returns error', async () => {
+    const result = await nullMod.incrementViewCount('123')
     expect(result.error.message).toBe('Supabase 미설정')
   })
 })
