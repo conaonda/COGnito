@@ -232,6 +232,20 @@ describe('getCogImages', () => {
     expect(q.eq).not.toHaveBeenCalled()
   })
 
+  it('applies userId filter', async () => {
+    const q = createQueryMock([])
+    setMockQuery(q)
+    await getCogImages({ userId: 'user-123' })
+    expect(q.eq).toHaveBeenCalledWith('user_id', 'user-123')
+  })
+
+  it('does not apply userId filter when empty', async () => {
+    const q = createQueryMock([])
+    setMockQuery(q)
+    await getCogImages({ userId: '' })
+    expect(q.eq).not.toHaveBeenCalled()
+  })
+
   it('sorts by like_count client-side', async () => {
     const q = createQueryMock([
       { id: '1', likes: [{ count: 2 }] },

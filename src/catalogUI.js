@@ -42,6 +42,16 @@ export function initCatalogUI(onSelectCog) {
   const regionFilter = filterContainer.querySelector('#catalog-filter-region')
   const sourceFilter = filterContainer.querySelector('#catalog-filter-source')
 
+  // 내 영상 필터 (로그인 시에만 표시)
+  const onlyMineContainer = document.createElement('div')
+  onlyMineContainer.className = 'catalog-only-mine'
+  onlyMineContainer.style.display = 'none'
+  onlyMineContainer.innerHTML = `
+    <label><input type="checkbox" id="catalog-filter-only-mine"> 내 등록 영상만</label>
+  `
+  filterContainer.parentNode.insertBefore(onlyMineContainer, filterContainer.nextSibling)
+  const onlyMineCheckbox = onlyMineContainer.querySelector('#catalog-filter-only-mine')
+
   // 정렬 드롭다운
   const sortContainer = document.createElement('div')
   sortContainer.className = 'catalog-sort'
@@ -51,7 +61,7 @@ export function initCatalogUI(onSelectCog) {
       <option value="like_count">인기순</option>
     </select>
   `
-  filterContainer.parentNode.insertBefore(sortContainer, filterContainer.nextSibling)
+  onlyMineContainer.parentNode.insertBefore(sortContainer, onlyMineContainer.nextSibling)
   const sortSelect = sortContainer.querySelector('#catalog-sort-select')
 
   let currentPage = 0
@@ -61,14 +71,19 @@ export function initCatalogUI(onSelectCog) {
   let isUserLoggedIn = false
   let currentUserId = null
 
-  getSession().then(session => {
+  function updateLoginState(session) {
     isUserLoggedIn = !!session?.user
     currentUserId = session?.user?.id || null
-  })
+    onlyMineContainer.style.display = isUserLoggedIn ? '' : 'none'
+    if (!isUserLoggedIn) {
+      onlyMineCheckbox.checked = false
+    }
+  }
+
+  getSession().then(updateLoginState)
   if (supabase) {
     supabase.auth.onAuthStateChange((_event, session) => {
-      isUserLoggedIn = !!session?.user
-      currentUserId = session?.user?.id || null
+      updateLoginState(session)
     })
   }
 
@@ -109,6 +124,10 @@ export function initCatalogUI(onSelectCog) {
     currentPage = 0
     loadPage()
   })
+  onlyMineCheckbox.addEventListener('change', () => {
+    currentPage = 0
+    loadPage()
+  })
 
   prevBtn.addEventListener('click', () => {
     if (currentPage > 0) {
@@ -141,6 +160,7 @@ export function initCatalogUI(onSelectCog) {
       region: regionFilter.value.trim(),
       sourceType: sourceFilter.value,
       sortBy,
+      userId: onlyMineCheckbox.checked ? currentUserId : '',
       limit: PAGE_SIZE,
       offset
     })

@@ -108,10 +108,11 @@ export async function saveCogImage(data) {
  * @param {string} [options.region] - 지역 필터
  * @param {string} [options.sourceType] - 등록 출처 필터 ('stac' 또는 'manual', 빈 문자열이면 전체)
  * @param {string} [options.sortBy] - 정렬 기준 ('created_at' 또는 'like_count')
+ * @param {string} [options.userId] - 특정 사용자의 영상만 필터 (user_id 기준)
  * @param {number} [options.limit] - 페이지당 결과 수
  * @param {number} [options.offset] - 페이지네이션 오프셋
  */
-export async function getCogImages({ search = '', tag = '', sensor = '', region = '', sourceType = '', sortBy = 'created_at', limit = 20, offset = 0 } = {}) {
+export async function getCogImages({ search = '', tag = '', sensor = '', region = '', sourceType = '', sortBy = 'created_at', userId = '', limit = 20, offset = 0 } = {}) {
   if (!supabase) return { data: [], error: null }
 
   let query = supabase
@@ -138,6 +139,9 @@ export async function getCogImages({ search = '', tag = '', sensor = '', region 
   }
   if (sourceType) {
     query = query.eq('source_type', sourceType)
+  }
+  if (userId) {
+    query = query.eq('user_id', userId)
   }
 
   const result = await query
