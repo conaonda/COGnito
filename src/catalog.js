@@ -168,6 +168,20 @@ export async function getCogImage(id) {
 }
 
 /**
+ * COG 영상 메타데이터 수정 (RLS가 소유자 체크)
+ * @param {string} id - 영상 ID
+ * @param {object} data - 수정할 필드 (title, description)
+ */
+export async function updateCogImage(id, data) {
+  if (!supabase) return { error: { message: 'Supabase 미설정' } }
+
+  return supabase
+    .from('cog_images')
+    .update(data)
+    .eq('id', id)
+}
+
+/**
  * COG 영상 삭제 (RLS가 소유자 체크)
  */
 export async function deleteCogImage(id) {

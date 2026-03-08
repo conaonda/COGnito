@@ -1,5 +1,5 @@
 import { supabase } from './supabase.js'
-import { getCogImages, deleteCogImage } from './catalog.js'
+import { getCogImages, deleteCogImage, updateCogImage } from './catalog.js'
 import { toggleLike, getLikeStates } from './likes.js'
 import { getSession } from './auth.js'
 
@@ -229,6 +229,15 @@ export function initCatalogUI(onSelectCog) {
         actionsRow.appendChild(watchlistBtn)
 
         if (currentUserId && item.user_id === currentUserId) {
+          const editBtn = document.createElement('button')
+          editBtn.className = 'catalog-edit-btn'
+          editBtn.textContent = '편집'
+          editBtn.addEventListener('click', (e) => {
+            e.stopPropagation()
+            showEditModal(item, loadPage)
+          })
+          actionsRow.appendChild(editBtn)
+
           const deleteBtn = document.createElement('button')
           deleteBtn.className = 'catalog-delete-btn'
           deleteBtn.textContent = '삭제'
@@ -282,4 +291,50 @@ function formatDate(iso) {
   if (!iso) return ''
   const d = new Date(iso)
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
+function showEditModal(item, onSave) {
+  // 기존 모달 제거
+  const existing = document.getElementById('catalog-edit-modal')
+  if (existing) existing.remove()
+
+  const overlay = document.createElement('div')
+  overlay.id = 'catalog-edit-modal'
+  overlay.className = 'catalog-edit-overlay'
+  overlay.innerHTML = `
+    <div class="catalog-edit-dialog">
+      <h3>영상 정보 편집</h3>
+      <label>제목<input type="text" id="edit-title" value="${escapeAttr(item.title || '')}"></label>
+      <label>설명<textarea id="edit-description" rows="3">${escapeHtml(item.description || '')}</textarea></label>
+      <div class="catalog-edit-actions">
+        <button id="edit-cancel" type="button">취소</button>
+        <button id="edit-save" type="button">저장</button>
+      </div>
+    </div>
+  `
+  document.body.appendChild(overlay)
+
+  overlay.querySelector('#edit-cancel').addEventListener('click', () => overlay.remove())
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) overlay.remove()
+  })
+
+  overlay.querySelector('#edit-save').addEventListener('click', async () => {
+    const title = overlay.querySelector('#edit-title').value.trim()
+    const description = overlay.querySelector('#edit-description').value.trim()
+    const saveBtn = overlay.querySelector('#edit-save')
+    saveBtn.disabled = true
+    const { error } = await updateCogImage(item.id, { title: title || null, description: description || null })
+    if (error) {
+      alert('수정 실패: ' + error.message)
+      saveBtn.disabled = false
+      return
+    }
+    overlay.remove()
+    onSave()
+  })
+}
+
+function escapeAttr(str) {
+  return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 }
