@@ -256,6 +256,22 @@
     }
     
     /* 뷰어 컨트롤 패널 */
+    .my-location-btn {
+      position: absolute;
+      bottom: 7rem;
+      right: 1.5rem;
+      z-index: 15;
+      background: rgba(255,255,255,0.95);
+      border: none;
+      border-radius: 8px;
+      padding: 0.5rem 0.75rem;
+      font-size: 1rem;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      line-height: 1;
+    }
+    .my-location-btn:hover { background: rgba(255,255,255,1); }
+    .my-location-btn.loading { opacity: 0.6; pointer-events: none; }
     .vc-toggle-btn {
       position: absolute;
       bottom: 4.5rem;
@@ -410,6 +426,10 @@
 
       #coordinate-display {
         display: none !important;
+      }
+
+      .my-location-btn {
+        bottom: 4rem;
       }
 
       .vc-toggle-btn {
@@ -1443,6 +1463,7 @@
       <h3 id="controls-title">영상 정보</h3>
       <p id="controls-info">-</p>
     </div>
+    <button id="my-location-btn" class="my-location-btn" title="내 위치로 이동" aria-label="내 위치로 지도 이동">&#9678;</button>
     <button id="vc-toggle-btn" class="vc-toggle-btn" aria-label="뷰어 컨트롤 열기">&#9881;</button>
     <div id="viewer-controls-panel" class="viewer-controls-panel">
       <button id="vc-toggle-btn-close" class="vc-toggle-btn" aria-label="뷰어 컨트롤 닫기">&times;</button>
