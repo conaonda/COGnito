@@ -1,5 +1,5 @@
 import { supabase } from './supabase.js'
-import { getCogImages } from './catalog.js'
+import { getCogImages, deleteCogImage } from './catalog.js'
 import { toggleLike, getLikeStates } from './likes.js'
 import { getSession } from './auth.js'
 
@@ -59,11 +59,16 @@ export function initCatalogUI(onSelectCog) {
   let sortBy = 'created_at'
   let debounceTimer = null
   let isUserLoggedIn = false
+  let currentUserId = null
 
-  getSession().then(session => { isUserLoggedIn = !!session?.user })
+  getSession().then(session => {
+    isUserLoggedIn = !!session?.user
+    currentUserId = session?.user?.id || null
+  })
   if (supabase) {
     supabase.auth.onAuthStateChange((_event, session) => {
       isUserLoggedIn = !!session?.user
+      currentUserId = session?.user?.id || null
     })
   }
 
@@ -222,6 +227,26 @@ export function initCatalogUI(onSelectCog) {
 
         actionsRow.appendChild(likeBtn)
         actionsRow.appendChild(watchlistBtn)
+
+        if (currentUserId && item.user_id === currentUserId) {
+          const deleteBtn = document.createElement('button')
+          deleteBtn.className = 'catalog-delete-btn'
+          deleteBtn.textContent = '삭제'
+          deleteBtn.addEventListener('click', async (e) => {
+            e.stopPropagation()
+            if (!confirm('이 영상을 삭제하시겠습니까?')) return
+            deleteBtn.disabled = true
+            const { error: delError } = await deleteCogImage(item.id)
+            if (delError) {
+              alert('삭제 실패: ' + delError.message)
+              deleteBtn.disabled = false
+              return
+            }
+            loadPage()
+          })
+          actionsRow.appendChild(deleteBtn)
+        }
+
         card.appendChild(actionsRow)
       } else {
         // 비로그인: 좋아요 수만 표시
