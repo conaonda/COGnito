@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.10.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.9.0...COGnito-v1.10.0) (2026-03-08)
+
+
+### Features
+
+* 카탈로그 조회수순 정렬 옵션 추가 ([#218](https://github.com/conaonda/COGnito/issues/218)) ([a7ae204](https://github.com/conaonda/COGnito/commit/a7ae2042e0b396ce5ba7a415f0470c35530c18c1))
+
 ## [1.9.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.8.0...COGnito-v1.9.0) (2026-03-08)
 
 
