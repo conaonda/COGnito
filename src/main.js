@@ -394,6 +394,35 @@ const loadCOG = async (rawUrl, catalogMeta = null, overrideBandInfo = null, { sk
     })
   })
 
+  // 내 위치 버튼
+  const myLocationBtn = document.getElementById('my-location-btn')
+  myLocationBtn.addEventListener('click', () => {
+    if (!navigator.geolocation) {
+      alert('이 브라우저에서는 위치 서비스를 지원하지 않습니다.')
+      return
+    }
+    myLocationBtn.classList.add('loading')
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        myLocationBtn.classList.remove('loading')
+        const { longitude, latitude } = position.coords
+        const center = transform([longitude, latitude], 'EPSG:4326', viewProjection)
+        view.cancelAnimations()
+        view.animate({ center, zoom: Math.max(view.getZoom(), 14), duration: 500 })
+      },
+      (error) => {
+        myLocationBtn.classList.remove('loading')
+        const messages = {
+          1: '위치 권한이 거부되었습니다. 브라우저 설정에서 위치 권한을 허용해 주세요.',
+          2: '현재 위치를 확인할 수 없습니다. 잠시 후 다시 시도해 주세요.',
+          3: '위치 조회 시간이 초과되었습니다. 다시 시도해 주세요.'
+        }
+        alert(messages[error.code] || '위치를 가져올 수 없습니다.')
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    )
+  })
+
   // 모바일 화질 토글
   const qualityToggle = document.getElementById('mobile-quality-toggle')
   const qualityLabel = document.getElementById('quality-label')

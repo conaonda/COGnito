@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.8.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.7.1...COGnito-v1.8.0) (2026-03-08)
+
+
+### Features
+
+* 내 위치 중심으로 지도 이동 기능 ([#173](https://github.com/conaonda/COGnito/issues/173)) ([2a35317](https://github.com/conaonda/COGnito/commit/2a3531750b2694daaede3e9d23a25af669637b07))
+
 ## [1.7.1](https://github.com/conaonda/COGnito/compare/COGnito-v1.7.0...COGnito-v1.7.1) (2026-03-07)
 
 
