@@ -3,7 +3,9 @@
 
 # Generated test files
 playwright-report/
+playwright-report-*/
 test-results/
+coverage/
 
 # Environment variables
 .env
@@ -22,3 +24,4 @@ tmp/
 docs/.bkit-memory.json
 docs/.pdca-status.json
 docs/.pdca-snapshots/
+sprint-logs/
