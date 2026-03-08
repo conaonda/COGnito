@@ -268,6 +268,24 @@ export function initCatalogUI(onSelectCog) {
         }
       }
 
+      // 공유 버튼 (모든 사용자에게 표시)
+      const shareBtn = document.createElement('button')
+      shareBtn.className = 'catalog-share-btn'
+      shareBtn.textContent = '🔗 공유'
+      shareBtn.addEventListener('click', async (e) => {
+        e.stopPropagation()
+        const shareUrl = `${location.origin}${location.pathname}?url=${encodeURIComponent(item.url)}`
+        try {
+          await navigator.clipboard.writeText(shareUrl)
+          shareBtn.textContent = '✅ 복사됨'
+          setTimeout(() => { shareBtn.textContent = '🔗 공유' }, 2000)
+        } catch {
+          shareBtn.textContent = '❌ 실패'
+          setTimeout(() => { shareBtn.textContent = '🔗 공유' }, 2000)
+        }
+      })
+      card.appendChild(shareBtn)
+
       card.addEventListener('click', () => {
         panel.classList.remove('open')
         onSelectCog(item.url, item)
