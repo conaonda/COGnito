@@ -285,12 +285,17 @@ export function initCatalogUI(onSelectCog) {
         ? `<div class="catalog-card-captured">📷 ${formatDate(item.captured_at)}</div>`
         : ''
 
+      const resolutionHtml = item.resolution != null
+        ? `<div class="catalog-card-resolution">📐 ${item.resolution}m</div>`
+        : ''
+
       card.innerHTML = `
         ${thumbHtml}
         <div class="catalog-card-title">${sourceBadge} ${escapeHtml(item.title || '제목 없음')}</div>
         <div class="catalog-card-desc">${escapeHtml(item.description || '')}</div>
         ${tagsHtml}
         ${capturedAtHtml}
+        ${resolutionHtml}
         <div class="catalog-card-meta">${metaParts.filter(Boolean).join(' | ')}</div>
       `
 

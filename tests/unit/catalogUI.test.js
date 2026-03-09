@@ -239,6 +239,23 @@ describe('catalogUI delete button', () => {
     const captured = document.querySelector('.catalog-card-captured')
     expect(captured).toBeNull()
   })
+
+  it('displays resolution on card when present', async () => {
+    await openPanelWithItems([
+      { id: '1', user_id: TEST_USER_ID, title: 'With Res', tags: [], created_at: '2026-01-01', resolution: 0.5 },
+    ])
+    const el = document.querySelector('.catalog-card-resolution')
+    expect(el).not.toBeNull()
+    expect(el.textContent).toContain('0.5m')
+  })
+
+  it('does not display resolution on card when absent', async () => {
+    await openPanelWithItems([
+      { id: '1', user_id: TEST_USER_ID, title: 'No Res', tags: [], created_at: '2026-01-01' },
+    ])
+    const el = document.querySelector('.catalog-card-resolution')
+    expect(el).toBeNull()
+  })
 })
 
 describe('catalogUI interactions', () => {
