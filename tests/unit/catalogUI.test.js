@@ -774,6 +774,71 @@ describe('catalogUI interactions', () => {
     expect(checkbox.checked).toBe(false)
   })
 
+  it('reset button is hidden when no filters active', async () => {
+    await initAndOpen([{ id: '1', title: 'T', tags: [], created_at: '2026-01-01' }])
+
+    const resetBtn = document.getElementById('catalog-filter-reset')
+    expect(resetBtn).not.toBeNull()
+    expect(resetBtn.style.display).toBe('none')
+  })
+
+  it('reset button appears when a filter is active', async () => {
+    await initAndOpen([{ id: '1', title: 'T', tags: [], created_at: '2026-01-01' }])
+    mockGetCogImages.mockResolvedValue({ data: [], error: null })
+
+    const tagFilter = document.getElementById('catalog-filter-tag')
+    tagFilter.value = 'flood'
+    tagFilter.dispatchEvent(new Event('input'))
+    await vi.advanceTimersByTimeAsync(300)
+    await vi.advanceTimersByTimeAsync(10)
+
+    const resetBtn = document.getElementById('catalog-filter-reset')
+    expect(resetBtn.style.display).toBe('')
+  })
+
+  it('reset button clears all filters and reloads', async () => {
+    await initAndOpen([{ id: '1', title: 'T', tags: [], created_at: '2026-01-01' }])
+    mockGetCogImages.mockResolvedValue({ data: [], error: null })
+
+    // Set multiple filters
+    const searchInput = document.getElementById('catalog-search')
+    const tagFilter = document.getElementById('catalog-filter-tag')
+    const sensorFilter = document.getElementById('catalog-filter-sensor')
+    const regionFilter = document.getElementById('catalog-filter-region')
+    const sourceFilter = document.getElementById('catalog-filter-source')
+    const onlyMine = document.getElementById('catalog-filter-only-mine')
+
+    searchInput.value = 'test'
+    tagFilter.value = 'flood'
+    sensorFilter.value = 'SAR'
+    regionFilter.value = 'Seoul'
+    sourceFilter.value = 'stac'
+    onlyMine.checked = true
+
+    mockGetCogImages.mockClear()
+    mockGetCogImages.mockResolvedValue({ data: [], error: null })
+
+    const resetBtn = document.getElementById('catalog-filter-reset')
+    resetBtn.click()
+    await vi.advanceTimersByTimeAsync(10)
+
+    expect(searchInput.value).toBe('')
+    expect(tagFilter.value).toBe('')
+    expect(sensorFilter.value).toBe('')
+    expect(regionFilter.value).toBe('')
+    expect(sourceFilter.value).toBe('')
+    expect(onlyMine.checked).toBe(false)
+    expect(resetBtn.style.display).toBe('none')
+    expect(mockGetCogImages).toHaveBeenCalledWith(expect.objectContaining({
+      search: '',
+      tag: '',
+      sensor: '',
+      region: '',
+      sourceType: '',
+      userId: '',
+    }))
+  })
+
   it('like button handles NaN count gracefully', async () => {
     mockToggleLike.mockResolvedValue({ liked: true, error: null })
     mockGetLikeStates.mockResolvedValue(new Map([['1', { count: 0, liked: false }]]))

@@ -42,6 +42,14 @@ export function initCatalogUI(onSelectCog) {
   const regionFilter = filterContainer.querySelector('#catalog-filter-region')
   const sourceFilter = filterContainer.querySelector('#catalog-filter-source')
 
+  // 필터 초기화 버튼
+  const resetBtn = document.createElement('button')
+  resetBtn.id = 'catalog-filter-reset'
+  resetBtn.className = 'catalog-filter-reset-btn'
+  resetBtn.textContent = '필터 초기화'
+  resetBtn.style.display = 'none'
+  filterContainer.appendChild(resetBtn)
+
   // 내 영상 필터 (로그인 시에만 표시)
   const onlyMineContainer = document.createElement('div')
   onlyMineContainer.className = 'catalog-only-mine'
@@ -106,11 +114,38 @@ export function initCatalogUI(onSelectCog) {
     })
   }
 
+  function hasActiveFilter() {
+    return searchInput.value.trim() !== '' ||
+      tagFilter.value.trim() !== '' ||
+      sensorFilter.value.trim() !== '' ||
+      regionFilter.value.trim() !== '' ||
+      sourceFilter.value !== '' ||
+      onlyMineCheckbox.checked
+  }
+
+  function updateResetBtnVisibility() {
+    resetBtn.style.display = hasActiveFilter() ? '' : 'none'
+  }
+
+  resetBtn.addEventListener('click', () => {
+    searchInput.value = ''
+    tagFilter.value = ''
+    sensorFilter.value = ''
+    regionFilter.value = ''
+    sourceFilter.value = ''
+    onlyMineCheckbox.checked = false
+    searchTerm = ''
+    currentPage = 0
+    updateResetBtnVisibility()
+    loadPage()
+  })
+
   function onFilterChange() {
     clearTimeout(debounceTimer)
     debounceTimer = setTimeout(() => {
       searchTerm = searchInput.value.trim()
       currentPage = 0
+      updateResetBtnVisibility()
       loadPage()
     }, 300)
   }
@@ -127,6 +162,7 @@ export function initCatalogUI(onSelectCog) {
   })
   onlyMineCheckbox.addEventListener('change', () => {
     currentPage = 0
+    updateResetBtnVisibility()
     loadPage()
   })
 
