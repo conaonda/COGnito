@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.20.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.19.0...COGnito-v1.20.0) (2026-03-09)
+
+
+### Features
+
+* 카탈로그 카드 관심목록 토글 버튼 개선 ([#274](https://github.com/conaonda/COGnito/issues/274)) ([c6d2f36](https://github.com/conaonda/COGnito/commit/c6d2f363ad836daf7844f32be1d74a501d08bc22))
+
 ## [1.19.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.18.0...COGnito-v1.19.0) (2026-03-09)
 
 
