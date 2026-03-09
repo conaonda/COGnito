@@ -492,6 +492,33 @@ describe('catalogUI interactions', () => {
     expect(document.getElementById('catalog-next').disabled).toBe(true)
   })
 
+  it('shows total count text when data loads', async () => {
+    await initAndOpen([{ id: '1', title: 'T', tags: [], created_at: '2026-01-01' }])
+    expect(document.getElementById('catalog-total-count').textContent).toBe('총 1개 영상')
+  })
+
+  it('shows 총 0개 영상 when data is empty', async () => {
+    mockGetCogImages.mockResolvedValue({ data: [], totalCount: 0, error: null })
+    initCatalogUI(vi.fn())
+    await vi.advanceTimersByTimeAsync(10)
+
+    document.getElementById('catalog-toggle-btn').click()
+    await vi.advanceTimersByTimeAsync(10)
+
+    expect(document.getElementById('catalog-total-count').textContent).toBe('총 0개 영상')
+  })
+
+  it('clears total count text on error', async () => {
+    mockGetCogImages.mockResolvedValue({ data: null, totalCount: 0, error: { message: 'DB error' } })
+    initCatalogUI(vi.fn())
+    await vi.advanceTimersByTimeAsync(10)
+
+    document.getElementById('catalog-toggle-btn').click()
+    await vi.advanceTimersByTimeAsync(10)
+
+    expect(document.getElementById('catalog-total-count').textContent).toBe('')
+  })
+
   it('like button toggles like state', async () => {
     mockToggleLike.mockResolvedValue({ liked: true, error: null })
     mockGetLikeStates.mockResolvedValue(new Map([['1', { count: 5, liked: false }]]))
