@@ -65,7 +65,7 @@ test.describe('카탈로그 UI 스모크 테스트', () => {
 
     // 옵션 확인
     const options = sortSelect.locator('option')
-    await expect(options).toHaveCount(3)
+    await expect(options).toHaveCount(5)
   })
 
   test('관심목록 패널: 비로그인 시 토글 버튼 숨김', async ({ page }) => {
