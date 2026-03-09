@@ -332,6 +332,28 @@ describe('getCogImages', () => {
     expect(result.data.map(d => d.id)).toEqual(['1', '2'])
   })
 
+  it('sorts by title ascending', async () => {
+    const q = createQueryMock([
+      { id: '1', title: 'Cherry' },
+      { id: '2', title: 'Apple' },
+      { id: '3', title: 'Banana' },
+    ])
+    setMockQuery(q)
+    const result = await getCogImages({ sortBy: 'title' })
+    expect(result.data.map(d => d.id)).toEqual(['2', '3', '1'])
+  })
+
+  it('sorts by title treats missing title as empty string', async () => {
+    const q = createQueryMock([
+      { id: '1', title: 'Banana' },
+      { id: '2' },
+      { id: '3', title: 'Apple' },
+    ])
+    setMockQuery(q)
+    const result = await getCogImages({ sortBy: 'title' })
+    expect(result.data.map(d => d.id)).toEqual(['2', '3', '1'])
+  })
+
   it('sorts by view_count treats missing view_count as 0', async () => {
     const q = createQueryMock([
       { id: '1' },
