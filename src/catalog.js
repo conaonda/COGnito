@@ -108,7 +108,7 @@ export async function saveCogImage(data) {
  * @param {string} [options.region] - 지역 필터
  * @param {string} [options.sourceType] - 등록 출처 필터 ('stac' 또는 'manual', 빈 문자열이면 전체)
  * @param {string} [options.year] - 촬영 연도 필터 (captured_at 기반, 빈 문자열이면 전체)
- * @param {string} [options.sortBy] - 정렬 기준 ('created_at', 'like_count' 또는 'view_count')
+ * @param {string} [options.sortBy] - 정렬 기준 ('created_at', 'like_count', 'view_count' 또는 'captured_at')
  * @param {string} [options.userId] - 특정 사용자의 영상만 필터 (user_id 기준)
  * @param {string[]} [options.likedIds] - 좋아요한 영상 ID 목록 (빈 배열이 아닐 때 id IN 필터 적용)
  * @param {number} [options.limit] - 페이지당 결과 수
@@ -169,6 +169,16 @@ export async function getCogImages({ search = '', tag = '', sensor = '', region 
   // 조회수순 정렬: view_count 기준 내림차순 (클라이언트 사이드)
   if (sortBy === 'view_count' && result.data) {
     result.data.sort((a, b) => (b.view_count || 0) - (a.view_count || 0))
+  }
+
+  // 촬영일자순 정렬: captured_at 기준 내림차순, null은 맨 뒤 (클라이언트 사이드)
+  if (sortBy === 'captured_at' && result.data) {
+    result.data.sort((a, b) => {
+      if (!a.captured_at && !b.captured_at) return 0
+      if (!a.captured_at) return 1
+      if (!b.captured_at) return -1
+      return new Date(b.captured_at) - new Date(a.captured_at)
+    })
   }
 
   return result

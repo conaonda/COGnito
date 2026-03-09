@@ -310,6 +310,28 @@ describe('getCogImages', () => {
     expect(result.data[2].id).toBe('3')
   })
 
+  it('sorts by captured_at descending with nulls last', async () => {
+    const q = createQueryMock([
+      { id: '1', captured_at: '2023-01-01T00:00:00Z' },
+      { id: '2', captured_at: null },
+      { id: '3', captured_at: '2024-06-15T00:00:00Z' },
+      { id: '4', captured_at: null },
+    ])
+    setMockQuery(q)
+    const result = await getCogImages({ sortBy: 'captured_at' })
+    expect(result.data.map(d => d.id)).toEqual(['3', '1', '2', '4'])
+  })
+
+  it('sorts by captured_at handles all nulls', async () => {
+    const q = createQueryMock([
+      { id: '1', captured_at: null },
+      { id: '2', captured_at: null },
+    ])
+    setMockQuery(q)
+    const result = await getCogImages({ sortBy: 'captured_at' })
+    expect(result.data.map(d => d.id)).toEqual(['1', '2'])
+  })
+
   it('sorts by view_count treats missing view_count as 0', async () => {
     const q = createQueryMock([
       { id: '1' },
