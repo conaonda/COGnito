@@ -127,6 +127,7 @@ export function initCatalogUI(onSelectCog) {
   let searchTerm = ''
   let sortBy = 'created_at'
   let sortOrder = DEFAULT_SORT_ORDERS[sortBy]
+  let watchlistAbort = null
 
   function updateSortOrderBtn() {
     sortOrderBtn.textContent = sortOrder === 'asc' ? '↑' : '↓'
@@ -304,6 +305,10 @@ export function initCatalogUI(onSelectCog) {
 
     listEl.innerHTML = ''
 
+    // 이전 watchlist-state-changed 리스너 정리
+    if (watchlistAbort) watchlistAbort.abort()
+    watchlistAbort = new AbortController()
+
     // 좋아요·관심목록 상태 일괄 조회
     const ids = data.map(item => item.id)
     const [likeStates, watchlistedIds] = await Promise.all([
@@ -391,7 +396,7 @@ export function initCatalogUI(onSelectCog) {
           const added = e.detail.watchlisted
           watchlistBtn.classList.toggle('watchlisted', added)
           watchlistBtn.textContent = added ? '✓ 관심목록' : '+ 관심목록'
-        })
+        }, { signal: watchlistAbort.signal })
 
         actionsRow.appendChild(likeBtn)
         actionsRow.appendChild(watchlistBtn)

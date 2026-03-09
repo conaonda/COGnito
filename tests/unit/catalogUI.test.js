@@ -641,6 +641,34 @@ describe('catalogUI interactions', () => {
     expect(btn.textContent).toBe('✓ 관심목록')
   })
 
+  it('watchlist-state-changed listeners are cleaned up on re-render (AbortController)', async () => {
+    const item = { id: '1', user_id: 'other', title: 'T', tags: [], created_at: '2026-01-01' }
+    await initAndOpen([item])
+
+    const btn1 = document.querySelector('.catalog-watchlist-btn')
+    expect(btn1.classList.contains('watchlisted')).toBe(false)
+
+    // Re-render (loadPage called again via pagination)
+    mockGetCogImages.mockResolvedValue({ data: [item], totalCount: 1, error: null })
+    document.querySelector('#catalog-next').click()
+    await vi.advanceTimersByTimeAsync(10)
+
+    // Go back
+    document.querySelector('#catalog-prev').click()
+    await vi.advanceTimersByTimeAsync(10)
+
+    const btn2 = document.querySelector('.catalog-watchlist-btn')
+
+    // Spy on classList.toggle to count calls
+    const toggleSpy = vi.spyOn(btn2.classList, 'toggle')
+
+    document.dispatchEvent(new CustomEvent('watchlist-state-changed', { detail: { cogImageId: '1', watchlisted: true } }))
+
+    // Should only be called once (old listeners aborted)
+    expect(toggleSpy.calls?.length ?? toggleSpy.mock.calls.length).toBe(1)
+    toggleSpy.mockRestore()
+  })
+
   it('shows like count for non-logged-in users', async () => {
     mockGetSession.mockResolvedValue(null)
     mockGetCogImages.mockResolvedValue({

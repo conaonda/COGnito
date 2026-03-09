@@ -59,6 +59,13 @@ export function initWatchlistUI(onSelectCog) {
     openAddToWatchlistModal(cogImageId)
   })
 
+  // 관심목록에서 제거 이벤트 수신
+  document.addEventListener('watchlist-remove', async (e) => {
+    const cogImageId = e.detail?.cogImageId
+    if (!cogImageId) return
+    await openRemoveFromWatchlistModal(cogImageId)
+  })
+
   async function loadWatchlists() {
     listEl.innerHTML = '<div style="text-align:center;padding:2rem;color:#999;">로딩 중...</div>'
 
@@ -306,7 +313,88 @@ export function initWatchlistUI(onSelectCog) {
           btn.textContent = addError.message.includes('duplicate') ? '이미 추가됨' : addError.message
           btn.disabled = false
         } else {
+          document.dispatchEvent(new CustomEvent('watchlist-state-changed', { detail: { cogImageId, watchlisted: true } }))
           overlay.remove()
+        }
+      })
+      listContainer.appendChild(btn)
+    })
+  }
+
+  async function openRemoveFromWatchlistModal(cogImageId) {
+    if (document.getElementById('watchlist-remove-overlay')) return
+
+    const overlay = document.createElement('div')
+    overlay.id = 'watchlist-remove-overlay'
+    overlay.className = 'login-modal-overlay'
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) overlay.remove()
+    })
+
+    const modal = document.createElement('div')
+    modal.className = 'login-modal'
+    modal.style.width = '300px'
+
+    const closeModalBtn = document.createElement('button')
+    closeModalBtn.className = 'login-modal-close'
+    closeModalBtn.textContent = '✕'
+    closeModalBtn.addEventListener('click', () => overlay.remove())
+    modal.appendChild(closeModalBtn)
+
+    const titleEl = document.createElement('h2')
+    titleEl.className = 'login-modal-title'
+    titleEl.textContent = '관심목록에서 제거'
+    modal.appendChild(titleEl)
+
+    const listContainer = document.createElement('div')
+    listContainer.style.cssText = 'max-height:200px;overflow-y:auto;'
+    listContainer.innerHTML = '<div style="text-align:center;padding:1rem;color:#999;">로딩 중...</div>'
+    modal.appendChild(listContainer)
+
+    const onEscape = (e) => {
+      if (e.key === 'Escape') { overlay.remove(); document.removeEventListener('keydown', onEscape) }
+    }
+    document.addEventListener('keydown', onEscape)
+
+    overlay.appendChild(modal)
+    document.body.appendChild(overlay)
+
+    const { data: watchlists } = await getWatchlists()
+    if (!watchlists || watchlists.length === 0) {
+      listContainer.innerHTML = '<div style="text-align:center;padding:1rem;color:#999;">관심목록이 없습니다.</div>'
+      return
+    }
+
+    // 이 영상이 포함된 관심목록만 필터링
+    const containingWatchlists = []
+    for (const wl of watchlists) {
+      const { data: items } = await getWatchlistItems(wl.id)
+      if (items && items.some(i => i.cog_image_id === cogImageId)) {
+        containingWatchlists.push(wl)
+      }
+    }
+
+    if (containingWatchlists.length === 0) {
+      listContainer.innerHTML = '<div style="text-align:center;padding:1rem;color:#999;">이 영상이 포함된 관심목록이 없습니다.</div>'
+      return
+    }
+
+    listContainer.innerHTML = ''
+    containingWatchlists.forEach(wl => {
+      const btn = document.createElement('button')
+      btn.style.cssText = 'display:block;width:100%;padding:0.6rem 0.75rem;border:1px solid #e5e7eb;border-radius:6px;background:white;text-align:left;cursor:pointer;margin-bottom:0.5rem;font-size:0.85rem;color:#dc2626;'
+      btn.textContent = `${wl.name}에서 제거`
+      btn.addEventListener('click', async () => {
+        btn.disabled = true
+        btn.textContent = '제거 중...'
+        const { error: removeError } = await removeItem(wl.id, cogImageId)
+        if (removeError) {
+          btn.textContent = removeError.message
+          btn.disabled = false
+        } else {
+          document.dispatchEvent(new CustomEvent('watchlist-state-changed', { detail: { cogImageId, watchlisted: false } }))
+          overlay.remove()
+          loadWatchlists()
         }
       })
       listContainer.appendChild(btn)
