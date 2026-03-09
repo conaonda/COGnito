@@ -281,11 +281,16 @@ export function initCatalogUI(onSelectCog) {
       if (item.region) metaParts.push(item.region)
       metaParts.push(formatDate(item.created_at))
 
+      const capturedAtHtml = item.captured_at
+        ? `<div class="catalog-card-captured">📷 ${formatDate(item.captured_at)}</div>`
+        : ''
+
       card.innerHTML = `
         ${thumbHtml}
         <div class="catalog-card-title">${sourceBadge} ${escapeHtml(item.title || '제목 없음')}</div>
         <div class="catalog-card-desc">${escapeHtml(item.description || '')}</div>
         ${tagsHtml}
+        ${capturedAtHtml}
         <div class="catalog-card-meta">${metaParts.filter(Boolean).join(' | ')}</div>
       `
 

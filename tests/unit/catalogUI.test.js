@@ -222,6 +222,23 @@ describe('catalogUI delete button', () => {
 
     expect(document.querySelector('.catalog-delete-btn')).toBeNull()
   })
+
+  it('displays captured_at on card when present', async () => {
+    await openPanelWithItems([
+      { id: '1', user_id: TEST_USER_ID, title: 'With Date', tags: [], created_at: '2026-01-01', captured_at: '2025-06-15T00:00:00Z' },
+    ])
+    const captured = document.querySelector('.catalog-card-captured')
+    expect(captured).not.toBeNull()
+    expect(captured.textContent).toContain('2025-06-15')
+  })
+
+  it('does not display captured_at on card when absent', async () => {
+    await openPanelWithItems([
+      { id: '1', user_id: TEST_USER_ID, title: 'No Date', tags: [], created_at: '2026-01-01' },
+    ])
+    const captured = document.querySelector('.catalog-card-captured')
+    expect(captured).toBeNull()
+  })
 })
 
 describe('catalogUI interactions', () => {
