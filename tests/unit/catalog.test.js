@@ -13,6 +13,8 @@ const { mockSupabase, setMockQuery, createQueryMock, mockDetectBands } = vi.hois
       or: vi.fn().mockReturnThis(),
       contains: vi.fn().mockReturnThis(),
       ilike: vi.fn().mockReturnThis(),
+      gte: vi.fn().mockReturnThis(),
+      lt: vi.fn().mockReturnThis(),
       order: vi.fn().mockReturnThis(),
       range: vi.fn().mockReturnThis(),
       single: vi.fn().mockResolvedValue(result),
@@ -244,6 +246,22 @@ describe('getCogImages', () => {
     setMockQuery(q)
     await getCogImages({ userId: '' })
     expect(q.eq).not.toHaveBeenCalled()
+  })
+
+  it('applies year filter with gte and lt on captured_at', async () => {
+    const q = createQueryMock([])
+    setMockQuery(q)
+    await getCogImages({ year: '2025' })
+    expect(q.gte).toHaveBeenCalledWith('captured_at', '2025-01-01T00:00:00Z')
+    expect(q.lt).toHaveBeenCalledWith('captured_at', '2026-01-01T00:00:00Z')
+  })
+
+  it('does not apply year filter when empty', async () => {
+    const q = createQueryMock([])
+    setMockQuery(q)
+    await getCogImages({ year: '' })
+    expect(q.gte).not.toHaveBeenCalled()
+    expect(q.lt).not.toHaveBeenCalled()
   })
 
   it('sorts by like_count client-side', async () => {

@@ -550,6 +550,30 @@ describe('catalogUI interactions', () => {
     expect(mockGetCogImages).toHaveBeenCalledWith(expect.objectContaining({ sourceType: 'stac' }))
   })
 
+  it('year filter triggers onFilterChange on change event', async () => {
+    await initAndOpen([{ id: '1', title: 'T', tags: [], created_at: '2026-01-01' }])
+    mockGetCogImages.mockClear()
+    mockGetCogImages.mockResolvedValue({ data: [], error: null })
+
+    const yearFilter = document.getElementById('catalog-filter-year')
+    yearFilter.value = '2025'
+    yearFilter.dispatchEvent(new Event('change'))
+    await vi.advanceTimersByTimeAsync(300)
+    await vi.advanceTimersByTimeAsync(10)
+
+    expect(mockGetCogImages).toHaveBeenCalledWith(expect.objectContaining({ year: '2025' }))
+  })
+
+  it('year filter dropdown has dynamic year options', async () => {
+    await initAndOpen([{ id: '1', title: 'T', tags: [], created_at: '2026-01-01' }])
+    const yearFilter = document.getElementById('catalog-filter-year')
+    const options = yearFilter.querySelectorAll('option')
+    // '전체 연도' + 6 years
+    expect(options.length).toBe(7)
+    expect(options[0].value).toBe('')
+    expect(options[0].textContent).toBe('전체 연도')
+  })
+
   it('prev button does nothing on first page', async () => {
     await initAndOpen([{ id: '1', title: 'T', tags: [], created_at: '2026-01-01' }])
     mockGetCogImages.mockClear()
@@ -808,11 +832,14 @@ describe('catalogUI interactions', () => {
     const sourceFilter = document.getElementById('catalog-filter-source')
     const onlyMine = document.getElementById('catalog-filter-only-mine')
 
+    const yearFilter = document.getElementById('catalog-filter-year')
+
     searchInput.value = 'test'
     tagFilter.value = 'flood'
     sensorFilter.value = 'SAR'
     regionFilter.value = 'Seoul'
     sourceFilter.value = 'stac'
+    yearFilter.value = '2025'
     onlyMine.checked = true
 
     mockGetCogImages.mockClear()
@@ -827,6 +854,7 @@ describe('catalogUI interactions', () => {
     expect(sensorFilter.value).toBe('')
     expect(regionFilter.value).toBe('')
     expect(sourceFilter.value).toBe('')
+    expect(yearFilter.value).toBe('')
     expect(onlyMine.checked).toBe(false)
     expect(resetBtn.style.display).toBe('none')
     expect(mockGetCogImages).toHaveBeenCalledWith(expect.objectContaining({
