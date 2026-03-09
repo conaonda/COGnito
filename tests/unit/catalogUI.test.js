@@ -63,7 +63,7 @@ describe('catalogUI delete button', () => {
   })
 
   async function openPanelWithItems(items) {
-    mockGetCogImages.mockResolvedValue({ data: items, error: null })
+    mockGetCogImages.mockResolvedValue({ data: items, totalCount: items.length, error: null })
     const onSelect = vi.fn()
     initCatalogUI(onSelect)
     // Wait for getSession to resolve
@@ -213,6 +213,7 @@ describe('catalogUI delete button', () => {
     mockGetSession.mockResolvedValue(null)
     mockGetCogImages.mockResolvedValue({
       data: [{ id: '1', user_id: TEST_USER_ID, title: 'Image', tags: [], created_at: '2026-01-01' }],
+      totalCount: 1,
       error: null,
     })
 
@@ -276,7 +277,7 @@ describe('catalogUI interactions', () => {
   })
 
   async function initAndOpen(items, onSelect) {
-    mockGetCogImages.mockResolvedValue({ data: items, error: null })
+    mockGetCogImages.mockResolvedValue({ data: items, totalCount: items.length, error: null })
     const cb = onSelect || vi.fn()
     initCatalogUI(cb)
     await vi.advanceTimersByTimeAsync(10)
@@ -286,7 +287,7 @@ describe('catalogUI interactions', () => {
   }
 
   it('onAuthStateChange updates login state', async () => {
-    mockGetCogImages.mockResolvedValue({ data: [{ id: '1', user_id: 'other', title: 'T', tags: [], created_at: '2026-01-01' }], error: null })
+    mockGetCogImages.mockResolvedValue({ data: [{ id: '1', user_id: 'other', title: 'T', tags: [], created_at: '2026-01-01' }], totalCount: 1, error: null })
     initCatalogUI(vi.fn())
     await vi.advanceTimersByTimeAsync(10)
 
@@ -316,7 +317,7 @@ describe('catalogUI interactions', () => {
   it('search input triggers debounced loadPage', async () => {
     await initAndOpen([{ id: '1', title: 'T', tags: [], created_at: '2026-01-01' }])
     mockGetCogImages.mockClear()
-    mockGetCogImages.mockResolvedValue({ data: [], error: null })
+    mockGetCogImages.mockResolvedValue({ data: [], totalCount: 0, error: null })
 
     const searchInput = document.getElementById('catalog-search')
     searchInput.value = 'test'
@@ -334,7 +335,7 @@ describe('catalogUI interactions', () => {
   it('sort change triggers loadPage', async () => {
     await initAndOpen([{ id: '1', title: 'T', tags: [], created_at: '2026-01-01' }])
     mockGetCogImages.mockClear()
-    mockGetCogImages.mockResolvedValue({ data: [], error: null })
+    mockGetCogImages.mockResolvedValue({ data: [], totalCount: 0, error: null })
 
     const sortSelect = document.getElementById('catalog-sort-select')
     sortSelect.value = 'like_count'
@@ -354,7 +355,7 @@ describe('catalogUI interactions', () => {
   it('sort by view_count triggers loadPage with sortBy view_count', async () => {
     await initAndOpen([{ id: '1', title: 'T', tags: [], created_at: '2026-01-01' }])
     mockGetCogImages.mockClear()
-    mockGetCogImages.mockResolvedValue({ data: [], error: null })
+    mockGetCogImages.mockResolvedValue({ data: [], totalCount: 0, error: null })
 
     const sortSelect = document.getElementById('catalog-sort-select')
     sortSelect.value = 'view_count'
@@ -374,7 +375,7 @@ describe('catalogUI interactions', () => {
   it('sort by title triggers loadPage with sortBy title', async () => {
     await initAndOpen([{ id: '1', title: 'T', tags: [], created_at: '2026-01-01' }])
     mockGetCogImages.mockClear()
-    mockGetCogImages.mockResolvedValue({ data: [], error: null })
+    mockGetCogImages.mockResolvedValue({ data: [], totalCount: 0, error: null })
 
     const sortSelect = document.getElementById('catalog-sort-select')
     sortSelect.value = 'title'
@@ -394,7 +395,7 @@ describe('catalogUI interactions', () => {
   it('sort order toggle switches direction and reloads', async () => {
     await initAndOpen([{ id: '1', title: 'T', tags: [], created_at: '2026-01-01' }])
     mockGetCogImages.mockClear()
-    mockGetCogImages.mockResolvedValue({ data: [], error: null })
+    mockGetCogImages.mockResolvedValue({ data: [], totalCount: 0, error: null })
 
     const btn = document.getElementById('catalog-sort-order-btn')
     btn.click()
@@ -413,7 +414,7 @@ describe('catalogUI interactions', () => {
     await vi.advanceTimersByTimeAsync(10)
 
     mockGetCogImages.mockClear()
-    mockGetCogImages.mockResolvedValue({ data: [], error: null })
+    mockGetCogImages.mockResolvedValue({ data: [], totalCount: 0, error: null })
 
     // Change to title (default: asc)
     const sortSelect = document.getElementById('catalog-sort-select')
@@ -431,13 +432,13 @@ describe('catalogUI interactions', () => {
     await initAndOpen(items)
 
     // Go to page 2
-    mockGetCogImages.mockResolvedValue({ data: [{ id: '20', title: 'T20', tags: [], created_at: '2026-01-01' }], error: null })
+    mockGetCogImages.mockResolvedValue({ data: [{ id: '20', title: 'T20', tags: [], created_at: '2026-01-01' }], totalCount: 1, error: null })
     document.getElementById('catalog-next').click()
     await vi.advanceTimersByTimeAsync(10)
 
     // Go back
     mockGetCogImages.mockClear()
-    mockGetCogImages.mockResolvedValue({ data: items, error: null })
+    mockGetCogImages.mockResolvedValue({ data: items, totalCount: items.length, error: null })
     document.getElementById('catalog-prev').click()
     await vi.advanceTimersByTimeAsync(10)
 
@@ -449,7 +450,7 @@ describe('catalogUI interactions', () => {
     await initAndOpen(items)
 
     mockGetCogImages.mockClear()
-    mockGetCogImages.mockResolvedValue({ data: [], error: null })
+    mockGetCogImages.mockResolvedValue({ data: [], totalCount: 0, error: null })
     document.getElementById('catalog-next').click()
     await vi.advanceTimersByTimeAsync(10)
 
@@ -459,7 +460,7 @@ describe('catalogUI interactions', () => {
   it('cog-registered event refreshes list when panel is open', async () => {
     await initAndOpen([{ id: '1', title: 'T', tags: [], created_at: '2026-01-01' }])
     mockGetCogImages.mockClear()
-    mockGetCogImages.mockResolvedValue({ data: [], error: null })
+    mockGetCogImages.mockResolvedValue({ data: [], totalCount: 0, error: null })
 
     document.dispatchEvent(new Event('cog-registered'))
     await vi.advanceTimersByTimeAsync(10)
@@ -479,7 +480,7 @@ describe('catalogUI interactions', () => {
   })
 
   it('shows empty message when no data', async () => {
-    mockGetCogImages.mockResolvedValue({ data: [], error: null })
+    mockGetCogImages.mockResolvedValue({ data: [], totalCount: 0, error: null })
     initCatalogUI(vi.fn())
     await vi.advanceTimersByTimeAsync(10)
 
@@ -489,6 +490,33 @@ describe('catalogUI interactions', () => {
     expect(document.getElementById('catalog-list').textContent).toContain('등록된 영상이 없습니다')
     expect(document.getElementById('catalog-prev').disabled).toBe(true)
     expect(document.getElementById('catalog-next').disabled).toBe(true)
+  })
+
+  it('shows total count text when data loads', async () => {
+    await initAndOpen([{ id: '1', title: 'T', tags: [], created_at: '2026-01-01' }])
+    expect(document.getElementById('catalog-total-count').textContent).toBe('총 1개 영상')
+  })
+
+  it('shows 총 0개 영상 when data is empty', async () => {
+    mockGetCogImages.mockResolvedValue({ data: [], totalCount: 0, error: null })
+    initCatalogUI(vi.fn())
+    await vi.advanceTimersByTimeAsync(10)
+
+    document.getElementById('catalog-toggle-btn').click()
+    await vi.advanceTimersByTimeAsync(10)
+
+    expect(document.getElementById('catalog-total-count').textContent).toBe('총 0개 영상')
+  })
+
+  it('clears total count text on error', async () => {
+    mockGetCogImages.mockResolvedValue({ data: null, totalCount: 0, error: { message: 'DB error' } })
+    initCatalogUI(vi.fn())
+    await vi.advanceTimersByTimeAsync(10)
+
+    document.getElementById('catalog-toggle-btn').click()
+    await vi.advanceTimersByTimeAsync(10)
+
+    expect(document.getElementById('catalog-total-count').textContent).toBe('')
   })
 
   it('like button toggles like state', async () => {
@@ -540,6 +568,7 @@ describe('catalogUI interactions', () => {
     mockGetSession.mockResolvedValue(null)
     mockGetCogImages.mockResolvedValue({
       data: [{ id: '1', title: 'T', tags: [], created_at: '2026-01-01', likes: [{ count: 10 }] }],
+      totalCount: 1,
       error: null,
     })
     mockGetLikeStates.mockResolvedValue(new Map())
@@ -591,7 +620,7 @@ describe('catalogUI interactions', () => {
   it('filter inputs trigger onFilterChange', async () => {
     await initAndOpen([{ id: '1', title: 'T', tags: [], created_at: '2026-01-01' }])
     mockGetCogImages.mockClear()
-    mockGetCogImages.mockResolvedValue({ data: [], error: null })
+    mockGetCogImages.mockResolvedValue({ data: [], totalCount: 0, error: null })
 
     // tag filter
     const tagFilter = document.getElementById('catalog-filter-tag')
@@ -606,7 +635,7 @@ describe('catalogUI interactions', () => {
   it('clicking a catalog-tag sets tag filter and triggers filtering', async () => {
     await initAndOpen([{ id: '1', title: 'T', tags: ['flood', 'sar'], created_at: '2026-01-01' }])
     mockGetCogImages.mockClear()
-    mockGetCogImages.mockResolvedValue({ data: [], error: null })
+    mockGetCogImages.mockResolvedValue({ data: [], totalCount: 0, error: null })
 
     const tag = document.querySelector('.catalog-tag')
     expect(tag.textContent).toBe('flood')
@@ -635,7 +664,7 @@ describe('catalogUI interactions', () => {
   it('source filter triggers onFilterChange on change event', async () => {
     await initAndOpen([{ id: '1', title: 'T', tags: [], created_at: '2026-01-01' }])
     mockGetCogImages.mockClear()
-    mockGetCogImages.mockResolvedValue({ data: [], error: null })
+    mockGetCogImages.mockResolvedValue({ data: [], totalCount: 0, error: null })
 
     const sourceFilter = document.getElementById('catalog-filter-source')
     sourceFilter.value = 'stac'
@@ -649,7 +678,7 @@ describe('catalogUI interactions', () => {
   it('year filter triggers onFilterChange on change event', async () => {
     await initAndOpen([{ id: '1', title: 'T', tags: [], created_at: '2026-01-01' }])
     mockGetCogImages.mockClear()
-    mockGetCogImages.mockResolvedValue({ data: [], error: null })
+    mockGetCogImages.mockResolvedValue({ data: [], totalCount: 0, error: null })
 
     const yearFilter = document.getElementById('catalog-filter-year')
     yearFilter.value = '2025'
@@ -701,7 +730,7 @@ describe('catalogUI interactions', () => {
   })
 
   it('authStateChange with null session sets logged out state', async () => {
-    mockGetCogImages.mockResolvedValue({ data: [{ id: '1', title: 'T', tags: [], created_at: '2026-01-01' }], error: null })
+    mockGetCogImages.mockResolvedValue({ data: [{ id: '1', title: 'T', tags: [], created_at: '2026-01-01' }], totalCount: 1, error: null })
     initCatalogUI(vi.fn())
     await vi.advanceTimersByTimeAsync(10)
 
@@ -723,7 +752,7 @@ describe('catalogUI interactions', () => {
     expect(document.getElementById('catalog-edit-modal')).not.toBeNull()
 
     // Reload and open again - should replace existing
-    mockGetCogImages.mockResolvedValue({ data: [{ id: '1', user_id: TEST_USER_ID, title: 'T2', tags: [], created_at: '2026-01-01' }], error: null })
+    mockGetCogImages.mockResolvedValue({ data: [{ id: '1', user_id: TEST_USER_ID, title: 'T2', tags: [], created_at: '2026-01-01' }], totalCount: 1, error: null })
     document.getElementById('catalog-toggle-btn').click()
     await vi.advanceTimersByTimeAsync(10)
 
@@ -759,6 +788,7 @@ describe('catalogUI interactions', () => {
     mockGetSession.mockResolvedValue(null)
     mockGetCogImages.mockResolvedValue({
       data: [{ id: '1', title: 'T', tags: [], created_at: '2026-01-01', likes: [{ count: 0 }] }],
+      totalCount: 1,
       error: null,
     })
 
@@ -824,6 +854,7 @@ describe('catalogUI interactions', () => {
     mockGetSession.mockResolvedValue(null)
     mockGetCogImages.mockResolvedValue({
       data: [{ id: '1', url: 'http://example.com/cog.tif', title: 'T', tags: [], created_at: '2026-01-01' }],
+      totalCount: 1,
       error: null,
     })
 
@@ -845,7 +876,7 @@ describe('catalogUI interactions', () => {
 
   it('hides only-mine checkbox when not logged in', async () => {
     mockGetSession.mockResolvedValue(null)
-    mockGetCogImages.mockResolvedValue({ data: [], error: null })
+    mockGetCogImages.mockResolvedValue({ data: [], totalCount: 0, error: null })
 
     initCatalogUI(vi.fn())
     await vi.advanceTimersByTimeAsync(10)
@@ -857,7 +888,7 @@ describe('catalogUI interactions', () => {
   it('only-mine checkbox passes userId to getCogImages', async () => {
     await initAndOpen([{ id: '1', title: 'T', tags: [], created_at: '2026-01-01' }])
     mockGetCogImages.mockClear()
-    mockGetCogImages.mockResolvedValue({ data: [], error: null })
+    mockGetCogImages.mockResolvedValue({ data: [], totalCount: 0, error: null })
 
     const checkbox = document.getElementById('catalog-filter-only-mine')
     checkbox.checked = true
@@ -870,7 +901,7 @@ describe('catalogUI interactions', () => {
   it('unchecking only-mine checkbox passes empty userId', async () => {
     await initAndOpen([{ id: '1', title: 'T', tags: [], created_at: '2026-01-01' }])
     mockGetCogImages.mockClear()
-    mockGetCogImages.mockResolvedValue({ data: [], error: null })
+    mockGetCogImages.mockResolvedValue({ data: [], totalCount: 0, error: null })
 
     const checkbox = document.getElementById('catalog-filter-only-mine')
     checkbox.checked = false
@@ -904,7 +935,7 @@ describe('catalogUI interactions', () => {
 
   it('reset button appears when a filter is active', async () => {
     await initAndOpen([{ id: '1', title: 'T', tags: [], created_at: '2026-01-01' }])
-    mockGetCogImages.mockResolvedValue({ data: [], error: null })
+    mockGetCogImages.mockResolvedValue({ data: [], totalCount: 0, error: null })
 
     const tagFilter = document.getElementById('catalog-filter-tag')
     tagFilter.value = 'flood'
@@ -918,7 +949,7 @@ describe('catalogUI interactions', () => {
 
   it('reset button clears all filters and reloads', async () => {
     await initAndOpen([{ id: '1', title: 'T', tags: [], created_at: '2026-01-01' }])
-    mockGetCogImages.mockResolvedValue({ data: [], error: null })
+    mockGetCogImages.mockResolvedValue({ data: [], totalCount: 0, error: null })
 
     // Set multiple filters
     const searchInput = document.getElementById('catalog-search')
@@ -939,7 +970,7 @@ describe('catalogUI interactions', () => {
     onlyMine.checked = true
 
     mockGetCogImages.mockClear()
-    mockGetCogImages.mockResolvedValue({ data: [], error: null })
+    mockGetCogImages.mockResolvedValue({ data: [], totalCount: 0, error: null })
 
     const resetBtn = document.getElementById('catalog-filter-reset')
     resetBtn.click()

@@ -100,6 +100,12 @@ export function initCatalogUI(onSelectCog) {
   const sortSelect = sortContainer.querySelector('#catalog-sort-select')
   const sortOrderBtn = sortContainer.querySelector('#catalog-sort-order-btn')
 
+  // 총 영상 수 표시
+  const totalCountEl = document.createElement('div')
+  totalCountEl.id = 'catalog-total-count'
+  totalCountEl.className = 'catalog-total-count'
+  sortContainer.parentNode.insertBefore(totalCountEl, sortContainer.nextSibling)
+
   let currentPage = 0
   let searchTerm = ''
   let sortBy = 'created_at'
@@ -244,7 +250,7 @@ export function initCatalogUI(onSelectCog) {
 
     const offset = currentPage * PAGE_SIZE
     const likedIds = likedOnlyCheckbox.checked ? await getLikedImageIds() : null
-    const { data, error } = await getCogImages({
+    const { data, totalCount, error } = await getCogImages({
       search: searchTerm,
       tag: tagFilter.value.trim(),
       sensor: sensorFilter.value.trim(),
@@ -261,6 +267,7 @@ export function initCatalogUI(onSelectCog) {
 
     if (error) {
       listEl.innerHTML = `<div style="text-align:center;padding:2rem;color:#dc2626;">${error.message}</div>`
+      totalCountEl.textContent = ''
       return
     }
 
@@ -269,6 +276,7 @@ export function initCatalogUI(onSelectCog) {
       prevBtn.disabled = true
       nextBtn.disabled = true
       pageInfo.textContent = ''
+      totalCountEl.textContent = '총 0개 영상'
       return
     }
 
@@ -433,6 +441,7 @@ export function initCatalogUI(onSelectCog) {
     prevBtn.disabled = currentPage === 0
     nextBtn.disabled = data.length < PAGE_SIZE
     pageInfo.textContent = `${currentPage + 1}`
+    totalCountEl.textContent = `총 ${totalCount}개 영상`
   }
 }
 
