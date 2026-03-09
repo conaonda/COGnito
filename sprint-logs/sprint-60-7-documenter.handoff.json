@@ -1,0 +1,12 @@
+{
+  "role": "documenter",
+  "sprint": 60,
+  "status": "success",
+  "documented_prs": [274, 272, 275],
+  "updated_files": ["docs/USER_GUIDE.md"],
+  "doc_pr_number": 278,
+  "issues": [
+    "PR #274 (관심목록 토글 버튼 개선) USER_GUIDE.md 미반영 → PR #278로 보완",
+    "이슈 #276 (watchlist-state-changed 이벤트 리스너 메모리 누수) — 다음 스프린트 처리 필요"
+  ]
+}
