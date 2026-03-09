@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.18.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.17.0...COGnito-v1.18.0) (2026-03-09)
+
+
+### Features
+
+* 카탈로그 검색 결과 총 영상 수 표시 ([#265](https://github.com/conaonda/COGnito/issues/265)) ([683ea6f](https://github.com/conaonda/COGnito/commit/683ea6f32821240b286d6876197735c4a48e004b))
+
 ## [1.17.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.16.0...COGnito-v1.17.0) (2026-03-09)
 
 
