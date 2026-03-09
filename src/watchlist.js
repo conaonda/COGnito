@@ -77,6 +77,34 @@ export async function removeItem(watchlistId, cogImageId) {
 }
 
 /**
+ * 주어진 영상 ID 목록에 대해 관심목록 포함 여부를 조회
+ * @param {string[]} cogImageIds
+ * @returns {Set<string>} 관심목록에 포함된 영상 ID 집합
+ */
+export async function getWatchlistedImageIds(cogImageIds) {
+  if (!supabase || cogImageIds.length === 0) return new Set()
+
+  const { data: { session } } = await supabase.auth.getSession()
+  if (!session?.user) return new Set()
+
+  const { data: watchlists } = await supabase
+    .from('watchlists')
+    .select('id')
+    .eq('user_id', session.user.id)
+
+  if (!watchlists || watchlists.length === 0) return new Set()
+
+  const watchlistIds = watchlists.map(w => w.id)
+  const { data: items } = await supabase
+    .from('watchlist_items')
+    .select('cog_image_id')
+    .in('watchlist_id', watchlistIds)
+    .in('cog_image_id', cogImageIds)
+
+  return new Set((items || []).map(i => i.cog_image_id))
+}
+
+/**
  * 관심목록의 영상 목록 조회 (cog_images join)
  * @param {string} watchlistId
  * @returns {{ data: Array, error: object|null }}

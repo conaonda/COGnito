@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
 const {
   mockGetCogImages, mockDeleteCogImage, mockUpdateCogImage, mockIncrementViewCount, mockToggleLike, mockGetLikeStates,
-  mockGetSession, mockOnAuthStateChange, mockSupabase,
+  mockGetWatchlistedImageIds, mockGetSession, mockOnAuthStateChange, mockSupabase,
 } = vi.hoisted(() => {
   const mockOnAuthStateChange = vi.fn()
   return {
@@ -13,6 +13,7 @@ const {
     mockIncrementViewCount: vi.fn().mockResolvedValue({ error: null }),
     mockToggleLike: vi.fn(),
     mockGetLikeStates: vi.fn(),
+    mockGetWatchlistedImageIds: vi.fn(),
     mockGetSession: vi.fn(),
     mockOnAuthStateChange,
     mockSupabase: { auth: { onAuthStateChange: mockOnAuthStateChange } },
@@ -30,6 +31,9 @@ vi.mock('../../src/catalog.js', () => ({
 vi.mock('../../src/likes.js', () => ({
   toggleLike: mockToggleLike,
   getLikeStates: mockGetLikeStates,
+}))
+vi.mock('../../src/watchlist.js', () => ({
+  getWatchlistedImageIds: mockGetWatchlistedImageIds,
 }))
 vi.mock('../../src/auth.js', () => ({
   getSession: mockGetSession,
@@ -60,6 +64,7 @@ describe('catalogUI delete button', () => {
     mockGetSession.mockResolvedValue({ user: { id: TEST_USER_ID } })
     mockOnAuthStateChange.mockImplementation(() => {})
     mockGetLikeStates.mockResolvedValue(new Map())
+    mockGetWatchlistedImageIds.mockResolvedValue(new Set())
   })
 
   async function openPanelWithItems(items) {

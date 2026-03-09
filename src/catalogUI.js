@@ -1,6 +1,7 @@
 import { supabase } from './supabase.js'
 import { getCogImages, deleteCogImage, updateCogImage, incrementViewCount, DEFAULT_SORT_ORDERS } from './catalog.js'
 import { toggleLike, getLikeStates, getLikedImageIds } from './likes.js'
+import { getWatchlistedImageIds } from './watchlist.js'
 import { getSession } from './auth.js'
 
 const DEFAULT_PAGE_SIZE = 20
@@ -303,9 +304,12 @@ export function initCatalogUI(onSelectCog) {
 
     listEl.innerHTML = ''
 
-    // 좋아요 상태 일괄 조회
+    // 좋아요·관심목록 상태 일괄 조회
     const ids = data.map(item => item.id)
-    const likeStates = await getLikeStates(ids)
+    const [likeStates, watchlistedIds] = await Promise.all([
+      getLikeStates(ids),
+      isUserLoggedIn ? getWatchlistedImageIds(ids) : Promise.resolve(new Set())
+    ])
 
     data.forEach(item => {
       const card = document.createElement('div')
@@ -370,12 +374,23 @@ export function initCatalogUI(onSelectCog) {
           likeBtn.disabled = false
         })
 
+        const isWatchlisted = watchlistedIds.has(item.id)
         const watchlistBtn = document.createElement('button')
-        watchlistBtn.className = 'catalog-watchlist-btn'
-        watchlistBtn.textContent = '+ 관심목록'
+        watchlistBtn.className = 'catalog-watchlist-btn' + (isWatchlisted ? ' watchlisted' : '')
+        watchlistBtn.textContent = isWatchlisted ? '✓ 관심목록' : '+ 관심목록'
         watchlistBtn.addEventListener('click', (e) => {
           e.stopPropagation()
-          document.dispatchEvent(new CustomEvent('watchlist-add', { detail: { cogImageId: item.id } }))
+          if (watchlistBtn.classList.contains('watchlisted')) {
+            document.dispatchEvent(new CustomEvent('watchlist-remove', { detail: { cogImageId: item.id } }))
+          } else {
+            document.dispatchEvent(new CustomEvent('watchlist-add', { detail: { cogImageId: item.id } }))
+          }
+        })
+        document.addEventListener('watchlist-state-changed', (e) => {
+          if (e.detail?.cogImageId !== item.id) return
+          const added = e.detail.watchlisted
+          watchlistBtn.classList.toggle('watchlisted', added)
+          watchlistBtn.textContent = added ? '✓ 관심목록' : '+ 관심목록'
         })
 
         actionsRow.appendChild(likeBtn)
