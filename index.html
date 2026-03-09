@@ -338,6 +338,7 @@
       gap: 0.3rem;
     }
     .vc-slider-row span { font-size: 0.65rem; color: #666; min-width: 3rem; text-align: right; }
+    .vc-number-input { width: 4rem; font-size: 0.65rem; text-align: right; border: 1px solid #ccc; border-radius: 3px; padding: 1px 3px; }
     .vc-stretch-mode { display: flex; gap: 0.5rem; margin-bottom: 0.3rem; }
     .vc-stretch-mode label { font-size: 0.65rem; color: #666; cursor: pointer; display: flex; align-items: center; gap: 0.2rem; }
     .vc-stretch-mode input[type="radio"] { margin: 0; }
@@ -1620,12 +1621,12 @@
           <div class="vc-slider-row">
             <span>Min</span>
             <input type="range" id="vc-min-slider" min="0" max="1" step="0.1" value="0" aria-label="최소값 스트레치">
-            <span id="vc-min-value">0</span>
+            <input type="number" id="vc-min-value" class="vc-number-input" value="0" step="any" aria-label="최소값 직접 입력">
           </div>
           <div class="vc-slider-row">
             <span>Max</span>
             <input type="range" id="vc-max-slider" min="0" max="1" step="0.1" value="1" aria-label="최대값 스트레치">
-            <span id="vc-max-value">1</span>
+            <input type="number" id="vc-max-value" class="vc-number-input" value="1" step="any" aria-label="최대값 직접 입력">
           </div>
         </div>
         <div id="vc-stretch-perband" style="display:none">
@@ -1634,12 +1635,12 @@
             <div class="vc-slider-row">
               <span>Min</span>
               <input type="range" class="vc-perband-min" min="0" max="1" step="0.1" value="0" aria-label="R 최소값">
-              <span class="vc-perband-min-value">0</span>
+              <input type="number" class="vc-perband-min-value vc-number-input" value="0" step="any">
             </div>
             <div class="vc-slider-row">
               <span>Max</span>
               <input type="range" class="vc-perband-max" min="0" max="1" step="0.1" value="1" aria-label="R 최대값">
-              <span class="vc-perband-max-value">1</span>
+              <input type="number" class="vc-perband-max-value vc-number-input" value="1" step="any">
             </div>
           </div>
           <div class="vc-perband-channel" data-channel="G">
@@ -1647,12 +1648,12 @@
             <div class="vc-slider-row">
               <span>Min</span>
               <input type="range" class="vc-perband-min" min="0" max="1" step="0.1" value="0" aria-label="G 최소값">
-              <span class="vc-perband-min-value">0</span>
+              <input type="number" class="vc-perband-min-value vc-number-input" value="0" step="any">
             </div>
             <div class="vc-slider-row">
               <span>Max</span>
               <input type="range" class="vc-perband-max" min="0" max="1" step="0.1" value="1" aria-label="G 최대값">
-              <span class="vc-perband-max-value">1</span>
+              <input type="number" class="vc-perband-max-value vc-number-input" value="1" step="any">
             </div>
           </div>
           <div class="vc-perband-channel" data-channel="B">
@@ -1660,12 +1661,12 @@
             <div class="vc-slider-row">
               <span>Min</span>
               <input type="range" class="vc-perband-min" min="0" max="1" step="0.1" value="0" aria-label="B 최소값">
-              <span class="vc-perband-min-value">0</span>
+              <input type="number" class="vc-perband-min-value vc-number-input" value="0" step="any">
             </div>
             <div class="vc-slider-row">
               <span>Max</span>
               <input type="range" class="vc-perband-max" min="0" max="1" step="0.1" value="1" aria-label="B 최대값">
-              <span class="vc-perband-max-value">1</span>
+              <input type="number" class="vc-perband-max-value vc-number-input" value="1" step="any">
             </div>
           </div>
         </div>

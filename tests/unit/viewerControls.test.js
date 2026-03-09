@@ -25,27 +25,27 @@ function setupDOM() {
       <div id="vc-stretch-batch">
         <input type="range" id="vc-min-slider" min="0" max="255" value="0">
         <input type="range" id="vc-max-slider" min="0" max="255" value="255">
-        <span id="vc-min-value">0</span>
-        <span id="vc-max-value">255</span>
+        <input type="number" id="vc-min-value" class="vc-number-input" value="0" step="any">
+        <input type="number" id="vc-max-value" class="vc-number-input" value="255" step="any">
       </div>
       <div id="vc-stretch-perband" style="display:none">
         <div class="vc-perband-channel" data-channel="R">
           <input type="range" class="vc-perband-min" min="0" max="255" value="0">
           <input type="range" class="vc-perband-max" min="0" max="255" value="255">
-          <span class="vc-perband-min-value">0</span>
-          <span class="vc-perband-max-value">255</span>
+          <input type="number" class="vc-perband-min-value vc-number-input" value="0" step="any">
+          <input type="number" class="vc-perband-max-value vc-number-input" value="255" step="any">
         </div>
         <div class="vc-perband-channel" data-channel="G">
           <input type="range" class="vc-perband-min" min="0" max="255" value="0">
           <input type="range" class="vc-perband-max" min="0" max="255" value="255">
-          <span class="vc-perband-min-value">0</span>
-          <span class="vc-perband-max-value">255</span>
+          <input type="number" class="vc-perband-min-value vc-number-input" value="0" step="any">
+          <input type="number" class="vc-perband-max-value vc-number-input" value="255" step="any">
         </div>
         <div class="vc-perband-channel" data-channel="B">
           <input type="range" class="vc-perband-min" min="0" max="255" value="0">
           <input type="range" class="vc-perband-max" min="0" max="255" value="255">
-          <span class="vc-perband-min-value">0</span>
-          <span class="vc-perband-max-value">255</span>
+          <input type="number" class="vc-perband-min-value vc-number-input" value="0" step="any">
+          <input type="number" class="vc-perband-max-value vc-number-input" value="255" step="any">
         </div>
       </div>
       <select id="vc-colormap"><option value="grayscale">Grayscale</option></select>
@@ -229,7 +229,7 @@ describe('viewerControls', () => {
 
       expect(onStyleChange).toHaveBeenCalledTimes(1)
       const minVal = document.getElementById('vc-min-value')
-      expect(minVal.textContent).toBe('10.0')
+      expect(minVal.value).toBe('10.0')
     })
 
     it('max 슬라이더 input 이벤트가 onStyleChange를 호출', () => {
@@ -246,7 +246,7 @@ describe('viewerControls', () => {
 
       expect(onStyleChange).toHaveBeenCalledTimes(1)
       const maxVal = document.getElementById('vc-max-value')
-      expect(maxVal.textContent).toBe('90.0')
+      expect(maxVal.value).toBe('90.0')
     })
 
     it('스트레치 모드 라디오 변경 시 batch/perband 그룹 가시성 전환', () => {
@@ -506,6 +506,81 @@ describe('viewerControls', () => {
       onStyleChange.mockClear()
       document.getElementById('vc-reset-btn').dispatchEvent(new Event('click'))
       expect(onStyleChange).toHaveBeenCalled()
+    })
+  })
+
+  describe('Min/Max clamp constraint', () => {
+    it('Min이 Max를 초과하면 Max가 Min으로 보정됨', () => {
+      const onStyleChange = vi.fn()
+      initViewerControls(onStyleChange, vi.fn())
+      updateControlsForCog(3, { type: 'gray', bands: [1] }, [
+        { min: 0, max: 100 }
+      ], 'affine')
+
+      const minSlider = document.getElementById('vc-min-slider')
+      const maxSlider = document.getElementById('vc-max-slider')
+      const maxVal = document.getElementById('vc-max-value')
+
+      // Max를 50으로 설정 후 Min을 80으로 올리면 Max가 80으로 보정
+      maxSlider.value = '50'
+      maxSlider.dispatchEvent(new Event('input'))
+      minSlider.value = '80'
+      minSlider.dispatchEvent(new Event('input'))
+
+      expect(Number(maxSlider.value)).toBe(80)
+      expect(maxVal.value).toBe('80.0')
+    })
+
+    it('number input으로 Min 값 직접 입력 시 슬라이더 동기화', () => {
+      const onStyleChange = vi.fn()
+      initViewerControls(onStyleChange, vi.fn())
+      updateControlsForCog(3, { type: 'gray', bands: [1] }, [
+        { min: 0, max: 100 }
+      ], 'affine')
+
+      const minSlider = document.getElementById('vc-min-slider')
+      const minVal = document.getElementById('vc-min-value')
+
+      minVal.value = '25'
+      minVal.dispatchEvent(new Event('change'))
+
+      expect(Number(minSlider.value)).toBe(25)
+      expect(onStyleChange).toHaveBeenCalled()
+    })
+
+    it('number input으로 Max 값 직접 입력 시 슬라이더 동기화', () => {
+      const onStyleChange = vi.fn()
+      initViewerControls(onStyleChange, vi.fn())
+      updateControlsForCog(3, { type: 'gray', bands: [1] }, [
+        { min: 0, max: 100 }
+      ], 'affine')
+
+      const maxSlider = document.getElementById('vc-max-slider')
+      const maxVal = document.getElementById('vc-max-value')
+
+      maxVal.value = '75'
+      maxVal.dispatchEvent(new Event('change'))
+
+      expect(Number(maxSlider.value)).toBe(75)
+      expect(onStyleChange).toHaveBeenCalled()
+    })
+
+    it('perband Min > Max 시 보정됨', () => {
+      initViewerControls(vi.fn(), vi.fn())
+      updateControlsForCog(3, { type: 'rgb', bands: [1, 2, 3] }, [
+        { min: 0, max: 100 }, { min: 0, max: 100 }, { min: 0, max: 100 }
+      ], 'affine')
+
+      const ch = document.querySelector('.vc-perband-channel')
+      const pMin = ch.querySelector('.vc-perband-min')
+      const pMax = ch.querySelector('.vc-perband-max')
+
+      pMax.value = '40'
+      pMax.dispatchEvent(new Event('input'))
+      pMin.value = '60'
+      pMin.dispatchEvent(new Event('input'))
+
+      expect(Number(pMax.value)).toBe(60)
     })
   })
 
