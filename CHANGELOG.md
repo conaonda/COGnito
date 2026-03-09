@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.15.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.14.0...COGnito-v1.15.0) (2026-03-09)
+
+
+### Features
+
+* 뷰어 현재 지도 범위(bbox) 클립보드 복사 버튼 ([#251](https://github.com/conaonda/COGnito/issues/251)) ([c02caab](https://github.com/conaonda/COGnito/commit/c02caabc089138d62c42d092f535ce193296e043)), closes [#249](https://github.com/conaonda/COGnito/issues/249)
+* 카탈로그 카드에 촬영일자(captured_at) 표시 ([#250](https://github.com/conaonda/COGnito/issues/250)) ([a4d862a](https://github.com/conaonda/COGnito/commit/a4d862a6ca0e2c22d9f756246c3e3b4b13e90bb0)), closes [#248](https://github.com/conaonda/COGnito/issues/248)
+
 ## [1.14.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.13.0...COGnito-v1.14.0) (2026-03-09)
 
 
