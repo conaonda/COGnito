@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.19.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.18.0...COGnito-v1.19.0) (2026-03-09)
+
+
+### Features
+
+* 카탈로그 페이지당 영상 수 변경 옵션 추가 ([#269](https://github.com/conaonda/COGnito/issues/269)) ([#270](https://github.com/conaonda/COGnito/issues/270)) ([6a51bc0](https://github.com/conaonda/COGnito/commit/6a51bc0ea45a5d8addcaf1f7b54fbe6b5e98c158))
+
 ## [1.18.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.17.0...COGnito-v1.18.0) (2026-03-09)
 
 
