@@ -29,6 +29,8 @@
 - catalog.js에 captured_at 기반 촬영일자순 정렬 옵션 추가, catalogUI.js에 '촬영일자순' 드롭다운 옵션 추가 — null 값 맨 뒤 처리, 테스트 324개 전체 통과, v1.14.0 릴리스 (스프린트 53)
 - catalogUI.js에 카탈로그 카드 해상도(resolution) 표시 추가 — cog_images.resolution 필드 활용, 테스트 330개 전체 통과, v1.15.0 릴리스 (스프린트 55)
 - catalog.js에 title 기반 이름순(가나다/알파벳) 정렬 옵션 추가, catalogUI.js에 '이름순' 드롭다운 옵션 추가 — locale 기반 정렬, 테스트 334개 전체 통과, v1.16.0 릴리스 (스프린트 56)
+- catalog.js에 pageSize 옵션 추가(10/20/50), catalogUI.js에 페이지당 영상 수 드롭다운 추가 — 페이지 변경 시 currentPage 초기화, 테스트 351개 전체 통과, v1.19.0 릴리스 (스프린트 59)
+- catalogUI.js 관심목록 토글 버튼 개선 — 추가/제거 상태 표시(하트/엑스 아이콘), getWatchlistedImageIds 활용, 테스트 362개 전체 통과, v1.20.0 릴리스 (스프린트 60)
 
 ## 반복 패턴 & 주의사항
 - 이슈 생성 전 기존 구현 여부를 반드시 확인할 것 (스프린트 20에서 #170, #171, 스프린트 31에서 #176이 이미 구현되어 있었음)
@@ -39,7 +41,8 @@
 - 스프린트 22~29 8회 연속 공회전 후 스프린트 30에서 정상 복귀 — agent/developer 라벨 이슈 사전 준비가 핵심
 - Reviewer 에이전트 Gemini API 오류 발생 가능 (스프린트 31~40: Thinking_config 관련 400 에러) — 자체 PR 승인 불가로 comment로 대체
 - catalogUI.js 커버리지는 V8 inline ternary 카운팅 한계로 Branch 100% 달성 불가 — Stmts/Funcs/Lines 100% + Branch 97.64% 수용 가능
-- E2E 스모크 테스트에서 UI 옵션 수 하드코딩 주의 — 신규 드롭다운 옵션 추가 시 `toHaveCount` 값도 함께 갱신해야 함 (스프린트 46에서 CI 실패 경험)
+- E2E 스모크 테스트에서 UI 옵션 수 하드코딩 주의 — 신규 드롭다운 옵션 추가 시 `toHaveCount` 값도 함께 갱신해야 함 (스프린트 46, 60 CI 실패 경험)
+- docs PR이 feat PR보다 늦게 CI를 통과하면 머지 충돌 발생 — rebase 후 재푸시 필요 (스프린트 60)
 
 ## 기술 부채 목록
 - [x] PR #132: PRE_LOGIN_STATE_KEY 문자열 중복 해소 (스프린트 21에서 머지)
@@ -47,16 +50,17 @@
 - [x] PR #174: release-please 릴리스 PR (v1.8.0) (스프린트 31에서 머지)
 - [x] catalogUI.js 미커버 라인(기존 코드) 테스트 보강 — PR #206 머지로 완료 (스프린트 41)
 - [ ] Reviewer 에이전트 Gemini API Thinking_config 400 에러 해결 필요
+- [ ] catalogUI.js watchlist-state-changed 이벤트 리스너 누적 메모리 누수 해결 — 이슈 #276
 
 ## 최근 3개 스프린트 요약
+### Sprint 60 (2026-03-10)
+- 완료: PR #274 머지 (feat: 관심목록 토글 버튼 추가/제거 상태 표시), PR #272 머지 (docs: sprint-59 문서 반영), PR #275 머지 (release v1.20.0), 이슈 #273 닫힘, 테스트 362개 전체 통과, v1.20.0 릴리스
+- 발견된 문제: Reviewer 자체 PR 승인 불가 (GitHub 정책), watchlist-state-changed 이벤트 리스너 누적 메모리 누수 발견 (이슈 #276 생성), E2E 정렬 옵션 수 불일치(3→5) CI 실패 — 수정 후 통과
+
+### Sprint 59 (2026-03-10)
+- 완료: PR #270 머지 (feat: 카탈로그 페이지당 영상 수 변경 옵션 추가), PR #268 머지 (docs: sprint-58 문서 반영), PR #271 머지 (release v1.19.0), 이슈 #269 닫힘, 테스트 351개 전체 통과, v1.19.0 릴리스
+- 발견된 문제: Reviewer 자체 PR 승인 불가 (GitHub 정책) — 리뷰 코멘트로 대체
+
 ### Sprint 56 (2026-03-10)
 - 완료: PR #258 머지 (feat: 카탈로그 이름순 정렬 옵션 추가), PR #256 머지 (docs: sprint-55 문서 반영), PR #255 머지 (release v1.16.0), 이슈 #257 닫힘, 테스트 334개 전체 통과, v1.16.0 릴리스
 - 발견된 문제: PR #256 머지 충돌 발생 (PR #258 머지 후 docs 브랜치 충돌) — rebase로 해결
-
-### Sprint 55 (2026-03-10)
-- 완료: PR #254 머지 (feat: 카탈로그 카드 해상도 표시), PR #252 머지 (docs: sprint-54 문서 반영), 이슈 #253 닫힘, 테스트 330개 전체 통과, v1.15.0 릴리스
-- 발견된 문제: Reviewer 자체 PR 승인 불가 (GitHub 정책) — 리뷰 코멘트로 대체
-
-### Sprint 53 (2026-03-10)
-- 완료: PR #245 머지 (feat: 카탈로그 촬영일자순 정렬 옵션 추가), PR #243 머지 (docs: sprint-52 문서 반영), PR #242 머지 (release v1.14.0), 이슈 #244 닫힘, 테스트 324개 전체 통과, v1.14.0 릴리스
-- 발견된 문제: Reviewer 자체 PR 승인 불가 (GitHub 정책) — 리뷰 코멘트로 대체
