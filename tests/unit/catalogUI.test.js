@@ -524,6 +524,18 @@ describe('catalogUI interactions', () => {
     expect(mockGetCogImages).toHaveBeenCalledWith(expect.objectContaining({ tag: 'flood' }))
   })
 
+  it('clicking a catalog-tag does not open the cog viewer (stopPropagation)', async () => {
+    const onSelect = vi.fn()
+    await initAndOpen([{ id: '1', url: 'http://example.com/cog.tif', title: 'T', tags: ['flood'], created_at: '2026-01-01' }], onSelect)
+
+    const tag = document.querySelector('.catalog-tag')
+    tag.click()
+
+    expect(onSelect).not.toHaveBeenCalled()
+    expect(mockIncrementViewCount).not.toHaveBeenCalled()
+    expect(document.getElementById('catalog-panel').classList.contains('open')).toBe(true)
+  })
+
   it('source filter triggers onFilterChange on change event', async () => {
     await initAndOpen([{ id: '1', title: 'T', tags: [], created_at: '2026-01-01' }])
     mockGetCogImages.mockClear()
