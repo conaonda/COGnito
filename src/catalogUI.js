@@ -34,6 +34,9 @@ export function initCatalogUI(onSelectCog) {
       <option value="manual">수동 등록</option>
       <option value="stac">STAC 자동</option>
     </select>
+    <select id="catalog-filter-year" class="catalog-filter-input" aria-label="촬영 연도 필터">
+      <option value="">전체 연도</option>
+    </select>
   `
   searchInput.parentNode.insertBefore(filterContainer, searchInput.nextSibling)
 
@@ -41,6 +44,16 @@ export function initCatalogUI(onSelectCog) {
   const sensorFilter = filterContainer.querySelector('#catalog-filter-sensor')
   const regionFilter = filterContainer.querySelector('#catalog-filter-region')
   const sourceFilter = filterContainer.querySelector('#catalog-filter-source')
+  const yearFilter = filterContainer.querySelector('#catalog-filter-year')
+
+  // 연도 드롭다운 옵션 동적 생성 (현재 연도부터 5년 전까지)
+  const currentYear = new Date().getFullYear()
+  for (let y = currentYear; y >= currentYear - 5; y--) {
+    const opt = document.createElement('option')
+    opt.value = String(y)
+    opt.textContent = `${y}년`
+    yearFilter.appendChild(opt)
+  }
 
   // 필터 초기화 버튼
   const resetBtn = document.createElement('button')
@@ -120,6 +133,7 @@ export function initCatalogUI(onSelectCog) {
       sensorFilter.value.trim() !== '' ||
       regionFilter.value.trim() !== '' ||
       sourceFilter.value !== '' ||
+      yearFilter.value !== '' ||
       onlyMineCheckbox.checked
   }
 
@@ -133,6 +147,7 @@ export function initCatalogUI(onSelectCog) {
     sensorFilter.value = ''
     regionFilter.value = ''
     sourceFilter.value = ''
+    yearFilter.value = ''
     onlyMineCheckbox.checked = false
     searchTerm = ''
     currentPage = 0
@@ -155,6 +170,7 @@ export function initCatalogUI(onSelectCog) {
   sensorFilter.addEventListener('input', onFilterChange)
   regionFilter.addEventListener('input', onFilterChange)
   sourceFilter.addEventListener('change', onFilterChange)
+  yearFilter.addEventListener('change', onFilterChange)
   sortSelect.addEventListener('change', () => {
     sortBy = sortSelect.value
     currentPage = 0
@@ -196,6 +212,7 @@ export function initCatalogUI(onSelectCog) {
       sensor: sensorFilter.value.trim(),
       region: regionFilter.value.trim(),
       sourceType: sourceFilter.value,
+      year: yearFilter.value,
       sortBy,
       userId: onlyMineCheckbox.checked ? currentUserId : '',
       limit: PAGE_SIZE,
