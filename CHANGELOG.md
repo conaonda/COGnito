@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.20.1](https://github.com/conaonda/COGnito/compare/COGnito-v1.20.0...COGnito-v1.20.1) (2026-03-09)
+
+
+### Bug Fixes
+
+* watchlist-state-changed 이벤트 리스너 누적 메모리 누수 해결 및 제거 모달 연동 ([#280](https://github.com/conaonda/COGnito/issues/280)) ([a2cf86f](https://github.com/conaonda/COGnito/commit/a2cf86fd9c68ae0e0ddfbc48776ffa87a808b30d))
+
 ## [1.20.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.19.0...COGnito-v1.20.0) (2026-03-09)
 
 
