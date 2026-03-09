@@ -10,6 +10,7 @@ const { mockSupabase, setMockQuery, createQueryMock, mockSession } = vi.hoisted(
       insert: vi.fn().mockReturnThis(),
       delete: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
+      in: vi.fn().mockReturnThis(),
       order: vi.fn().mockReturnThis(),
       single: vi.fn().mockResolvedValue(result),
       then: (resolve) => resolve(result),
@@ -30,7 +31,7 @@ const { mockSupabase, setMockQuery, createQueryMock, mockSession } = vi.hoisted(
 
 vi.mock('../../src/supabase.js', () => ({ supabase: mockSupabase }))
 
-import { getWatchlists, createWatchlist, deleteWatchlist, addItem, removeItem, getWatchlistItems } from '../../src/watchlist.js'
+import { getWatchlists, createWatchlist, deleteWatchlist, addItem, removeItem, getWatchlistItems, getWatchlistedImageIds } from '../../src/watchlist.js'
 
 const testUser = { id: 'user-1' }
 const testSession = { user: testUser }
@@ -126,5 +127,46 @@ describe('getWatchlistItems', () => {
     expect(q.eq).toHaveBeenCalledWith('watchlist_id', 'wl-1')
     expect(q.order).toHaveBeenCalledWith('added_at', { ascending: false })
     expect(result.data).toEqual(items)
+  })
+})
+
+describe('getWatchlistedImageIds', () => {
+  it('returns empty Set when not logged in', async () => {
+    const result = await getWatchlistedImageIds(['img-1'])
+    expect(result).toBeInstanceOf(Set)
+    expect(result.size).toBe(0)
+  })
+
+  it('returns empty Set when cogImageIds is empty', async () => {
+    mockSession(testSession)
+    const result = await getWatchlistedImageIds([])
+    expect(result).toBeInstanceOf(Set)
+    expect(result.size).toBe(0)
+  })
+
+  it('returns empty Set when user has no watchlists', async () => {
+    mockSession(testSession)
+    const q = createQueryMock([])
+    setMockQuery(q)
+
+    const result = await getWatchlistedImageIds(['img-1'])
+    expect(result).toBeInstanceOf(Set)
+    expect(result.size).toBe(0)
+  })
+
+  it('returns Set of watchlisted image IDs', async () => {
+    mockSession(testSession)
+    const watchlistsQuery = createQueryMock([{ id: 'wl-1' }])
+    const itemsQuery = createQueryMock([{ cog_image_id: 'img-1' }])
+    let callCount = 0
+    mockSupabase.from = vi.fn(() => {
+      callCount++
+      return callCount === 1 ? watchlistsQuery : itemsQuery
+    })
+
+    const result = await getWatchlistedImageIds(['img-1', 'img-2'])
+    expect(result).toBeInstanceOf(Set)
+    expect(result.has('img-1')).toBe(true)
+    expect(result.has('img-2')).toBe(false)
   })
 })

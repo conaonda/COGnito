@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest'
 
 vi.mock('../../src/supabase.js', () => ({ supabase: null }))
 
-import { getWatchlists, createWatchlist, deleteWatchlist, addItem, removeItem, getWatchlistItems } from '../../src/watchlist.js'
+import { getWatchlists, createWatchlist, deleteWatchlist, addItem, removeItem, getWatchlistItems, getWatchlistedImageIds } from '../../src/watchlist.js'
 
 describe('watchlist functions when supabase is null', () => {
   it('getWatchlists returns empty data', async () => {
@@ -33,5 +33,11 @@ describe('watchlist functions when supabase is null', () => {
   it('getWatchlistItems returns empty data', async () => {
     const result = await getWatchlistItems('wl-1')
     expect(result).toEqual({ data: [], error: null })
+  })
+
+  it('getWatchlistedImageIds returns empty Set', async () => {
+    const result = await getWatchlistedImageIds(['img-1', 'img-2'])
+    expect(result).toBeInstanceOf(Set)
+    expect(result.size).toBe(0)
   })
 })
