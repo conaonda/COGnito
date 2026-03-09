@@ -1,6 +1,6 @@
 import { supabase } from './supabase.js'
 import { getCogImages, deleteCogImage, updateCogImage, incrementViewCount } from './catalog.js'
-import { toggleLike, getLikeStates } from './likes.js'
+import { toggleLike, getLikeStates, getLikedImageIds } from './likes.js'
 import { getSession } from './auth.js'
 
 const PAGE_SIZE = 20
@@ -73,6 +73,16 @@ export function initCatalogUI(onSelectCog) {
   filterContainer.parentNode.insertBefore(onlyMineContainer, filterContainer.nextSibling)
   const onlyMineCheckbox = onlyMineContainer.querySelector('#catalog-filter-only-mine')
 
+  // 좋아요한 영상만 보기 필터 (로그인 시에만 표시)
+  const likedOnlyContainer = document.createElement('div')
+  likedOnlyContainer.className = 'catalog-liked-only'
+  likedOnlyContainer.style.display = 'none'
+  likedOnlyContainer.innerHTML = `
+    <label><input type="checkbox" id="catalog-filter-liked-only"> 좋아요한 영상만</label>
+  `
+  onlyMineContainer.parentNode.insertBefore(likedOnlyContainer, onlyMineContainer.nextSibling)
+  const likedOnlyCheckbox = likedOnlyContainer.querySelector('#catalog-filter-liked-only')
+
   // 정렬 드롭다운
   const sortContainer = document.createElement('div')
   sortContainer.className = 'catalog-sort'
@@ -83,7 +93,7 @@ export function initCatalogUI(onSelectCog) {
       <option value="view_count">조회수순</option>
     </select>
   `
-  onlyMineContainer.parentNode.insertBefore(sortContainer, onlyMineContainer.nextSibling)
+  likedOnlyContainer.parentNode.insertBefore(sortContainer, likedOnlyContainer.nextSibling)
   const sortSelect = sortContainer.querySelector('#catalog-sort-select')
 
   let currentPage = 0
@@ -97,8 +107,10 @@ export function initCatalogUI(onSelectCog) {
     isUserLoggedIn = !!session?.user
     currentUserId = session?.user?.id || null
     onlyMineContainer.style.display = isUserLoggedIn ? '' : 'none'
+    likedOnlyContainer.style.display = isUserLoggedIn ? '' : 'none'
     if (!isUserLoggedIn) {
       onlyMineCheckbox.checked = false
+      likedOnlyCheckbox.checked = false
     }
   }
 
@@ -134,7 +146,8 @@ export function initCatalogUI(onSelectCog) {
       regionFilter.value.trim() !== '' ||
       sourceFilter.value !== '' ||
       yearFilter.value !== '' ||
-      onlyMineCheckbox.checked
+      onlyMineCheckbox.checked ||
+      likedOnlyCheckbox.checked
   }
 
   function updateResetBtnVisibility() {
@@ -149,6 +162,7 @@ export function initCatalogUI(onSelectCog) {
     sourceFilter.value = ''
     yearFilter.value = ''
     onlyMineCheckbox.checked = false
+    likedOnlyCheckbox.checked = false
     searchTerm = ''
     currentPage = 0
     updateResetBtnVisibility()
@@ -181,6 +195,11 @@ export function initCatalogUI(onSelectCog) {
     updateResetBtnVisibility()
     loadPage()
   })
+  likedOnlyCheckbox.addEventListener('change', () => {
+    currentPage = 0
+    updateResetBtnVisibility()
+    loadPage()
+  })
 
   prevBtn.addEventListener('click', () => {
     if (currentPage > 0) {
@@ -206,6 +225,7 @@ export function initCatalogUI(onSelectCog) {
     listEl.innerHTML = '<div style="text-align:center;padding:2rem;color:#999;">로딩 중...</div>'
 
     const offset = currentPage * PAGE_SIZE
+    const likedIds = likedOnlyCheckbox.checked ? await getLikedImageIds() : null
     const { data, error } = await getCogImages({
       search: searchTerm,
       tag: tagFilter.value.trim(),
@@ -215,6 +235,7 @@ export function initCatalogUI(onSelectCog) {
       year: yearFilter.value,
       sortBy,
       userId: onlyMineCheckbox.checked ? currentUserId : '',
+      likedIds,
       limit: PAGE_SIZE,
       offset
     })

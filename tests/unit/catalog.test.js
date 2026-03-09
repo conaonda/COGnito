@@ -248,6 +248,29 @@ describe('getCogImages', () => {
     expect(q.eq).not.toHaveBeenCalled()
   })
 
+  it('applies likedIds filter with in operator', async () => {
+    const q = createQueryMock([{ id: 'a' }])
+    q.in = vi.fn().mockReturnThis()
+    setMockQuery(q)
+    await getCogImages({ likedIds: ['a', 'b'] })
+    expect(q.in).toHaveBeenCalledWith('id', ['a', 'b'])
+  })
+
+  it('returns empty data when likedIds is empty array', async () => {
+    const q = createQueryMock([{ id: 'a' }])
+    setMockQuery(q)
+    const result = await getCogImages({ likedIds: [] })
+    expect(result).toEqual({ data: [], error: null })
+  })
+
+  it('does not apply likedIds filter when null', async () => {
+    const q = createQueryMock([{ id: 'a' }])
+    q.in = vi.fn().mockReturnThis()
+    setMockQuery(q)
+    await getCogImages({ likedIds: null })
+    expect(q.in).not.toHaveBeenCalled()
+  })
+
   it('applies year filter with gte and lt on captured_at', async () => {
     const q = createQueryMock([])
     setMockQuery(q)
