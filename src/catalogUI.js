@@ -1,5 +1,5 @@
 import { supabase } from './supabase.js'
-import { getCogImages, deleteCogImage, updateCogImage, incrementViewCount } from './catalog.js'
+import { getCogImages, deleteCogImage, updateCogImage, incrementViewCount, DEFAULT_SORT_ORDERS } from './catalog.js'
 import { toggleLike, getLikeStates, getLikedImageIds } from './likes.js'
 import { getSession } from './auth.js'
 
@@ -94,13 +94,21 @@ export function initCatalogUI(onSelectCog) {
       <option value="captured_at">촬영일자순</option>
       <option value="title">이름순</option>
     </select>
+    <button id="catalog-sort-order-btn" class="catalog-sort-order-btn" type="button" aria-label="정렬 방향 전환" title="정렬 방향 전환">↓</button>
   `
   likedOnlyContainer.parentNode.insertBefore(sortContainer, likedOnlyContainer.nextSibling)
   const sortSelect = sortContainer.querySelector('#catalog-sort-select')
+  const sortOrderBtn = sortContainer.querySelector('#catalog-sort-order-btn')
 
   let currentPage = 0
   let searchTerm = ''
   let sortBy = 'created_at'
+  let sortOrder = DEFAULT_SORT_ORDERS[sortBy]
+
+  function updateSortOrderBtn() {
+    sortOrderBtn.textContent = sortOrder === 'asc' ? '↑' : '↓'
+    sortOrderBtn.title = sortOrder === 'asc' ? '오름차순' : '내림차순'
+  }
   let debounceTimer = null
   let isUserLoggedIn = false
   let currentUserId = null
@@ -189,6 +197,14 @@ export function initCatalogUI(onSelectCog) {
   yearFilter.addEventListener('change', onFilterChange)
   sortSelect.addEventListener('change', () => {
     sortBy = sortSelect.value
+    sortOrder = DEFAULT_SORT_ORDERS[sortBy] || 'desc'
+    updateSortOrderBtn()
+    currentPage = 0
+    loadPage()
+  })
+  sortOrderBtn.addEventListener('click', () => {
+    sortOrder = sortOrder === 'asc' ? 'desc' : 'asc'
+    updateSortOrderBtn()
     currentPage = 0
     loadPage()
   })
@@ -236,6 +252,7 @@ export function initCatalogUI(onSelectCog) {
       sourceType: sourceFilter.value,
       year: yearFilter.value,
       sortBy,
+      sortOrder,
       userId: onlyMineCheckbox.checked ? currentUserId : '',
       likedIds,
       limit: PAGE_SIZE,
