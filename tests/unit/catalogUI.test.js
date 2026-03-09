@@ -994,6 +994,48 @@ describe('catalogUI interactions', () => {
     }))
   })
 
+  it('page size dropdown exists with options 10/20/50', async () => {
+    await initAndOpen([{ id: '1', title: 'T', tags: [], created_at: '2026-01-01' }])
+    const select = document.getElementById('catalog-page-size-select')
+    expect(select).not.toBeNull()
+    const values = Array.from(select.options).map(o => o.value)
+    expect(values).toEqual(['10', '20', '50'])
+    expect(select.value).toBe('20')
+  })
+
+  it('changing page size reloads with new limit and resets page', async () => {
+    const items = Array.from({ length: 20 }, (_, i) => ({ id: String(i), title: `T${i}`, tags: [], created_at: '2026-01-01' }))
+    await initAndOpen(items)
+
+    // Go to page 2 first
+    mockGetCogImages.mockResolvedValue({ data: [{ id: '20', title: 'T20', tags: [], created_at: '2026-01-01' }], totalCount: 21, error: null })
+    document.getElementById('catalog-next').click()
+    await vi.advanceTimersByTimeAsync(10)
+
+    mockGetCogImages.mockClear()
+    mockGetCogImages.mockResolvedValue({ data: [], totalCount: 0, error: null })
+
+    const select = document.getElementById('catalog-page-size-select')
+    select.value = '10'
+    select.dispatchEvent(new Event('change'))
+    await vi.advanceTimersByTimeAsync(10)
+
+    expect(mockGetCogImages).toHaveBeenCalledWith(expect.objectContaining({ limit: 10, offset: 0 }))
+  })
+
+  it('changing page size to 50 passes limit 50', async () => {
+    await initAndOpen([{ id: '1', title: 'T', tags: [], created_at: '2026-01-01' }])
+    mockGetCogImages.mockClear()
+    mockGetCogImages.mockResolvedValue({ data: [], totalCount: 0, error: null })
+
+    const select = document.getElementById('catalog-page-size-select')
+    select.value = '50'
+    select.dispatchEvent(new Event('change'))
+    await vi.advanceTimersByTimeAsync(10)
+
+    expect(mockGetCogImages).toHaveBeenCalledWith(expect.objectContaining({ limit: 50 }))
+  })
+
   it('like button handles NaN count gracefully', async () => {
     mockToggleLike.mockResolvedValue({ liked: true, error: null })
     mockGetLikeStates.mockResolvedValue(new Map([['1', { count: 0, liked: false }]]))
