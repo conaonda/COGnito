@@ -275,6 +275,7 @@ describe('catalogUI interactions', () => {
     mockGetSession.mockResolvedValue({ user: { id: TEST_USER_ID } })
     mockOnAuthStateChange.mockImplementation(() => {})
     mockGetLikeStates.mockResolvedValue(new Map())
+    mockGetWatchlistedImageIds.mockResolvedValue(new Set())
   })
 
   afterEach(() => {
@@ -555,7 +556,7 @@ describe('catalogUI interactions', () => {
     expect(likeBtn.classList.contains('liked')).toBe(false)
   })
 
-  it('watchlist button dispatches event', async () => {
+  it('watchlist button dispatches watchlist-add event when not watchlisted', async () => {
     await initAndOpen([{ id: '1', user_id: 'other', title: 'T', tags: [], created_at: '2026-01-01' }])
 
     const handler = vi.fn()
@@ -567,6 +568,77 @@ describe('catalogUI interactions', () => {
       detail: { cogImageId: '1' }
     }))
     document.removeEventListener('watchlist-add', handler)
+  })
+
+  it('watchlist button shows watchlisted state when item is in watchlist', async () => {
+    mockGetWatchlistedImageIds.mockResolvedValue(new Set(['1']))
+    await initAndOpen([{ id: '1', user_id: 'other', title: 'T', tags: [], created_at: '2026-01-01' }])
+
+    const btn = document.querySelector('.catalog-watchlist-btn')
+    expect(btn.classList.contains('watchlisted')).toBe(true)
+    expect(btn.textContent).toBe('✓ 관심목록')
+  })
+
+  it('watchlist button shows default state when item is not watchlisted', async () => {
+    await initAndOpen([{ id: '1', user_id: 'other', title: 'T', tags: [], created_at: '2026-01-01' }])
+
+    const btn = document.querySelector('.catalog-watchlist-btn')
+    expect(btn.classList.contains('watchlisted')).toBe(false)
+    expect(btn.textContent).toBe('+ 관심목록')
+  })
+
+  it('watchlist button dispatches watchlist-remove event when already watchlisted', async () => {
+    mockGetWatchlistedImageIds.mockResolvedValue(new Set(['1']))
+    await initAndOpen([{ id: '1', user_id: 'other', title: 'T', tags: [], created_at: '2026-01-01' }])
+
+    const removeHandler = vi.fn()
+    const addHandler = vi.fn()
+    document.addEventListener('watchlist-remove', removeHandler)
+    document.addEventListener('watchlist-add', addHandler)
+
+    document.querySelector('.catalog-watchlist-btn').click()
+
+    expect(removeHandler).toHaveBeenCalledWith(expect.objectContaining({ detail: { cogImageId: '1' } }))
+    expect(addHandler).not.toHaveBeenCalled()
+    document.removeEventListener('watchlist-remove', removeHandler)
+    document.removeEventListener('watchlist-add', addHandler)
+  })
+
+  it('watchlist-state-changed event updates button to watchlisted state', async () => {
+    await initAndOpen([{ id: '1', user_id: 'other', title: 'T', tags: [], created_at: '2026-01-01' }])
+
+    const btn = document.querySelector('.catalog-watchlist-btn')
+    expect(btn.classList.contains('watchlisted')).toBe(false)
+
+    document.dispatchEvent(new CustomEvent('watchlist-state-changed', { detail: { cogImageId: '1', watchlisted: true } }))
+
+    expect(btn.classList.contains('watchlisted')).toBe(true)
+    expect(btn.textContent).toBe('✓ 관심목록')
+  })
+
+  it('watchlist-state-changed event updates button to unwatchlisted state', async () => {
+    mockGetWatchlistedImageIds.mockResolvedValue(new Set(['1']))
+    await initAndOpen([{ id: '1', user_id: 'other', title: 'T', tags: [], created_at: '2026-01-01' }])
+
+    const btn = document.querySelector('.catalog-watchlist-btn')
+    expect(btn.classList.contains('watchlisted')).toBe(true)
+
+    document.dispatchEvent(new CustomEvent('watchlist-state-changed', { detail: { cogImageId: '1', watchlisted: false } }))
+
+    expect(btn.classList.contains('watchlisted')).toBe(false)
+    expect(btn.textContent).toBe('+ 관심목록')
+  })
+
+  it('watchlist-state-changed event ignores different cogImageId', async () => {
+    mockGetWatchlistedImageIds.mockResolvedValue(new Set(['1']))
+    await initAndOpen([{ id: '1', user_id: 'other', title: 'T', tags: [], created_at: '2026-01-01' }])
+
+    const btn = document.querySelector('.catalog-watchlist-btn')
+
+    document.dispatchEvent(new CustomEvent('watchlist-state-changed', { detail: { cogImageId: '999', watchlisted: false } }))
+
+    expect(btn.classList.contains('watchlisted')).toBe(true)
+    expect(btn.textContent).toBe('✓ 관심목록')
   })
 
   it('shows like count for non-logged-in users', async () => {
