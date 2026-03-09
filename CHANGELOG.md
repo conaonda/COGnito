@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.12.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.11.0...COGnito-v1.12.0) (2026-03-09)
+
+
+### Features
+
+* 카탈로그 촬영 연도 필터 추가 (captured_at 기반) ([#232](https://github.com/conaonda/COGnito/issues/232)) ([5b013cf](https://github.com/conaonda/COGnito/commit/5b013cf9970fa63c9af3a7b68c57c8e5f272c6f0)), closes [#231](https://github.com/conaonda/COGnito/issues/231)
+
 ## [1.11.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.10.0...COGnito-v1.11.0) (2026-03-09)
 
 
