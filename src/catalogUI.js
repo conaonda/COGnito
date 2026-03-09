@@ -3,7 +3,7 @@ import { getCogImages, deleteCogImage, updateCogImage, incrementViewCount, DEFAU
 import { toggleLike, getLikeStates, getLikedImageIds } from './likes.js'
 import { getSession } from './auth.js'
 
-const PAGE_SIZE = 20
+const DEFAULT_PAGE_SIZE = 20
 
 /**
  * 카탈로그 사이드바 UI 초기화
@@ -100,12 +100,28 @@ export function initCatalogUI(onSelectCog) {
   const sortSelect = sortContainer.querySelector('#catalog-sort-select')
   const sortOrderBtn = sortContainer.querySelector('#catalog-sort-order-btn')
 
+  // 페이지당 영상 수 드롭다운
+  const pageSizeContainer = document.createElement('div')
+  pageSizeContainer.className = 'catalog-page-size'
+  pageSizeContainer.innerHTML = `
+    <label>
+      <select id="catalog-page-size-select" class="catalog-filter-input" aria-label="페이지당 영상 수">
+        <option value="10">10개씩</option>
+        <option value="20" selected>20개씩</option>
+        <option value="50">50개씩</option>
+      </select>
+    </label>
+  `
+  sortContainer.parentNode.insertBefore(pageSizeContainer, sortContainer.nextSibling)
+  const pageSizeSelect = pageSizeContainer.querySelector('#catalog-page-size-select')
+
   // 총 영상 수 표시
   const totalCountEl = document.createElement('div')
   totalCountEl.id = 'catalog-total-count'
   totalCountEl.className = 'catalog-total-count'
-  sortContainer.parentNode.insertBefore(totalCountEl, sortContainer.nextSibling)
+  pageSizeContainer.parentNode.insertBefore(totalCountEl, pageSizeContainer.nextSibling)
 
+  let pageSize = DEFAULT_PAGE_SIZE
   let currentPage = 0
   let searchTerm = ''
   let sortBy = 'created_at'
@@ -214,6 +230,11 @@ export function initCatalogUI(onSelectCog) {
     currentPage = 0
     loadPage()
   })
+  pageSizeSelect.addEventListener('change', () => {
+    pageSize = Number(pageSizeSelect.value)
+    currentPage = 0
+    loadPage()
+  })
   onlyMineCheckbox.addEventListener('change', () => {
     currentPage = 0
     updateResetBtnVisibility()
@@ -248,7 +269,7 @@ export function initCatalogUI(onSelectCog) {
   async function loadPage() {
     listEl.innerHTML = '<div style="text-align:center;padding:2rem;color:#999;">로딩 중...</div>'
 
-    const offset = currentPage * PAGE_SIZE
+    const offset = currentPage * pageSize
     const likedIds = likedOnlyCheckbox.checked ? await getLikedImageIds() : null
     const { data, totalCount, error } = await getCogImages({
       search: searchTerm,
@@ -261,7 +282,7 @@ export function initCatalogUI(onSelectCog) {
       sortOrder,
       userId: onlyMineCheckbox.checked ? currentUserId : '',
       likedIds,
-      limit: PAGE_SIZE,
+      limit: pageSize,
       offset
     })
 
@@ -439,7 +460,7 @@ export function initCatalogUI(onSelectCog) {
     })
 
     prevBtn.disabled = currentPage === 0
-    nextBtn.disabled = data.length < PAGE_SIZE
+    nextBtn.disabled = data.length < pageSize
     pageInfo.textContent = `${currentPage + 1}`
     totalCountEl.textContent = `총 ${totalCount}개 영상`
   }
