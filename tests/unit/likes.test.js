@@ -30,7 +30,7 @@ const { mockSupabase, setMockQuery, createQueryMock, mockSession } = vi.hoisted(
 
 vi.mock('../../src/supabase.js', () => ({ supabase: mockSupabase }))
 
-import { toggleLike, getLikeCount, isLiked, getLikeStates } from '../../src/likes.js'
+import { toggleLike, getLikeCount, isLiked, getLikeStates, getLikedImageIds } from '../../src/likes.js'
 
 const testUser = { id: 'user-1' }
 const testSession = { user: testUser }
@@ -242,5 +242,39 @@ describe('getLikeStates', () => {
 
     const result = await getLikeStates(['img-1'])
     expect(result.get('img-1')).toEqual({ count: 1, liked: false })
+  })
+})
+
+describe('getLikedImageIds', () => {
+  it('returns empty array when not logged in', async () => {
+    mockSession(null)
+    const result = await getLikedImageIds()
+    expect(result).toEqual([])
+  })
+
+  it('returns liked image ids for logged-in user', async () => {
+    mockSession(testSession)
+    const q = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      then: (resolve) => resolve({ data: [{ cog_image_id: 'img-1' }, { cog_image_id: 'img-2' }] }),
+    }
+    setMockQuery(q)
+
+    const result = await getLikedImageIds()
+    expect(result).toEqual(['img-1', 'img-2'])
+  })
+
+  it('returns empty array when data is null', async () => {
+    mockSession(testSession)
+    const q = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      then: (resolve) => resolve({ data: null }),
+    }
+    setMockQuery(q)
+
+    const result = await getLikedImageIds()
+    expect(result).toEqual([])
   })
 })

@@ -117,3 +117,21 @@ export async function getLikeStates(cogImageIds) {
 
   return result
 }
+
+/**
+ * 현재 로그인 사용자가 좋아요한 영상 ID 목록 조회
+ * @returns {Promise<string[]>}
+ */
+export async function getLikedImageIds() {
+  if (!supabase) return []
+
+  const { data: { session } } = await supabase.auth.getSession()
+  if (!session?.user) return []
+
+  const { data } = await supabase
+    .from('likes')
+    .select('cog_image_id')
+    .eq('user_id', session.user.id)
+
+  return (data || []).map(row => row.cog_image_id)
+}
