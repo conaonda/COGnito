@@ -364,6 +364,64 @@ describe('getCogImages', () => {
     expect(result.data[0].id).toBe('2')
     expect(result.data[1].id).toBe('1')
   })
+
+  it('sorts by like_count ascending when sortOrder is asc', async () => {
+    const q = createQueryMock([
+      { id: '1', likes: [{ count: 5 }] },
+      { id: '2', likes: [{ count: 2 }] },
+    ])
+    setMockQuery(q)
+    const result = await getCogImages({ sortBy: 'like_count', sortOrder: 'asc' })
+    expect(result.data[0].id).toBe('2')
+    expect(result.data[1].id).toBe('1')
+  })
+
+  it('sorts by view_count ascending when sortOrder is asc', async () => {
+    const q = createQueryMock([
+      { id: '1', view_count: 10 },
+      { id: '2', view_count: 3 },
+    ])
+    setMockQuery(q)
+    const result = await getCogImages({ sortBy: 'view_count', sortOrder: 'asc' })
+    expect(result.data[0].id).toBe('2')
+    expect(result.data[1].id).toBe('1')
+  })
+
+  it('sorts by title descending when sortOrder is desc', async () => {
+    const q = createQueryMock([
+      { id: '1', title: 'Apple' },
+      { id: '2', title: 'Cherry' },
+      { id: '3', title: 'Banana' },
+    ])
+    setMockQuery(q)
+    const result = await getCogImages({ sortBy: 'title', sortOrder: 'desc' })
+    expect(result.data.map(d => d.id)).toEqual(['2', '3', '1'])
+  })
+
+  it('sorts by captured_at ascending when sortOrder is asc', async () => {
+    const q = createQueryMock([
+      { id: '1', captured_at: '2024-06-15T00:00:00Z' },
+      { id: '2', captured_at: '2023-01-01T00:00:00Z' },
+      { id: '3', captured_at: null },
+    ])
+    setMockQuery(q)
+    const result = await getCogImages({ sortBy: 'captured_at', sortOrder: 'asc' })
+    expect(result.data.map(d => d.id)).toEqual(['2', '1', '3'])
+  })
+
+  it('passes sortOrder asc to DB order for created_at', async () => {
+    const q = createQueryMock([])
+    setMockQuery(q)
+    await getCogImages({ sortBy: 'created_at', sortOrder: 'asc' })
+    expect(q.order).toHaveBeenCalledWith('created_at', { ascending: true })
+  })
+
+  it('uses default desc for created_at when sortOrder not specified', async () => {
+    const q = createQueryMock([])
+    setMockQuery(q)
+    await getCogImages({ sortBy: 'created_at' })
+    expect(q.order).toHaveBeenCalledWith('created_at', { ascending: false })
+  })
 })
 
 describe('getCogImage', () => {

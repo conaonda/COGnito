@@ -6,6 +6,7 @@ vi.mock('../../src/catalog.js', () => ({
   getCogImages: vi.fn(),
   deleteCogImage: vi.fn(),
   updateCogImage: vi.fn(),
+  DEFAULT_SORT_ORDERS: { created_at: 'desc', like_count: 'desc', view_count: 'desc', captured_at: 'desc', title: 'asc' },
 }))
 vi.mock('../../src/likes.js', () => ({
   toggleLike: vi.fn(),

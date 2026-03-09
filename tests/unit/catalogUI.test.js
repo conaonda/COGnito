@@ -25,6 +25,7 @@ vi.mock('../../src/catalog.js', () => ({
   deleteCogImage: mockDeleteCogImage,
   updateCogImage: mockUpdateCogImage,
   incrementViewCount: mockIncrementViewCount,
+  DEFAULT_SORT_ORDERS: { created_at: 'desc', like_count: 'desc', view_count: 'desc', captured_at: 'desc', title: 'asc' },
 }))
 vi.mock('../../src/likes.js', () => ({
   toggleLike: mockToggleLike,
@@ -381,6 +382,47 @@ describe('catalogUI interactions', () => {
     await vi.advanceTimersByTimeAsync(10)
 
     expect(mockGetCogImages).toHaveBeenCalledWith(expect.objectContaining({ sortBy: 'title' }))
+  })
+
+  it('sort order toggle button exists and defaults to ↓', async () => {
+    await initAndOpen([{ id: '1', title: 'T', tags: [], created_at: '2026-01-01' }])
+    const btn = document.getElementById('catalog-sort-order-btn')
+    expect(btn).toBeTruthy()
+    expect(btn.textContent).toBe('↓')
+  })
+
+  it('sort order toggle switches direction and reloads', async () => {
+    await initAndOpen([{ id: '1', title: 'T', tags: [], created_at: '2026-01-01' }])
+    mockGetCogImages.mockClear()
+    mockGetCogImages.mockResolvedValue({ data: [], error: null })
+
+    const btn = document.getElementById('catalog-sort-order-btn')
+    btn.click()
+    await vi.advanceTimersByTimeAsync(10)
+
+    expect(btn.textContent).toBe('↑')
+    expect(mockGetCogImages).toHaveBeenCalledWith(expect.objectContaining({ sortOrder: 'asc' }))
+  })
+
+  it('sort criterion change resets sort order to default', async () => {
+    await initAndOpen([{ id: '1', title: 'T', tags: [], created_at: '2026-01-01' }])
+
+    // Toggle to asc first
+    const btn = document.getElementById('catalog-sort-order-btn')
+    btn.click()
+    await vi.advanceTimersByTimeAsync(10)
+
+    mockGetCogImages.mockClear()
+    mockGetCogImages.mockResolvedValue({ data: [], error: null })
+
+    // Change to title (default: asc)
+    const sortSelect = document.getElementById('catalog-sort-select')
+    sortSelect.value = 'title'
+    sortSelect.dispatchEvent(new Event('change'))
+    await vi.advanceTimersByTimeAsync(10)
+
+    expect(btn.textContent).toBe('↑')
+    expect(mockGetCogImages).toHaveBeenCalledWith(expect.objectContaining({ sortOrder: 'asc' }))
   })
 
   it('prev button navigates back', async () => {

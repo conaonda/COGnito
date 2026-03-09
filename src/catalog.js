@@ -109,18 +109,29 @@ export async function saveCogImage(data) {
  * @param {string} [options.sourceType] - 등록 출처 필터 ('stac' 또는 'manual', 빈 문자열이면 전체)
  * @param {string} [options.year] - 촬영 연도 필터 (captured_at 기반, 빈 문자열이면 전체)
  * @param {string} [options.sortBy] - 정렬 기준 ('created_at', 'like_count', 'view_count', 'captured_at' 또는 'title')
+ * @param {'asc'|'desc'} [options.sortOrder] - 정렬 방향 ('asc' 또는 'desc', 미지정 시 각 정렬 기준의 기본값 사용)
  * @param {string} [options.userId] - 특정 사용자의 영상만 필터 (user_id 기준)
  * @param {string[]} [options.likedIds] - 좋아요한 영상 ID 목록 (빈 배열이 아닐 때 id IN 필터 적용)
  * @param {number} [options.limit] - 페이지당 결과 수
  * @param {number} [options.offset] - 페이지네이션 오프셋
  */
-export async function getCogImages({ search = '', tag = '', sensor = '', region = '', sourceType = '', year = '', sortBy = 'created_at', userId = '', likedIds = null, limit = 20, offset = 0 } = {}) {
+// 각 정렬 기준의 기본 방향
+export const DEFAULT_SORT_ORDERS = {
+  created_at: 'desc',
+  like_count: 'desc',
+  view_count: 'desc',
+  captured_at: 'desc',
+  title: 'asc'
+}
+
+export async function getCogImages({ search = '', tag = '', sensor = '', region = '', sourceType = '', year = '', sortBy = 'created_at', sortOrder, userId = '', likedIds = null, limit = 20, offset = 0 } = {}) {
+  const effectiveOrder = sortOrder || DEFAULT_SORT_ORDERS[sortBy] || 'desc'
   if (!supabase) return { data: [], error: null }
 
   let query = supabase
     .from('cog_images')
     .select('*, likes(count)')
-    .order('created_at', { ascending: false })
+    .order('created_at', { ascending: effectiveOrder === 'asc' })
     .range(offset, offset + limit - 1)
 
   if (search) {
@@ -157,33 +168,35 @@ export async function getCogImages({ search = '', tag = '', sensor = '', region 
 
   const result = await query
 
-  // 인기순 정렬: likes count 기준 내림차순 (클라이언트 사이드)
+  const dir = effectiveOrder === 'asc' ? 1 : -1
+
+  // 인기순 정렬: likes count 기준 (클라이언트 사이드)
   if (sortBy === 'like_count' && result.data) {
     result.data.sort((a, b) => {
       const countA = a.likes?.[0]?.count || 0
       const countB = b.likes?.[0]?.count || 0
-      return countB - countA
+      return (countA - countB) * dir
     })
   }
 
-  // 조회수순 정렬: view_count 기준 내림차순 (클라이언트 사이드)
+  // 조회수순 정렬: view_count 기준 (클라이언트 사이드)
   if (sortBy === 'view_count' && result.data) {
-    result.data.sort((a, b) => (b.view_count || 0) - (a.view_count || 0))
+    result.data.sort((a, b) => ((a.view_count || 0) - (b.view_count || 0)) * dir)
   }
 
-  // 촬영일자순 정렬: captured_at 기준 내림차순, null은 맨 뒤 (클라이언트 사이드)
+  // 촬영일자순 정렬: captured_at 기준, null은 맨 뒤 (클라이언트 사이드)
   if (sortBy === 'captured_at' && result.data) {
     result.data.sort((a, b) => {
       if (!a.captured_at && !b.captured_at) return 0
       if (!a.captured_at) return 1
       if (!b.captured_at) return -1
-      return new Date(b.captured_at) - new Date(a.captured_at)
+      return (new Date(a.captured_at) - new Date(b.captured_at)) * dir
     })
   }
 
-  // 이름순 정렬: title 기준 오름차순 (클라이언트 사이드)
+  // 이름순 정렬: title 기준 (클라이언트 사이드)
   if (sortBy === 'title' && result.data) {
-    result.data.sort((a, b) => (a.title || '').localeCompare(b.title || ''))
+    result.data.sort((a, b) => (a.title || '').localeCompare(b.title || '') * dir)
   }
 
   return result

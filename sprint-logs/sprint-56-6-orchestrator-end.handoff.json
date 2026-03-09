@@ -1,0 +1,10 @@
+{
+  "role": "orchestrator-end",
+  "sprint": 56,
+  "status": "success",
+  "merged_prs": [258, 256, 255],
+  "closed_issues": [257],
+  "new_issues_created": [],
+  "released": {"version": "v1.16.0", "tag": "COGnito-v1.16.0"},
+  "next_action": "Documenter: sprint-56 카탈로그 이름순 정렬 추가 내용을 USER_GUIDE 및 ROADMAP에 반영"
+}
