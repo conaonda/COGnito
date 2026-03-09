@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.11.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.10.0...COGnito-v1.11.0) (2026-03-09)
+
+
+### Features
+
+* 카탈로그 카드 태그 클릭 시 태그 필터 자동 적용 ([#224](https://github.com/conaonda/COGnito/issues/224)) ([aa889d2](https://github.com/conaonda/COGnito/commit/aa889d29081a7ee342a2966e0330f646878baa9c))
+* 카탈로그 필터 일괄 초기화 버튼 추가 ([#229](https://github.com/conaonda/COGnito/issues/229)) ([2bbd110](https://github.com/conaonda/COGnito/commit/2bbd1109172e7b944cbeaab51a825befbf415600)), closes [#228](https://github.com/conaonda/COGnito/issues/228)
+
 ## [1.10.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.9.0...COGnito-v1.10.0) (2026-03-08)
 
 
