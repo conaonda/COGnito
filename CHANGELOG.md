@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.13.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.12.0...COGnito-v1.13.0) (2026-03-09)
+
+
+### Features
+
+* 카탈로그 '좋아요한 영상만 보기' 필터 추가 ([#238](https://github.com/conaonda/COGnito/issues/238)) ([69452f1](https://github.com/conaonda/COGnito/commit/69452f1e7f3bce1700763a8e487d1416c4373a87)), closes [#236](https://github.com/conaonda/COGnito/issues/236)
+
 ## [1.12.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.11.0...COGnito-v1.12.0) (2026-03-09)
 
 
