@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.14.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.13.0...COGnito-v1.14.0) (2026-03-09)
+
+
+### Features
+
+* 뷰어 Min/Max 스트레치 슬라이더 강화 — 숫자 직접 입력 및 Min&gt;Max 자동 보정 ([#241](https://github.com/conaonda/COGnito/issues/241)) ([e176498](https://github.com/conaonda/COGnito/commit/e176498b783009335daf2cd3e0eceecc07dca28e)), closes [#240](https://github.com/conaonda/COGnito/issues/240)
+* 카탈로그 촬영일자순 정렬 옵션 추가 ([#245](https://github.com/conaonda/COGnito/issues/245)) ([73eb899](https://github.com/conaonda/COGnito/commit/73eb8990da9b5c58dc36d14aece1522d69e24170)), closes [#244](https://github.com/conaonda/COGnito/issues/244)
+
 ## [1.13.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.12.0...COGnito-v1.13.0) (2026-03-09)
 
 
