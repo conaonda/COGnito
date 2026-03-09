@@ -1,0 +1,10 @@
+{
+  "role": "orchestrator-end",
+  "sprint": 60,
+  "status": "success",
+  "merged_prs": [274, 272, 275],
+  "closed_issues": [273],
+  "new_issues_created": [276],
+  "released": {"version": "v1.20.0", "tag": "COGnito-v1.20.0"},
+  "next_action": "Documenter: sprint-60 완료 — 관심목록 토글 버튼 개선(PR #274), docs PR #272, v1.20.0 릴리스 반영; 이슈 #276(watchlist 이벤트 리스너 메모리 누수) 다음 스프린트 우선순위 고려"
+}
