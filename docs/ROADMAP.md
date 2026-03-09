@@ -261,7 +261,7 @@ v1.0 이후 사용자 피드백과 우선순위에 따라 추진할 기능.
 
 - 밴드 선택 UI (R/G/B 채널에 임의 밴드 매핑)
 - 컬러맵 적용 (Grayscale, Viridis, Inferno 등)
-- Min/Max 스트레치 슬라이더
+- ✅ Min/Max 스트레치 슬라이더 (숫자 직접 입력 + Min>Max 자동 보정)
 - 투영 모드 UI 토글 (Affine ↔ Reproject)
 
 ### 오프라인/캐싱

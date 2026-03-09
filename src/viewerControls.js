@@ -24,13 +24,27 @@ export function initViewerControls(onStyleChange, onProjectionChange) {
 
   if (minSlider) {
     minSlider.addEventListener('input', () => {
-      minVal.textContent = Number(minSlider.value).toFixed(1)
+      clampMinMax(minSlider, maxSlider, minVal, maxVal)
       emitStyleChange()
     })
   }
   if (maxSlider) {
     maxSlider.addEventListener('input', () => {
-      maxVal.textContent = Number(maxSlider.value).toFixed(1)
+      clampMinMax(minSlider, maxSlider, minVal, maxVal)
+      emitStyleChange()
+    })
+  }
+  if (minVal) {
+    minVal.addEventListener('change', () => {
+      minSlider.value = minVal.value
+      clampMinMax(minSlider, maxSlider, minVal, maxVal)
+      emitStyleChange()
+    })
+  }
+  if (maxVal) {
+    maxVal.addEventListener('change', () => {
+      maxSlider.value = maxVal.value
+      clampMinMax(minSlider, maxSlider, minVal, maxVal)
       emitStyleChange()
     })
   }
@@ -42,8 +56,10 @@ export function initViewerControls(onStyleChange, onProjectionChange) {
     const pMax = ch.querySelector('.vc-perband-max')
     const pMinVal = ch.querySelector('.vc-perband-min-value')
     const pMaxVal = ch.querySelector('.vc-perband-max-value')
-    if (pMin) pMin.addEventListener('input', () => { pMinVal.textContent = Number(pMin.value).toFixed(1); emitStyleChange() })
-    if (pMax) pMax.addEventListener('input', () => { pMaxVal.textContent = Number(pMax.value).toFixed(1); emitStyleChange() })
+    if (pMin) pMin.addEventListener('input', () => { clampMinMax(pMin, pMax, pMinVal, pMaxVal); emitStyleChange() })
+    if (pMax) pMax.addEventListener('input', () => { clampMinMax(pMin, pMax, pMinVal, pMaxVal); emitStyleChange() })
+    if (pMinVal) pMinVal.addEventListener('change', () => { pMin.value = pMinVal.value; clampMinMax(pMin, pMax, pMinVal, pMaxVal); emitStyleChange() })
+    if (pMaxVal) pMaxVal.addEventListener('change', () => { pMax.value = pMaxVal.value; clampMinMax(pMin, pMax, pMinVal, pMaxVal); emitStyleChange() })
   })
 
   // 스트레치 모드 토글 (일괄/개별)
@@ -142,8 +158,8 @@ export function updateControlsForCog(totalBands, bandInfo, stats, projectionMode
     maxSlider.max = s.max
     maxSlider.step = (s.max - s.min) / 200
     maxSlider.value = s.max
-    minVal.textContent = s.min.toFixed(1)
-    maxVal.textContent = s.max.toFixed(1)
+    minVal.value = s.min.toFixed(1)
+    maxVal.value = s.max.toFixed(1)
   }
 
   // 밴드별 슬라이더 초기화
@@ -156,11 +172,11 @@ export function updateControlsForCog(totalBands, bandInfo, stats, projectionMode
     const pMaxVal = ch.querySelector('.vc-perband-max-value')
     if (pMin) {
       pMin.min = s.min; pMin.max = s.max; pMin.step = (s.max - s.min) / 200; pMin.value = s.min
-      pMinVal.textContent = s.min.toFixed(1)
+      pMinVal.value = s.min.toFixed(1)
     }
     if (pMax) {
       pMax.min = s.min; pMax.max = s.max; pMax.step = (s.max - s.min) / 200; pMax.value = s.max
-      pMaxVal.textContent = s.max.toFixed(1)
+      pMaxVal.value = s.max.toFixed(1)
     }
   })
 
@@ -297,8 +313,8 @@ function resetSlidersToStats(stats) {
   if (minSlider && stats.length > 0) {
     minSlider.value = stats[0].min
     maxSlider.value = stats[0].max
-    minVal.textContent = stats[0].min.toFixed(1)
-    maxVal.textContent = stats[0].max.toFixed(1)
+    minVal.value = stats[0].min.toFixed(1)
+    maxVal.value = stats[0].max.toFixed(1)
   }
 
   const channels = document.querySelectorAll('.vc-perband-channel')
@@ -306,8 +322,8 @@ function resetSlidersToStats(stats) {
     const s = stats[i] || stats[0]
     const pMin = ch.querySelector('.vc-perband-min')
     const pMax = ch.querySelector('.vc-perband-max')
-    if (pMin) { pMin.value = s.min; ch.querySelector('.vc-perband-min-value').textContent = s.min.toFixed(1) }
-    if (pMax) { pMax.value = s.max; ch.querySelector('.vc-perband-max-value').textContent = s.max.toFixed(1) }
+    if (pMin) { pMin.value = s.min; ch.querySelector('.vc-perband-min-value').value = s.min.toFixed(1) }
+    if (pMax) { pMax.value = s.max; ch.querySelector('.vc-perband-max-value').value = s.max.toFixed(1) }
   })
 }
 
@@ -327,6 +343,17 @@ function updateStretchModeVisibility(bandType) {
       if (perbandGroup) perbandGroup.style.display = 'none'
     }
   }
+}
+
+function clampMinMax(minSlider, maxSlider, minVal, maxVal) {
+  let min = Number(minSlider.value)
+  let max = Number(maxSlider.value)
+  if (min > max) {
+    max = min
+    maxSlider.value = max
+  }
+  if (minVal) minVal.value = min.toFixed(1)
+  if (maxVal) maxVal.value = max.toFixed(1)
 }
 
 function emitStyleChange() {
