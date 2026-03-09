@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.16.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.15.0...COGnito-v1.16.0) (2026-03-09)
+
+
+### Features
+
+* 카탈로그 이름순(가나다/알파벳) 정렬 옵션 추가 ([#258](https://github.com/conaonda/COGnito/issues/258)) ([90a7784](https://github.com/conaonda/COGnito/commit/90a7784835a37d9b52e512fec349ddd069a9f152)), closes [#257](https://github.com/conaonda/COGnito/issues/257)
+* 카탈로그 카드에 해상도(resolution) 표시 ([#254](https://github.com/conaonda/COGnito/issues/254)) ([5b79568](https://github.com/conaonda/COGnito/commit/5b795689e7933c0c15e2f141333fbf511cacb8ed)), closes [#253](https://github.com/conaonda/COGnito/issues/253)
+
 ## [1.15.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.14.0...COGnito-v1.15.0) (2026-03-09)
 
 
