@@ -313,7 +313,13 @@ export function initCatalogUI(onSelectCog) {
       viewCountEl.textContent = `👁 ${item.view_count || 0}`
       card.appendChild(viewCountEl)
 
-      card.addEventListener('click', () => {
+      card.addEventListener('click', (e) => {
+        if (e.target.classList.contains('catalog-tag')) {
+          e.stopPropagation()
+          tagFilter.value = e.target.textContent
+          tagFilter.dispatchEvent(new Event('input'))
+          return
+        }
         panel.classList.remove('open')
         incrementViewCount(item.id)
         onSelectCog(item.url, item)
