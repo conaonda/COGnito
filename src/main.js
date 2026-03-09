@@ -1,7 +1,7 @@
 import { Map, View } from 'ol'
 import LayerGroup from 'ol/layer/Group'
 import { defaults as defaultControls } from 'ol/control'
-import { transform } from 'ol/proj'
+import { transform, transformExtent } from 'ol/proj'
 // @conaonda/ol-cog-layers: 동적 import로 초기 번들에서 제외
 const _cogLayers = () => import('@conaonda/ol-cog-layers')
 import { proxyCogUrl } from './proxy.js'
@@ -109,7 +109,8 @@ const initMap = async () => {
     <div style="color: #666; margin-bottom: 0.25rem;">경위도 (WGS84):</div>
     <div id="wgs84-coords" style="color: #333; margin-bottom: 0.5rem;">-</div>
     <div style="color: #666; margin-bottom: 0.25rem;">줌 레벨:</div>
-    <div id="zoom-level" style="color: #333;">-</div>
+    <div id="zoom-level" style="color: #333; margin-bottom: 0.5rem;">-</div>
+    <button id="bbox-copy-btn" style="width: 100%; padding: 0.35rem; border: 1px solid #ccc; border-radius: 4px; background: #f5f5f5; cursor: pointer; font-size: 0.7rem; font-family: monospace;">bbox 복사</button>
   `
   document.getElementById('app').appendChild(coordDisplay)
   const mapCoordsEl = document.getElementById('map-coords')
@@ -140,6 +141,19 @@ const initMap = async () => {
   }
   map.on('moveend', updateZoom)
   updateZoom()
+
+  document.getElementById('bbox-copy-btn').addEventListener('click', () => {
+    const extent = map.getView().calculateExtent(map.getSize())
+    const bbox = transformExtent(extent, viewProjection, 'EPSG:4326')
+    const text = `[${bbox.map(v => v.toFixed(6)).join(', ')}]`
+    const btn = document.getElementById('bbox-copy-btn')
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = '복사됨!'
+      setTimeout(() => { btn.textContent = 'bbox 복사' }, 2000)
+    }).catch(() => {
+      prompt('bbox:', text)
+    })
+  })
 
   const supportsWebGLFloat = () => {
   try {
