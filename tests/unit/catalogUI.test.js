@@ -363,6 +363,26 @@ describe('catalogUI interactions', () => {
     expect(mockGetCogImages).toHaveBeenCalledWith(expect.objectContaining({ sortBy: 'view_count' }))
   })
 
+  it('sort select includes title option', async () => {
+    await initAndOpen([{ id: '1', title: 'T', tags: [], created_at: '2026-01-01' }])
+    const sortSelect = document.getElementById('catalog-sort-select')
+    const options = Array.from(sortSelect.options).map(o => o.value)
+    expect(options).toContain('title')
+  })
+
+  it('sort by title triggers loadPage with sortBy title', async () => {
+    await initAndOpen([{ id: '1', title: 'T', tags: [], created_at: '2026-01-01' }])
+    mockGetCogImages.mockClear()
+    mockGetCogImages.mockResolvedValue({ data: [], error: null })
+
+    const sortSelect = document.getElementById('catalog-sort-select')
+    sortSelect.value = 'title'
+    sortSelect.dispatchEvent(new Event('change'))
+    await vi.advanceTimersByTimeAsync(10)
+
+    expect(mockGetCogImages).toHaveBeenCalledWith(expect.objectContaining({ sortBy: 'title' }))
+  })
+
   it('prev button navigates back', async () => {
     // First load returns full page to enable next
     const items = Array.from({ length: 20 }, (_, i) => ({ id: String(i), title: `T${i}`, tags: [], created_at: '2026-01-01' }))

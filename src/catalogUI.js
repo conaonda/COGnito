@@ -92,6 +92,7 @@ export function initCatalogUI(onSelectCog) {
       <option value="like_count">인기순</option>
       <option value="view_count">조회수순</option>
       <option value="captured_at">촬영일자순</option>
+      <option value="title">이름순</option>
     </select>
   `
   likedOnlyContainer.parentNode.insertBefore(sortContainer, likedOnlyContainer.nextSibling)
