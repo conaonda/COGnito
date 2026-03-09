@@ -185,6 +185,26 @@ describe('getCogImages', () => {
     expect(result.data).toEqual([{ id: '1' }])
   })
 
+  it('returns totalCount from Supabase count', async () => {
+    const q = createQueryMock([{ id: '1' }])
+    // Simulate Supabase returning count property
+    const origThen = q.then
+    q.then = (resolve) => {
+      const result = { data: [{ id: '1' }], error: null, count: 42 }
+      return resolve(result)
+    }
+    setMockQuery(q)
+    const result = await getCogImages()
+    expect(result.totalCount).toBe(42)
+  })
+
+  it('returns totalCount 0 when count is null', async () => {
+    const q = createQueryMock([{ id: '1' }])
+    setMockQuery(q)
+    const result = await getCogImages()
+    expect(result.totalCount).toBe(0)
+  })
+
   it('applies search filter with sanitization', async () => {
     const q = createQueryMock([])
     setMockQuery(q)
@@ -260,7 +280,8 @@ describe('getCogImages', () => {
     const q = createQueryMock([{ id: 'a' }])
     setMockQuery(q)
     const result = await getCogImages({ likedIds: [] })
-    expect(result).toEqual({ data: [], error: null })
+    expect(result.data).toEqual([])
+    expect(result.error).toBeNull()
   })
 
   it('does not apply likedIds filter when null', async () => {
@@ -636,7 +657,7 @@ describe('supabase null guards', () => {
 
   it('getCogImages returns empty array', async () => {
     const result = await nullMod.getCogImages()
-    expect(result).toEqual({ data: [], error: null })
+    expect(result).toEqual({ data: [], totalCount: 0, error: null })
   })
 
   it('getCogImage returns null data', async () => {

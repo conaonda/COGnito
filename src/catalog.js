@@ -126,11 +126,11 @@ export const DEFAULT_SORT_ORDERS = {
 
 export async function getCogImages({ search = '', tag = '', sensor = '', region = '', sourceType = '', year = '', sortBy = 'created_at', sortOrder, userId = '', likedIds = null, limit = 20, offset = 0 } = {}) {
   const effectiveOrder = sortOrder || DEFAULT_SORT_ORDERS[sortBy] || 'desc'
-  if (!supabase) return { data: [], error: null }
+  if (!supabase) return { data: [], totalCount: 0, error: null }
 
   let query = supabase
     .from('cog_images')
-    .select('*, likes(count)')
+    .select('*, likes(count)', { count: 'exact' })
     .order('created_at', { ascending: effectiveOrder === 'asc' })
     .range(offset, offset + limit - 1)
 
@@ -167,6 +167,7 @@ export async function getCogImages({ search = '', tag = '', sensor = '', region 
   }
 
   const result = await query
+  result.totalCount = result.count ?? 0
 
   const dir = effectiveOrder === 'asc' ? 1 : -1
 
