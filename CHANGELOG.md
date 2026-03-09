@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.17.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.16.0...COGnito-v1.17.0) (2026-03-09)
+
+
+### Features
+
+* 카탈로그 정렬 방향(오름차순/내림차순) 토글 버튼 추가 ([#261](https://github.com/conaonda/COGnito/issues/261)) ([a0318bb](https://github.com/conaonda/COGnito/commit/a0318bb1e54d5ab0c5edaa7e60cf1940eb3209f3))
+
 ## [1.16.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.15.0...COGnito-v1.16.0) (2026-03-09)
 
 
