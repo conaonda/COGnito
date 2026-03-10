@@ -1,0 +1,10 @@
+{
+  "role": "orchestrator-end",
+  "sprint": 62,
+  "status": "success",
+  "merged_prs": [283, 284],
+  "closed_issues": [282],
+  "new_issues_created": [],
+  "released": {"version": "v1.21.0", "tag": "COGnito-v1.21.0"},
+  "next_action": "Documenter는 sprint-62 결과(feat: 카탈로그 필터/정렬 상태 URL 쿼리스트링 동기화, v1.21.0 릴리스)를 USER_GUIDE.md 및 ROADMAP.md에 반영하세요"
+}
