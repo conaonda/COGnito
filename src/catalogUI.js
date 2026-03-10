@@ -473,17 +473,9 @@ export function initCatalogUI(onSelectCog) {
           const deleteBtn = document.createElement('button')
           deleteBtn.className = 'catalog-delete-btn'
           deleteBtn.textContent = '삭제'
-          deleteBtn.addEventListener('click', async (e) => {
+          deleteBtn.addEventListener('click', (e) => {
             e.stopPropagation()
-            if (!confirm('이 영상을 삭제하시겠습니까?')) return
-            deleteBtn.disabled = true
-            const { error: delError } = await deleteCogImage(item.id)
-            if (delError) {
-              alert('삭제 실패: ' + delError.message)
-              deleteBtn.disabled = false
-              return
-            }
-            loadPage()
+            showDeleteModal(item, loadPage)
           })
           actionsRow.appendChild(deleteBtn)
         }
@@ -596,6 +588,47 @@ function showEditModal(item, onSave) {
     }
     overlay.remove()
     onSave()
+  })
+}
+
+function showDeleteModal(item, onDelete) {
+  const existing = document.getElementById('catalog-delete-modal')
+  if (existing) existing.remove()
+
+  const overlay = document.createElement('div')
+  overlay.id = 'catalog-delete-modal'
+  overlay.className = 'catalog-edit-overlay'
+  overlay.innerHTML = `
+    <div class="catalog-edit-dialog">
+      <h3>영상 삭제</h3>
+      <p class="catalog-delete-message">"${escapeHtml(item.title || '제목 없음')}" 영상을 삭제하시겠습니까?</p>
+      <div class="catalog-delete-error" style="display:none;color:#dc2626;font-size:0.85rem;margin-top:0.5rem;"></div>
+      <div class="catalog-edit-actions">
+        <button id="delete-cancel" type="button">취소</button>
+        <button id="delete-confirm" type="button" class="catalog-delete-confirm-btn">삭제</button>
+      </div>
+    </div>
+  `
+  document.body.appendChild(overlay)
+
+  overlay.querySelector('#delete-cancel').addEventListener('click', () => overlay.remove())
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) overlay.remove()
+  })
+
+  overlay.querySelector('#delete-confirm').addEventListener('click', async () => {
+    const confirmBtn = overlay.querySelector('#delete-confirm')
+    confirmBtn.disabled = true
+    const { error } = await deleteCogImage(item.id)
+    if (error) {
+      const errorEl = overlay.querySelector('.catalog-delete-error')
+      errorEl.textContent = '삭제 실패: ' + error.message
+      errorEl.style.display = 'block'
+      confirmBtn.disabled = false
+      return
+    }
+    overlay.remove()
+    onDelete()
   })
 }
 

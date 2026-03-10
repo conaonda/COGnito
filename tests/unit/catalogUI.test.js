@@ -93,38 +93,70 @@ describe('catalogUI delete button', () => {
     expect(cards[1].querySelector('.catalog-delete-btn')).toBeNull()
   })
 
+  it('shows delete modal with item title on delete button click', async () => {
+    await openPanelWithItems([
+      { id: '1', user_id: TEST_USER_ID, title: 'My Image', tags: [], created_at: '2026-01-01' },
+    ])
+
+    document.querySelector('.catalog-delete-btn').click()
+    await new Promise(r => setTimeout(r, 10))
+
+    const modal = document.getElementById('catalog-delete-modal')
+    expect(modal).not.toBeNull()
+    expect(modal.querySelector('.catalog-delete-message').textContent).toContain('My Image')
+  })
+
   it('calls deleteCogImage after confirm and refreshes list', async () => {
     mockDeleteCogImage.mockResolvedValue({ error: null })
-    window.confirm = vi.fn().mockReturnValue(true)
 
     await openPanelWithItems([
       { id: '1', user_id: TEST_USER_ID, title: 'My Image', tags: [], created_at: '2026-01-01' },
     ])
 
     document.querySelector('.catalog-delete-btn').click()
+    await new Promise(r => setTimeout(r, 10))
+
+    document.querySelector('#delete-confirm').click()
     await new Promise(r => setTimeout(r, 10))
 
     expect(mockDeleteCogImage).toHaveBeenCalledWith('1')
     expect(mockGetCogImages).toHaveBeenCalledTimes(2)
+    expect(document.getElementById('catalog-delete-modal')).toBeNull()
   })
 
-  it('does not delete when confirm is cancelled', async () => {
-    window.confirm = vi.fn().mockReturnValue(false)
-
+  it('does not delete when cancel is clicked', async () => {
     await openPanelWithItems([
       { id: '1', user_id: TEST_USER_ID, title: 'My Image', tags: [], created_at: '2026-01-01' },
     ])
 
     document.querySelector('.catalog-delete-btn').click()
+    await new Promise(r => setTimeout(r, 10))
+
+    document.querySelector('#delete-cancel').click()
     await new Promise(r => setTimeout(r, 10))
 
     expect(mockDeleteCogImage).not.toHaveBeenCalled()
+    expect(document.getElementById('catalog-delete-modal')).toBeNull()
   })
 
-  it('shows alert on delete error', async () => {
+  it('does not delete when overlay is clicked', async () => {
+    await openPanelWithItems([
+      { id: '1', user_id: TEST_USER_ID, title: 'My Image', tags: [], created_at: '2026-01-01' },
+    ])
+
+    document.querySelector('.catalog-delete-btn').click()
+    await new Promise(r => setTimeout(r, 10))
+
+    const modal = document.getElementById('catalog-delete-modal')
+    modal.click()
+    await new Promise(r => setTimeout(r, 10))
+
+    expect(mockDeleteCogImage).not.toHaveBeenCalled()
+    expect(document.getElementById('catalog-delete-modal')).toBeNull()
+  })
+
+  it('shows error in modal on delete failure', async () => {
     mockDeleteCogImage.mockResolvedValue({ error: { message: '권한 없음' } })
-    window.confirm = vi.fn().mockReturnValue(true)
-    window.alert = vi.fn()
 
     await openPanelWithItems([
       { id: '1', user_id: TEST_USER_ID, title: 'My Image', tags: [], created_at: '2026-01-01' },
@@ -133,7 +165,14 @@ describe('catalogUI delete button', () => {
     document.querySelector('.catalog-delete-btn').click()
     await new Promise(r => setTimeout(r, 10))
 
-    expect(window.alert).toHaveBeenCalledWith('삭제 실패: 권한 없음')
+    document.querySelector('#delete-confirm').click()
+    await new Promise(r => setTimeout(r, 10))
+
+    const modal = document.getElementById('catalog-delete-modal')
+    expect(modal).not.toBeNull()
+    const errorEl = modal.querySelector('.catalog-delete-error')
+    expect(errorEl.style.display).toBe('block')
+    expect(errorEl.textContent).toBe('삭제 실패: 권한 없음')
   })
 
   it('shows edit button only for owner items', async () => {
