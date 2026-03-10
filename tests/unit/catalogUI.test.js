@@ -276,10 +276,12 @@ describe('catalogUI interactions', () => {
     mockOnAuthStateChange.mockImplementation(() => {})
     mockGetLikeStates.mockResolvedValue(new Map())
     mockGetWatchlistedImageIds.mockResolvedValue(new Set())
+    window.history.replaceState(null, '', window.location.pathname)
   })
 
   afterEach(() => {
     vi.useRealTimers()
+    window.history.replaceState(null, '', window.location.pathname)
   })
 
   async function initAndOpen(items, onSelect) {
@@ -1155,5 +1157,147 @@ describe('catalogUI interactions', () => {
 
     // NaN || 0 → 0, liked → 0 + 1 = 1
     expect(likeBtn.querySelector('.like-count').textContent).toBe('1')
+  })
+})
+
+describe('catalogUI URL query string sync', () => {
+  const TEST_USER_ID = 'user-123'
+
+  beforeEach(() => {
+    vi.useFakeTimers()
+    vi.clearAllMocks()
+    setupDOM()
+    mockGetSession.mockResolvedValue({ user: { id: TEST_USER_ID } })
+    mockOnAuthStateChange.mockImplementation(() => {})
+    mockGetLikeStates.mockResolvedValue(new Map())
+    mockGetWatchlistedImageIds.mockResolvedValue(new Set())
+    // Reset URL
+    window.history.replaceState(null, '', window.location.pathname)
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+    window.history.replaceState(null, '', window.location.pathname)
+  })
+
+  async function initAndOpen(items, onSelect = vi.fn()) {
+    mockGetCogImages.mockResolvedValue({ data: items, totalCount: items.length, error: null })
+    initCatalogUI(onSelect)
+    await vi.advanceTimersByTimeAsync(10)
+    document.getElementById('catalog-toggle-btn').click()
+    await vi.advanceTimersByTimeAsync(10)
+    return onSelect
+  }
+
+  it('updates URL when tag filter is applied', async () => {
+    await initAndOpen([{ id: '1', title: 'T', tags: [], created_at: '2026-01-01' }])
+    mockGetCogImages.mockResolvedValue({ data: [], totalCount: 0, error: null })
+
+    const tagFilter = document.getElementById('catalog-filter-tag')
+    tagFilter.value = 'flood'
+    tagFilter.dispatchEvent(new Event('input'))
+    await vi.advanceTimersByTimeAsync(300)
+    await vi.advanceTimersByTimeAsync(10)
+
+    const params = new URLSearchParams(window.location.search)
+    expect(params.get('tag')).toBe('flood')
+  })
+
+  it('removes default values from URL', async () => {
+    await initAndOpen([{ id: '1', title: 'T', tags: [], created_at: '2026-01-01' }])
+
+    const params = new URLSearchParams(window.location.search)
+    expect(params.has('sortBy')).toBe(false)
+    expect(params.has('sortOrder')).toBe(false)
+    expect(params.has('search')).toBe(false)
+  })
+
+  it('updates URL when sort is changed', async () => {
+    await initAndOpen([{ id: '1', title: 'T', tags: [], created_at: '2026-01-01' }])
+    mockGetCogImages.mockResolvedValue({ data: [], totalCount: 0, error: null })
+
+    const sortSelect = document.getElementById('catalog-sort-select')
+    sortSelect.value = 'title'
+    sortSelect.dispatchEvent(new Event('change'))
+    await vi.advanceTimersByTimeAsync(10)
+
+    const params = new URLSearchParams(window.location.search)
+    expect(params.get('sortBy')).toBe('title')
+    expect(params.get('sortOrder')).toBe('asc')
+  })
+
+  it('restores filters from URL on init', async () => {
+    window.history.replaceState(null, '', '?tag=flood&sensor=SAR&sortBy=title&sortOrder=asc')
+    mockGetCogImages.mockResolvedValue({ data: [], totalCount: 0, error: null })
+
+    initCatalogUI(vi.fn())
+    await vi.advanceTimersByTimeAsync(10)
+
+    document.getElementById('catalog-toggle-btn').click()
+    await vi.advanceTimersByTimeAsync(10)
+
+    expect(document.getElementById('catalog-filter-tag').value).toBe('flood')
+    expect(document.getElementById('catalog-filter-sensor').value).toBe('SAR')
+    expect(document.getElementById('catalog-sort-select').value).toBe('title')
+    expect(mockGetCogImages).toHaveBeenCalledWith(expect.objectContaining({
+      tag: 'flood',
+      sensor: 'SAR',
+      sortBy: 'title',
+      sortOrder: 'asc',
+    }))
+  })
+
+  it('restores boolean filters from URL', async () => {
+    window.history.replaceState(null, '', '?likedOnly=true&myImagesOnly=true')
+    mockGetCogImages.mockResolvedValue({ data: [], totalCount: 0, error: null })
+
+    initCatalogUI(vi.fn())
+    await vi.advanceTimersByTimeAsync(10)
+
+    expect(document.getElementById('catalog-filter-liked-only').checked).toBe(true)
+    expect(document.getElementById('catalog-filter-only-mine').checked).toBe(true)
+  })
+
+  it('clears URL params on filter reset', async () => {
+    window.history.replaceState(null, '', '?tag=flood&sensor=SAR')
+    await initAndOpen([{ id: '1', title: 'T', tags: [], created_at: '2026-01-01' }])
+    mockGetCogImages.mockResolvedValue({ data: [], totalCount: 0, error: null })
+
+    document.getElementById('catalog-filter-reset').click()
+    await vi.advanceTimersByTimeAsync(10)
+
+    expect(window.location.search).toBe('')
+  })
+
+  it('updates URL with multiple filters', async () => {
+    await initAndOpen([{ id: '1', title: 'T', tags: [], created_at: '2026-01-01' }])
+    mockGetCogImages.mockResolvedValue({ data: [], totalCount: 0, error: null })
+
+    document.getElementById('catalog-filter-tag').value = 'flood'
+    document.getElementById('catalog-filter-sensor').value = 'SAR'
+    document.getElementById('catalog-filter-source').value = 'stac'
+    document.getElementById('catalog-filter-source').dispatchEvent(new Event('change'))
+    await vi.advanceTimersByTimeAsync(300)
+    await vi.advanceTimersByTimeAsync(10)
+
+    const params = new URLSearchParams(window.location.search)
+    expect(params.get('tag')).toBe('flood')
+    expect(params.get('sensor')).toBe('SAR')
+    expect(params.get('source')).toBe('stac')
+  })
+
+  it('restores search term from URL', async () => {
+    window.history.replaceState(null, '', '?search=satellite')
+    mockGetCogImages.mockResolvedValue({ data: [], totalCount: 0, error: null })
+
+    initCatalogUI(vi.fn())
+    await vi.advanceTimersByTimeAsync(10)
+
+    expect(document.getElementById('catalog-search').value).toBe('satellite')
+
+    document.getElementById('catalog-toggle-btn').click()
+    await vi.advanceTimersByTimeAsync(10)
+
+    expect(mockGetCogImages).toHaveBeenCalledWith(expect.objectContaining({ search: 'satellite' }))
   })
 })

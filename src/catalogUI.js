@@ -133,6 +133,64 @@ export function initCatalogUI(onSelectCog) {
     sortOrderBtn.textContent = sortOrder === 'asc' ? '↑' : '↓'
     sortOrderBtn.title = sortOrder === 'asc' ? '오름차순' : '내림차순'
   }
+
+  // URL 쿼리스트링 → UI 상태 복원
+  function readUrlParams() {
+    const params = new URLSearchParams(window.location.search)
+    if (params.has('search')) searchInput.value = params.get('search')
+    if (params.has('tag')) tagFilter.value = params.get('tag')
+    if (params.has('sensor')) sensorFilter.value = params.get('sensor')
+    if (params.has('region')) regionFilter.value = params.get('region')
+    if (params.has('source')) sourceFilter.value = params.get('source')
+    if (params.has('year')) yearFilter.value = params.get('year')
+    if (params.has('sortBy')) {
+      sortBy = params.get('sortBy')
+      sortSelect.value = sortBy
+    }
+    if (params.has('sortOrder')) {
+      sortOrder = params.get('sortOrder')
+    }
+    if (params.get('likedOnly') === 'true') likedOnlyCheckbox.checked = true
+    if (params.get('myImagesOnly') === 'true') onlyMineCheckbox.checked = true
+    searchTerm = searchInput.value.trim()
+    updateSortOrderBtn()
+    updateResetBtnVisibility()
+  }
+
+  // UI 상태 → URL 쿼리스트링 동기화
+  function syncUrlToState() {
+    const params = new URLSearchParams(window.location.search)
+    const defaults = {
+      search: '', tag: '', sensor: '', region: '', source: '', year: '',
+      sortBy: 'created_at', sortOrder: DEFAULT_SORT_ORDERS['created_at'],
+      likedOnly: 'false', myImagesOnly: 'false'
+    }
+    const current = {
+      search: searchTerm,
+      tag: tagFilter.value.trim(),
+      sensor: sensorFilter.value.trim(),
+      region: regionFilter.value.trim(),
+      source: sourceFilter.value,
+      year: yearFilter.value,
+      sortBy,
+      sortOrder,
+      likedOnly: String(likedOnlyCheckbox.checked),
+      myImagesOnly: String(onlyMineCheckbox.checked)
+    }
+    for (const [key, val] of Object.entries(current)) {
+      if (val !== defaults[key]) {
+        params.set(key, val)
+      } else {
+        params.delete(key)
+      }
+    }
+    const qs = params.toString()
+    const newUrl = window.location.pathname + (qs ? '?' + qs : '')
+    history.replaceState(null, '', newUrl)
+  }
+
+  readUrlParams()
+
   let debounceTimer = null
   let isUserLoggedIn = false
   let currentUserId = null
@@ -269,6 +327,7 @@ export function initCatalogUI(onSelectCog) {
   })
 
   async function loadPage() {
+    syncUrlToState()
     listEl.innerHTML = '<div style="text-align:center;padding:2rem;color:#999;">로딩 중...</div>'
 
     const offset = currentPage * pageSize
