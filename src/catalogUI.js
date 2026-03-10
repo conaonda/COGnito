@@ -128,6 +128,7 @@ export function initCatalogUI(onSelectCog) {
   let sortBy = 'created_at'
   let sortOrder = DEFAULT_SORT_ORDERS[sortBy]
   let watchlistAbort = null
+  let activeCardId = null
 
   function updateSortOrderBtn() {
     sortOrderBtn.textContent = sortOrder === 'asc' ? '↑' : '↓'
@@ -377,7 +378,7 @@ export function initCatalogUI(onSelectCog) {
 
     data.forEach(item => {
       const card = document.createElement('div')
-      card.className = 'catalog-card'
+      card.className = 'catalog-card' + (activeCardId === item.id ? ' catalog-card--active' : '')
 
       const thumbHtml = item.thumbnail_url
         ? `<img src="${escapeHtml(item.thumbnail_url)}" class="catalog-card-thumb" alt="${escapeHtml(item.title || '영상')}" loading="lazy" onerror="this.style.display='none'">`
@@ -523,6 +524,11 @@ export function initCatalogUI(onSelectCog) {
           tagFilter.dispatchEvent(new Event('input'))
           return
         }
+        // 이전 활성 카드 해제, 새 카드 활성화
+        const prevActive = listEl.querySelector('.catalog-card--active')
+        if (prevActive) prevActive.classList.remove('catalog-card--active')
+        card.classList.add('catalog-card--active')
+        activeCardId = item.id
         panel.classList.remove('open')
         incrementViewCount(item.id)
         onSelectCog(item.url, item)

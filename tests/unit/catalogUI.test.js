@@ -1340,3 +1340,79 @@ describe('catalogUI URL query string sync', () => {
     expect(mockGetCogImages).toHaveBeenCalledWith(expect.objectContaining({ search: 'satellite' }))
   })
 })
+
+describe('catalogUI active card', () => {
+  const items = [
+    { id: 'a1', title: 'First', url: 'http://a1.tif', crs: 'EPSG:4326', created_at: '2024-01-01' },
+    { id: 'a2', title: 'Second', url: 'http://a2.tif', crs: 'EPSG:4326', created_at: '2024-01-02' },
+  ]
+
+  beforeEach(() => {
+    vi.useFakeTimers()
+    setupDOM()
+    mockGetSession.mockResolvedValue(null)
+    mockGetLikeStates.mockResolvedValue(new Map())
+    mockGetWatchlistedImageIds.mockResolvedValue(new Set())
+    mockGetCogImages.mockResolvedValue({ data: items, totalCount: 2, error: null })
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+    vi.restoreAllMocks()
+    document.body.innerHTML = ''
+    window.history.replaceState(null, '', '/')
+  })
+
+  it('카드 클릭 시 catalog-card--active 클래스 적용', async () => {
+    const onSelect = vi.fn()
+    initCatalogUI(onSelect)
+    await vi.advanceTimersByTimeAsync(10)
+
+    document.getElementById('catalog-toggle-btn').click()
+    await vi.advanceTimersByTimeAsync(10)
+
+    const cards = document.querySelectorAll('.catalog-card')
+    expect(cards.length).toBe(2)
+
+    cards[0].click()
+    expect(cards[0].classList.contains('catalog-card--active')).toBe(true)
+    expect(cards[1].classList.contains('catalog-card--active')).toBe(false)
+  })
+
+  it('다른 카드 클릭 시 이전 카드 활성 해제', async () => {
+    const onSelect = vi.fn()
+    initCatalogUI(onSelect)
+    await vi.advanceTimersByTimeAsync(10)
+
+    document.getElementById('catalog-toggle-btn').click()
+    await vi.advanceTimersByTimeAsync(10)
+
+    const cards = document.querySelectorAll('.catalog-card')
+    cards[0].click()
+    cards[1].click()
+    expect(cards[0].classList.contains('catalog-card--active')).toBe(false)
+    expect(cards[1].classList.contains('catalog-card--active')).toBe(true)
+  })
+
+  it('패널 재오픈 시 활성 카드 유지', async () => {
+    const onSelect = vi.fn()
+    initCatalogUI(onSelect)
+    await vi.advanceTimersByTimeAsync(10)
+
+    document.getElementById('catalog-toggle-btn').click()
+    await vi.advanceTimersByTimeAsync(10)
+
+    const cards = document.querySelectorAll('.catalog-card')
+    cards[0].click()
+
+    // 패널 닫기 후 다시 열기
+    document.getElementById('catalog-toggle-btn').click()
+    await vi.advanceTimersByTimeAsync(10)
+    document.getElementById('catalog-toggle-btn').click()
+    await vi.advanceTimersByTimeAsync(10)
+
+    const refreshedCards = document.querySelectorAll('.catalog-card')
+    expect(refreshedCards[0].classList.contains('catalog-card--active')).toBe(true)
+    expect(refreshedCards[1].classList.contains('catalog-card--active')).toBe(false)
+  })
+})
