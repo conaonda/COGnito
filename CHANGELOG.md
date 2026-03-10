@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.22.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.21.0...COGnito-v1.22.0) (2026-03-10)
+
+
+### Features
+
+* 카탈로그 영상 삭제 confirm() → 커스텀 확인 모달 교체 ([#288](https://github.com/conaonda/COGnito/issues/288)) ([d0714f4](https://github.com/conaonda/COGnito/commit/d0714f46933becd8ad56247fb1156f1369b9b0d3)), closes [#287](https://github.com/conaonda/COGnito/issues/287)
+
 ## [1.21.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.20.1...COGnito-v1.21.0) (2026-03-10)
 
 
