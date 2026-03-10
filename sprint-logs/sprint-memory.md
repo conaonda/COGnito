@@ -31,6 +31,8 @@
 - catalog.js에 title 기반 이름순(가나다/알파벳) 정렬 옵션 추가, catalogUI.js에 '이름순' 드롭다운 옵션 추가 — locale 기반 정렬, 테스트 334개 전체 통과, v1.16.0 릴리스 (스프린트 56)
 - catalog.js에 pageSize 옵션 추가(10/20/50), catalogUI.js에 페이지당 영상 수 드롭다운 추가 — 페이지 변경 시 currentPage 초기화, 테스트 351개 전체 통과, v1.19.0 릴리스 (스프린트 59)
 - catalogUI.js 관심목록 토글 버튼 개선 — 추가/제거 상태 표시(하트/엑스 아이콘), getWatchlistedImageIds 활용, 테스트 362개 전체 통과, v1.20.0 릴리스 (스프린트 60)
+- catalogUI.js watchlist-state-changed 이벤트 리스너 누적 메모리 누수 수정 및 카탈로그 카드 관심목록 제거 버튼 → watchlistUI 제거 모달 연동 — 테스트 366개 전체 통과, v1.20.1 릴리스 (스프린트 61)
+- catalogUI.js에 필터/정렬 상태 URL 쿼리스트링 동기화 추가 — history.replaceState + 디바운싱(300ms) 적용, 유효하지 않은 파라미터 무시, 테스트 371개(+5) 전체 통과, v1.21.0 릴리스 (스프린트 62)
 
 ## 반복 패턴 & 주의사항
 - 이슈 생성 전 기존 구현 여부를 반드시 확인할 것 (스프린트 20에서 #170, #171, 스프린트 31에서 #176이 이미 구현되어 있었음)
@@ -50,17 +52,18 @@
 - [x] PR #174: release-please 릴리스 PR (v1.8.0) (스프린트 31에서 머지)
 - [x] catalogUI.js 미커버 라인(기존 코드) 테스트 보강 — PR #206 머지로 완료 (스프린트 41)
 - [ ] Reviewer 에이전트 Gemini API Thinking_config 400 에러 해결 필요
-- [ ] catalogUI.js watchlist-state-changed 이벤트 리스너 누적 메모리 누수 해결 — 이슈 #276
+- [x] catalogUI.js watchlist-state-changed 이벤트 리스너 누적 메모리 누수 해결 — 이슈 #276, PR #280 머지 (스프린트 61)
 
 ## 최근 3개 스프린트 요약
+### Sprint 62 (2026-03-10)
+- 완료: PR #283 머지 (feat: 카탈로그 필터/정렬 상태 URL 쿼리스트링 동기화), PR #284 머지 (release v1.21.0), 이슈 #282 닫힘, 테스트 371개(+5) 전체 통과, v1.21.0 릴리스
+- 발견된 문제: Reviewer 자체 PR 승인 불가 (GitHub 정책) — change_requested 상태였으나 구현에 이미 replaceState + 디바운싱 반영되어 있어 Tester 검증 후 머지
+
+### Sprint 61 (2026-03-10)
+- 완료: PR #280 머지 (fix: watchlist-state-changed 이벤트 리스너 누적 메모리 누수 해결 + feat: 카탈로그 카드 관심목록 제거 모달 연동), PR #278 머지 (docs: sprint-60 문서 반영), PR #281 머지 (release v1.20.1), 이슈 #276 #279 닫힘, 테스트 366개 전체 통과, v1.20.1 릴리스
+- 발견된 문제: Reviewer 자체 PR 승인 불가 (GitHub 정책) — 리뷰 코멘트로 대체
+
 ### Sprint 60 (2026-03-10)
 - 완료: PR #274 머지 (feat: 관심목록 토글 버튼 추가/제거 상태 표시), PR #272 머지 (docs: sprint-59 문서 반영), PR #275 머지 (release v1.20.0), 이슈 #273 닫힘, 테스트 362개 전체 통과, v1.20.0 릴리스
 - 발견된 문제: Reviewer 자체 PR 승인 불가 (GitHub 정책), watchlist-state-changed 이벤트 리스너 누적 메모리 누수 발견 (이슈 #276 생성), E2E 정렬 옵션 수 불일치(3→5) CI 실패 — 수정 후 통과
 
-### Sprint 59 (2026-03-10)
-- 완료: PR #270 머지 (feat: 카탈로그 페이지당 영상 수 변경 옵션 추가), PR #268 머지 (docs: sprint-58 문서 반영), PR #271 머지 (release v1.19.0), 이슈 #269 닫힘, 테스트 351개 전체 통과, v1.19.0 릴리스
-- 발견된 문제: Reviewer 자체 PR 승인 불가 (GitHub 정책) — 리뷰 코멘트로 대체
-
-### Sprint 56 (2026-03-10)
-- 완료: PR #258 머지 (feat: 카탈로그 이름순 정렬 옵션 추가), PR #256 머지 (docs: sprint-55 문서 반영), PR #255 머지 (release v1.16.0), 이슈 #257 닫힘, 테스트 334개 전체 통과, v1.16.0 릴리스
-- 발견된 문제: PR #256 머지 충돌 발생 (PR #258 머지 후 docs 브랜치 충돌) — rebase로 해결
