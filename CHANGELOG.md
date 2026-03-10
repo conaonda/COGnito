@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.23.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.22.0...COGnito-v1.23.0) (2026-03-10)
+
+
+### Features
+
+* 카탈로그 현재 뷰어 로드 영상 카드 활성 표시 ([#292](https://github.com/conaonda/COGnito/issues/292)) ([7188b6f](https://github.com/conaonda/COGnito/commit/7188b6f58e8300ea14a5a25869c616901d565808)), closes [#291](https://github.com/conaonda/COGnito/issues/291)
+
 ## [1.22.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.21.0...COGnito-v1.22.0) (2026-03-10)
 
 
