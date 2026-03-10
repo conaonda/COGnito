@@ -493,6 +493,18 @@ export function initCatalogUI(onSelectCog) {
         }
       }
 
+      // 지도로 이동 버튼 (bbox가 있는 경우만 표시)
+      if (item.bbox) {
+        const fitBboxBtn = document.createElement('button')
+        fitBboxBtn.className = 'catalog-fit-bbox-btn'
+        fitBboxBtn.textContent = '🗺️ 지도로 이동'
+        fitBboxBtn.addEventListener('click', (e) => {
+          e.stopPropagation()
+          document.dispatchEvent(new CustomEvent('catalog-fit-bbox', { detail: { bbox: item.bbox } }))
+        })
+        card.appendChild(fitBboxBtn)
+      }
+
       // 공유 버튼 (모든 사용자에게 표시)
       const shareBtn = document.createElement('button')
       shareBtn.className = 'catalog-share-btn'

@@ -484,6 +484,15 @@ const loadCOG = async (rawUrl, catalogMeta = null, overrideBandInfo = null, { sk
   import('./catalogUI.js').then(m => m.initCatalogUI((url, catalogItem) => loadCOG(url, catalogItem))).catch(console.error)
   import('./watchlistUI.js').then(m => m.initWatchlistUI((url, catalogItem) => loadCOG(url, catalogItem))).catch(console.error)
 
+  // 카탈로그 카드 '지도로 이동' 버튼 이벤트 핸들러
+  document.addEventListener('catalog-fit-bbox', (e) => {
+    const bbox = e.detail?.bbox
+    if (!bbox || bbox.length !== 4) return
+    const extent = transformExtent(bbox, 'EPSG:4326', map.getView().getProjection())
+    const pad = window.innerWidth <= 768 ? 20 : 50
+    map.getView().fit(extent, { padding: [pad, pad, pad, pad], duration: 500 })
+  })
+
   // STAC UI 초기화
   import('./stacUI.js').then(m => m.initStacUI(
     (url) => loadCOG(url),

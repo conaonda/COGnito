@@ -1416,3 +1416,53 @@ describe('catalogUI active card', () => {
     expect(refreshedCards[1].classList.contains('catalog-card--active')).toBe(false)
   })
 })
+
+describe('catalogUI fit-bbox button', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    setupDOM()
+    mockGetSession.mockResolvedValue({ user: null })
+    mockOnAuthStateChange.mockImplementation(() => {})
+    mockGetLikeStates.mockResolvedValue(new Map())
+    mockGetWatchlistedImageIds.mockResolvedValue(new Set())
+  })
+
+  async function openPanelWithItems(items) {
+    mockGetCogImages.mockResolvedValue({ data: items, totalCount: items.length, error: null })
+    const onSelect = vi.fn()
+    initCatalogUI(onSelect)
+    await new Promise(r => setTimeout(r, 10))
+    document.getElementById('catalog-toggle-btn').click()
+    await new Promise(r => setTimeout(r, 10))
+    return onSelect
+  }
+
+  it('bbox가 있는 카드에 지도로 이동 버튼이 표시된다', async () => {
+    await openPanelWithItems([
+      { id: '1', url: 'http://a.tif', title: 'With bbox', bbox: [1, 2, 3, 4] },
+    ])
+    const btn = document.querySelector('.catalog-fit-bbox-btn')
+    expect(btn).not.toBeNull()
+    expect(btn.textContent).toContain('지도로 이동')
+  })
+
+  it('bbox가 없는 카드에는 지도로 이동 버튼이 표시되지 않는다', async () => {
+    await openPanelWithItems([
+      { id: '2', url: 'http://b.tif', title: 'No bbox', bbox: null },
+    ])
+    const btn = document.querySelector('.catalog-fit-bbox-btn')
+    expect(btn).toBeNull()
+  })
+
+  it('버튼 클릭 시 catalog-fit-bbox 이벤트를 발행한다', async () => {
+    await openPanelWithItems([
+      { id: '3', url: 'http://c.tif', title: 'Test', bbox: [10, 20, 30, 40] },
+    ])
+    const handler = vi.fn()
+    document.addEventListener('catalog-fit-bbox', handler)
+    document.querySelector('.catalog-fit-bbox-btn').click()
+    expect(handler).toHaveBeenCalledTimes(1)
+    expect(handler.mock.calls[0][0].detail).toEqual({ bbox: [10, 20, 30, 40] })
+    document.removeEventListener('catalog-fit-bbox', handler)
+  })
+})
