@@ -1466,3 +1466,61 @@ describe('catalogUI fit-bbox button', () => {
     document.removeEventListener('catalog-fit-bbox', handler)
   })
 })
+
+describe('catalogUI hover bbox highlight', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    setupDOM()
+    mockGetSession.mockResolvedValue({ user: null })
+    mockOnAuthStateChange.mockImplementation(() => {})
+    mockGetLikeStates.mockResolvedValue(new Map())
+    mockGetWatchlistedImageIds.mockResolvedValue(new Set())
+  })
+
+  async function openPanelWithItems(items) {
+    mockGetCogImages.mockResolvedValue({ data: items, totalCount: items.length, error: null })
+    const onSelect = vi.fn()
+    initCatalogUI(onSelect)
+    await new Promise(r => setTimeout(r, 10))
+    document.getElementById('catalog-toggle-btn').click()
+    await new Promise(r => setTimeout(r, 10))
+    return onSelect
+  }
+
+  it('bbox가 있는 카드에 mouseenter 시 catalog-card-mouseenter 이벤트를 발행한다', async () => {
+    await openPanelWithItems([
+      { id: '1', url: 'http://a.tif', title: 'With bbox', bbox: [1, 2, 3, 4] },
+    ])
+    const handler = vi.fn()
+    document.addEventListener('catalog-card-mouseenter', handler)
+    const card = document.querySelector('.catalog-card')
+    card.dispatchEvent(new MouseEvent('mouseenter'))
+    expect(handler).toHaveBeenCalledTimes(1)
+    expect(handler.mock.calls[0][0].detail).toEqual({ bbox: [1, 2, 3, 4] })
+    document.removeEventListener('catalog-card-mouseenter', handler)
+  })
+
+  it('bbox가 있는 카드에서 mouseleave 시 catalog-card-mouseleave 이벤트를 발행한다', async () => {
+    await openPanelWithItems([
+      { id: '1', url: 'http://a.tif', title: 'With bbox', bbox: [1, 2, 3, 4] },
+    ])
+    const handler = vi.fn()
+    document.addEventListener('catalog-card-mouseleave', handler)
+    const card = document.querySelector('.catalog-card')
+    card.dispatchEvent(new MouseEvent('mouseleave'))
+    expect(handler).toHaveBeenCalledTimes(1)
+    document.removeEventListener('catalog-card-mouseleave', handler)
+  })
+
+  it('bbox가 없는 카드에 mouseenter 시 이벤트를 발행하지 않는다', async () => {
+    await openPanelWithItems([
+      { id: '2', url: 'http://b.tif', title: 'No bbox', bbox: null },
+    ])
+    const handler = vi.fn()
+    document.addEventListener('catalog-card-mouseenter', handler)
+    const card = document.querySelector('.catalog-card')
+    card.dispatchEvent(new MouseEvent('mouseenter'))
+    expect(handler).not.toHaveBeenCalled()
+    document.removeEventListener('catalog-card-mouseenter', handler)
+  })
+})
