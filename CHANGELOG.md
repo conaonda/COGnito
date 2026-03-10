@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.24.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.23.0...COGnito-v1.24.0) (2026-03-10)
+
+
+### Features
+
+* 카탈로그 카드 '지도로 이동' 버튼 추가 (bbox 기반) ([#296](https://github.com/conaonda/COGnito/issues/296)) ([a2bec2a](https://github.com/conaonda/COGnito/commit/a2bec2ae247d896a26f168ab1355889e26246c62)), closes [#295](https://github.com/conaonda/COGnito/issues/295)
+* 카탈로그 카드 hover 시 지도에 bbox 하이라이트 표시 ([#300](https://github.com/conaonda/COGnito/issues/300)) ([432425e](https://github.com/conaonda/COGnito/commit/432425e5da9e4530c7da40cd9005565a374fe1d4)), closes [#299](https://github.com/conaonda/COGnito/issues/299)
+
 ## [1.23.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.22.0...COGnito-v1.23.0) (2026-03-10)
 
 
