@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.21.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.20.1...COGnito-v1.21.0) (2026-03-10)
+
+
+### Features
+
+* 카탈로그 필터/정렬 상태 URL 쿼리스트링 동기화 ([#283](https://github.com/conaonda/COGnito/issues/283)) ([2e69089](https://github.com/conaonda/COGnito/commit/2e6908948a0654c62a15fd3ba8efdf72af115a70)), closes [#282](https://github.com/conaonda/COGnito/issues/282)
+
 ## [1.20.1](https://github.com/conaonda/COGnito/compare/COGnito-v1.20.0...COGnito-v1.20.1) (2026-03-09)
 
 
