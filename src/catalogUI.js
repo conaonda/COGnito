@@ -529,6 +529,16 @@ export function initCatalogUI(onSelectCog) {
       viewCountEl.textContent = `👁 ${item.view_count || 0}`
       card.appendChild(viewCountEl)
 
+      // hover 시 bbox 하이라이트 표시
+      if (item.bbox) {
+        card.addEventListener('mouseenter', () => {
+          document.dispatchEvent(new CustomEvent('catalog-card-mouseenter', { detail: { bbox: item.bbox } }))
+        })
+        card.addEventListener('mouseleave', () => {
+          document.dispatchEvent(new CustomEvent('catalog-card-mouseleave'))
+        })
+      }
+
       card.addEventListener('click', (e) => {
         if (e.target.classList.contains('catalog-tag')) {
           e.stopPropagation()

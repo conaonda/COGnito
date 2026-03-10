@@ -2,6 +2,11 @@ import { Map, View } from 'ol'
 import LayerGroup from 'ol/layer/Group'
 import { defaults as defaultControls } from 'ol/control'
 import { transform, transformExtent } from 'ol/proj'
+import VectorLayer from 'ol/layer/Vector'
+import VectorSource from 'ol/source/Vector'
+import Feature from 'ol/Feature'
+import { fromExtent } from 'ol/geom/Polygon'
+import { Style, Stroke, Fill } from 'ol/style'
 // @conaonda/ol-cog-layers: 동적 import로 초기 번들에서 제외
 const _cogLayers = () => import('@conaonda/ol-cog-layers')
 import { proxyCogUrl } from './proxy.js'
@@ -483,6 +488,30 @@ const loadCOG = async (rawUrl, catalogMeta = null, overrideBandInfo = null, { sk
 
   import('./catalogUI.js').then(m => m.initCatalogUI((url, catalogItem) => loadCOG(url, catalogItem))).catch(console.error)
   import('./watchlistUI.js').then(m => m.initWatchlistUI((url, catalogItem) => loadCOG(url, catalogItem))).catch(console.error)
+
+  // 카탈로그 카드 hover bbox 하이라이트 레이어
+  const highlightSource = new VectorSource()
+  const highlightLayer = new VectorLayer({
+    source: highlightSource,
+    style: new Style({
+      stroke: new Stroke({ color: '#667eea', width: 2 }),
+      fill: new Fill({ color: 'rgba(102,126,234,0.15)' })
+    }),
+    zIndex: 200
+  })
+  map.addLayer(highlightLayer)
+
+  document.addEventListener('catalog-card-mouseenter', (e) => {
+    const bbox = e.detail?.bbox
+    if (!bbox || bbox.length !== 4) return
+    highlightSource.clear()
+    const extent = transformExtent(bbox, 'EPSG:4326', map.getView().getProjection())
+    highlightSource.addFeature(new Feature(fromExtent(extent)))
+  })
+
+  document.addEventListener('catalog-card-mouseleave', () => {
+    highlightSource.clear()
+  })
 
   // 카탈로그 카드 '지도로 이동' 버튼 이벤트 핸들러
   document.addEventListener('catalog-fit-bbox', (e) => {
