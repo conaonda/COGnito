@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.27.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.26.0...COGnito-v1.27.0) (2026-03-12)
+
+
+### Features
+
+* 카탈로그 활성 필터 칩(active filter chips) 표시 ([#311](https://github.com/conaonda/COGnito/issues/311)) ([54f85a5](https://github.com/conaonda/COGnito/commit/54f85a5b4679b1fea726ff174e9c8abd3bd9e6e5)), closes [#310](https://github.com/conaonda/COGnito/issues/310)
+
 ## [1.26.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.25.0...COGnito-v1.26.0) (2026-03-12)
 
 
