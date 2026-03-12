@@ -1937,3 +1937,72 @@ describe('catalogUI 검색창 단축키', () => {
     expect(document.activeElement).not.toBe(searchInput)
   })
 })
+
+describe('catalogUI keyboard accessibility', () => {
+  const TEST_USER_ID = 'user-123'
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    setupDOM()
+    mockGetSession.mockResolvedValue({ user: { id: TEST_USER_ID } })
+    mockOnAuthStateChange.mockImplementation(() => {})
+    mockGetLikeStates.mockResolvedValue(new Map())
+    mockGetWatchlistedImageIds.mockResolvedValue(new Set())
+  })
+
+  async function openPanelWithItems(items) {
+    mockGetCogImages.mockResolvedValue({ data: items, totalCount: items.length, error: null })
+    const onSelect = vi.fn()
+    initCatalogUI(onSelect)
+    await new Promise(r => setTimeout(r, 10))
+    document.getElementById('catalog-toggle-btn').click()
+    await new Promise(r => setTimeout(r, 10))
+    return onSelect
+  }
+
+  it('catalog cards have tabIndex=0 and role=button', async () => {
+    await openPanelWithItems([
+      { id: '1', user_id: TEST_USER_ID, title: 'Test', tags: [], created_at: '2026-01-01' },
+    ])
+
+    const card = document.querySelector('.catalog-card')
+    expect(card.tabIndex).toBe(0)
+    expect(card.getAttribute('role')).toBe('button')
+  })
+
+  it('Enter key on card triggers click (opens viewer)', async () => {
+    const onSelect = await openPanelWithItems([
+      { id: '1', user_id: TEST_USER_ID, title: 'Test', url: 'http://example.com/test.tif', tags: [], created_at: '2026-01-01' },
+    ])
+
+    const card = document.querySelector('.catalog-card')
+    card.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }))
+    await new Promise(r => setTimeout(r, 10))
+
+    expect(onSelect).toHaveBeenCalledWith('http://example.com/test.tif', expect.objectContaining({ id: '1' }))
+  })
+
+  it('Space key on card triggers click (opens viewer)', async () => {
+    const onSelect = await openPanelWithItems([
+      { id: '1', user_id: TEST_USER_ID, title: 'Test', url: 'http://example.com/test.tif', tags: [], created_at: '2026-01-01' },
+    ])
+
+    const card = document.querySelector('.catalog-card')
+    card.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }))
+    await new Promise(r => setTimeout(r, 10))
+
+    expect(onSelect).toHaveBeenCalledWith('http://example.com/test.tif', expect.objectContaining({ id: '1' }))
+  })
+
+  it('Enter/Space on inner button does not trigger card click', async () => {
+    const onSelect = await openPanelWithItems([
+      { id: '1', user_id: TEST_USER_ID, title: 'Test', url: 'http://example.com/test.tif', tags: [], created_at: '2026-01-01' },
+    ])
+
+    const shareBtn = document.querySelector('.catalog-share-btn')
+    shareBtn.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }))
+    await new Promise(r => setTimeout(r, 10))
+
+    expect(onSelect).not.toHaveBeenCalled()
+  })
+})
