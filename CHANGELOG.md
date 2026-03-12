@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.25.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.24.0...COGnito-v1.25.0) (2026-03-12)
+
+
+### Features
+
+* 카탈로그 검색어 하이라이팅 (카드 제목/설명에 검색어 강조 표시) ([#303](https://github.com/conaonda/COGnito/issues/303)) ([93efe1e](https://github.com/conaonda/COGnito/commit/93efe1eefed1700ee42b267b114d58e73dc906df)), closes [#302](https://github.com/conaonda/COGnito/issues/302)
+
 ## [1.24.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.23.0...COGnito-v1.24.0) (2026-03-10)
 
 
