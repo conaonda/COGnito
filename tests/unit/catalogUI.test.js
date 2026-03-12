@@ -2006,3 +2006,58 @@ describe('catalogUI keyboard accessibility', () => {
     expect(onSelect).not.toHaveBeenCalled()
   })
 })
+
+describe('스켈레톤 카드 UI', () => {
+  beforeEach(() => {
+    setupDOM()
+    mockGetSession.mockResolvedValue({ data: { session: null } })
+    mockOnAuthStateChange.mockReturnValue({ data: { subscription: { unsubscribe: vi.fn() } } })
+  })
+
+  afterEach(() => { vi.restoreAllMocks() })
+
+  it('로딩 시 pageSize 수만큼 스켈레톤 카드를 표시한다', async () => {
+    let resolveLoad
+    mockGetCogImages.mockReturnValue(new Promise(r => { resolveLoad = r }))
+
+    const onSelect = vi.fn()
+    initCatalogUI(onSelect)
+
+    document.getElementById('catalog-toggle-btn').click()
+    await new Promise(r => setTimeout(r, 50))
+
+    const skeletons = document.querySelectorAll('.catalog-skeleton-card')
+    expect(skeletons.length).toBe(20) // DEFAULT_PAGE_SIZE
+
+    resolveLoad({ data: [], totalCount: 0 })
+  })
+
+  it('스켈레톤 카드에 shimmer 클래스가 적용된다', async () => {
+    let resolveLoad
+    mockGetCogImages.mockReturnValue(new Promise(r => { resolveLoad = r }))
+
+    const onSelect = vi.fn()
+    initCatalogUI(onSelect)
+
+    document.getElementById('catalog-toggle-btn').click()
+    await new Promise(r => setTimeout(r, 50))
+
+    const shimmers = document.querySelectorAll('.catalog-skeleton-shimmer')
+    expect(shimmers.length).toBeGreaterThan(0)
+
+    resolveLoad({ data: [], totalCount: 0 })
+  })
+
+  it('데이터 로드 후 스켈레톤 카드가 제거된다', async () => {
+    mockGetCogImages.mockResolvedValue({ data: [], totalCount: 0 })
+
+    const onSelect = vi.fn()
+    initCatalogUI(onSelect)
+
+    document.getElementById('catalog-toggle-btn').click()
+    await new Promise(r => setTimeout(r, 50))
+
+    const skeletons = document.querySelectorAll('.catalog-skeleton-card')
+    expect(skeletons.length).toBe(0)
+  })
+})

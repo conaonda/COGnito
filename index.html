@@ -1482,6 +1482,43 @@
       color: #fff;
     }
 
+    /* Skeleton card shimmer */
+    @keyframes catalog-shimmer {
+      0% { background-position: -200px 0; }
+      100% { background-position: 200px 0; }
+    }
+
+    .catalog-skeleton-shimmer {
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 400px 100%;
+      animation: catalog-shimmer 1.5s infinite linear;
+      border-radius: 4px;
+    }
+
+    .catalog-skeleton-thumb {
+      width: 100%;
+      height: 80px;
+      margin-bottom: 0.5rem;
+    }
+
+    .catalog-list--list-view .catalog-skeleton-thumb {
+      width: 60px;
+      height: 60px;
+      flex-shrink: 0;
+      margin-bottom: 0;
+    }
+
+    .catalog-skeleton-title {
+      height: 0.75rem;
+      width: 70%;
+      margin-bottom: 0.4rem;
+    }
+
+    .catalog-skeleton-tags {
+      height: 0.6rem;
+      width: 40%;
+    }
+
     .catalog-source-badge {
       display: inline-block;
       padding: 0.1rem 0.35rem;
