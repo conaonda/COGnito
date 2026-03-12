@@ -1772,6 +1772,40 @@ describe('catalogUI active filter chips', () => {
     expect(labels.some(l => l.includes('연도: 2025'))).toBe(true)
   })
 
+  it('필터 칩 컨테이너에 role="list"와 aria-label이 있다', async () => {
+    await initAndOpen()
+    const container = document.getElementById('catalog-active-filters')
+    expect(container.getAttribute('role')).toBe('list')
+    expect(container.getAttribute('aria-label')).toBe('활성 필터 목록')
+  })
+
+  it('개별 칩에 role="listitem"과 aria-label이 있다', async () => {
+    await initAndOpen()
+    const searchInput = document.getElementById('catalog-search')
+    searchInput.value = '위성'
+    searchInput.dispatchEvent(new Event('input'))
+    await vi.advanceTimersByTimeAsync(300)
+    const chip = document.querySelector('.catalog-filter-chip')
+    expect(chip.getAttribute('role')).toBe('listitem')
+    expect(chip.getAttribute('aria-label')).toBe('검색: 위성 필터 활성')
+  })
+
+  it('필터 초기화 버튼에 aria-label이 있다', async () => {
+    await initAndOpen()
+    const resetBtn = document.getElementById('catalog-filter-reset')
+    expect(resetBtn.getAttribute('aria-label')).toBe('모든 필터 초기화')
+  })
+
+  it('필터 칩 제거 버튼에 aria-label이 있다', async () => {
+    await initAndOpen()
+    const searchInput = document.getElementById('catalog-search')
+    searchInput.value = '위성'
+    searchInput.dispatchEvent(new Event('input'))
+    await vi.advanceTimersByTimeAsync(300)
+    const removeBtn = document.querySelector('.catalog-filter-chip-remove')
+    expect(removeBtn.getAttribute('aria-label')).toBe('검색: 위성 필터 해제')
+  })
+
   it('필터 초기화 버튼 클릭 시 모든 칩이 제거된다', async () => {
     await initAndOpen()
     const searchInput = document.getElementById('catalog-search')
@@ -1783,5 +1817,46 @@ describe('catalogUI active filter chips', () => {
     await vi.advanceTimersByTimeAsync(0)
     expect(document.querySelectorAll('.catalog-filter-chip').length).toBe(0)
     expect(document.getElementById('catalog-active-filters').style.display).toBe('none')
+  })
+})
+
+describe('catalogUI thumbnail lazy loading', () => {
+  const TEST_USER_ID = 'user-123'
+
+  beforeEach(() => {
+    vi.useFakeTimers()
+    vi.clearAllMocks()
+    history.replaceState(null, '', window.location.pathname)
+    setupDOM()
+    mockGetSession.mockResolvedValue({ user: { id: TEST_USER_ID } })
+    mockOnAuthStateChange.mockImplementation(() => {})
+    mockGetLikeStates.mockResolvedValue(new Map())
+    mockGetWatchlistedImageIds.mockResolvedValue(new Set())
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  async function initAndOpen(items) {
+    mockGetCogImages.mockResolvedValue({ data: items, totalCount: items.length, error: null })
+    const onSelect = vi.fn()
+    initCatalogUI(onSelect)
+    await vi.advanceTimersByTimeAsync(10)
+    document.getElementById('catalog-toggle-btn').click()
+    await vi.advanceTimersByTimeAsync(10)
+  }
+
+  it('썸네일 이미지에 loading="lazy" 속성이 있다', async () => {
+    await initAndOpen([{ id: '1', title: 'T', tags: [], thumbnail_url: 'http://img.png', created_at: '2026-01-01' }])
+    const img = document.querySelector('.catalog-card-thumb')
+    expect(img).not.toBeNull()
+    expect(img.getAttribute('loading')).toBe('lazy')
+  })
+
+  it('썸네일이 없는 카드에서 오류가 없다', async () => {
+    await initAndOpen([{ id: '1', title: 'T', tags: [], created_at: '2026-01-01' }])
+    expect(document.querySelector('.catalog-card-thumb')).toBeNull()
+    expect(document.querySelector('.catalog-card')).not.toBeNull()
   })
 })

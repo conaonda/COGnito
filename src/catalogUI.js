@@ -61,6 +61,7 @@ export function initCatalogUI(onSelectCog) {
   resetBtn.id = 'catalog-filter-reset'
   resetBtn.className = 'catalog-filter-reset-btn'
   resetBtn.textContent = '필터 초기화'
+  resetBtn.setAttribute('aria-label', '모든 필터 초기화')
   resetBtn.style.display = 'none'
   filterContainer.appendChild(resetBtn)
 
@@ -156,6 +157,8 @@ export function initCatalogUI(onSelectCog) {
   const activeFiltersContainer = document.createElement('div')
   activeFiltersContainer.id = 'catalog-active-filters'
   activeFiltersContainer.className = 'catalog-active-filters'
+  activeFiltersContainer.setAttribute('role', 'list')
+  activeFiltersContainer.setAttribute('aria-label', '활성 필터 목록')
   activeFiltersContainer.style.display = 'none'
   listEl.parentNode.insertBefore(activeFiltersContainer, listEl)
 
@@ -301,6 +304,8 @@ export function initCatalogUI(onSelectCog) {
     chips.forEach(({ label, clear }) => {
       const chip = document.createElement('span')
       chip.className = 'catalog-filter-chip'
+      chip.setAttribute('role', 'listitem')
+      chip.setAttribute('aria-label', `${label} 필터 활성`)
       chip.textContent = label
 
       const removeBtn = document.createElement('button')
