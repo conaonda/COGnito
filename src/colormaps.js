@@ -6,6 +6,22 @@ const MAGMA_KEYS = [
   [253, 187, 110], [253, 222, 148], [251, 252, 191], [252, 253, 191]
 ]
 
+// Viridis 16-step keypoints (matplotlib 기준)
+const VIRIDIS_KEYS = [
+  [68, 1, 84], [72, 20, 103], [72, 38, 119], [69, 55, 129],
+  [63, 71, 136], [56, 87, 140], [49, 104, 142], [42, 120, 142],
+  [35, 136, 142], [31, 152, 139], [34, 168, 132], [53, 183, 121],
+  [94, 201, 98], [144, 215, 67], [200, 225, 32], [253, 231, 37]
+]
+
+// Inferno 16-step keypoints (matplotlib 기준)
+const INFERNO_KEYS = [
+  [0, 0, 4], [11, 7, 42], [32, 12, 74], [56, 12, 101],
+  [81, 9, 113], [106, 13, 118], [132, 22, 113], [157, 37, 99],
+  [181, 54, 79], [202, 75, 56], [221, 100, 34], [237, 132, 14],
+  [247, 169, 9], [250, 209, 35], [245, 243, 96], [252, 255, 164]
+]
+
 function interpolateLUT(keypoints) {
   const lut = new Array(256)
   for (let i = 0; i < 256; i++) {
@@ -25,4 +41,6 @@ function interpolateLUT(keypoints) {
 export async function registerColormaps() {
   const { COLORMAPS } = await import('@conaonda/ol-cog-layers')
   COLORMAPS.magma = interpolateLUT(MAGMA_KEYS)
+  COLORMAPS.viridis = interpolateLUT(VIRIDIS_KEYS)
+  COLORMAPS.inferno = interpolateLUT(INFERNO_KEYS)
 }
