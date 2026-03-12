@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.32.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.31.0...COGnito-v1.32.0) (2026-03-12)
+
+
+### Features
+
+* 뷰어 Viridis / Inferno 컬러맵 추가 (closes [#335](https://github.com/conaonda/COGnito/issues/335)) ([#336](https://github.com/conaonda/COGnito/issues/336)) ([b5e6372](https://github.com/conaonda/COGnito/commit/b5e637242277aaed97e817be83e507f89c3ef025))
+
 ## [1.31.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.30.0...COGnito-v1.31.0) (2026-03-12)
 
 
