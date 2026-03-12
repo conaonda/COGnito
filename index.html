@@ -1488,6 +1488,21 @@
       100% { background-position: 200px 0; }
     }
 
+    @keyframes catalog-fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .catalog-card--enter {
+      animation: catalog-fadeIn 200ms ease-out both;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .catalog-card--enter {
+        animation: none;
+      }
+    }
+
     .catalog-skeleton-shimmer {
       background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
       background-size: 400px 100%;
