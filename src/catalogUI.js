@@ -407,8 +407,8 @@ export function initCatalogUI(onSelectCog) {
 
       card.innerHTML = `
         ${thumbHtml}
-        <div class="catalog-card-title">${sourceBadge} ${escapeHtml(item.title || '제목 없음')}</div>
-        <div class="catalog-card-desc">${escapeHtml(item.description || '')}</div>
+        <div class="catalog-card-title">${sourceBadge} ${highlightText(item.title || '제목 없음', searchTerm)}</div>
+        <div class="catalog-card-desc">${highlightText(item.description || '', searchTerm)}</div>
         ${tagsHtml}
         ${capturedAtHtml}
         ${resolutionHtml}
@@ -569,6 +569,14 @@ function escapeHtml(str) {
   const div = document.createElement('div')
   div.textContent = str
   return div.innerHTML
+}
+
+function highlightText(text, query) {
+  if (!query) return escapeHtml(text)
+  const escaped = escapeHtml(text)
+  const escapedQuery = escapeHtml(query)
+  const regex = new RegExp(`(${escapedQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi')
+  return escaped.replace(regex, '<mark>$1</mark>')
 }
 
 function formatDate(iso) {
