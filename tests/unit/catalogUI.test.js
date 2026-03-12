@@ -1595,3 +1595,88 @@ describe('catalogUI search highlighting', () => {
     expect(card.querySelector('script')).toBeNull()
   })
 })
+
+describe('catalogUI view toggle (grid/list)', () => {
+  const TEST_USER_ID = 'user-123'
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    localStorage.clear()
+    setupDOM()
+    mockGetSession.mockResolvedValue({ user: { id: TEST_USER_ID } })
+    mockOnAuthStateChange.mockImplementation(() => {})
+    mockGetLikeStates.mockResolvedValue(new Map())
+    mockGetWatchlistedImageIds.mockResolvedValue(new Set())
+  })
+
+  async function openPanelWithItems(items) {
+    mockGetCogImages.mockResolvedValue({ data: items, totalCount: items.length, error: null })
+    const onSelect = vi.fn()
+    initCatalogUI(onSelect)
+    await new Promise(r => setTimeout(r, 10))
+    document.getElementById('catalog-toggle-btn').click()
+    await new Promise(r => setTimeout(r, 10))
+    return onSelect
+  }
+
+  it('renders view toggle buttons', async () => {
+    await openPanelWithItems([])
+    const btns = document.querySelectorAll('.catalog-view-btn')
+    expect(btns).toHaveLength(2)
+    expect(btns[0].dataset.view).toBe('grid')
+    expect(btns[1].dataset.view).toBe('list')
+  })
+
+  it('defaults to grid view with active class', async () => {
+    await openPanelWithItems([])
+    const gridBtn = document.querySelector('.catalog-view-btn[data-view="grid"]')
+    const listBtn = document.querySelector('.catalog-view-btn[data-view="list"]')
+    expect(gridBtn.classList.contains('active')).toBe(true)
+    expect(listBtn.classList.contains('active')).toBe(false)
+    expect(document.getElementById('catalog-list').classList.contains('catalog-list--list-view')).toBe(false)
+  })
+
+  it('switches to list view on click', async () => {
+    await openPanelWithItems([])
+    const listBtn = document.querySelector('.catalog-view-btn[data-view="list"]')
+    listBtn.click()
+    expect(listBtn.classList.contains('active')).toBe(true)
+    expect(document.getElementById('catalog-list').classList.contains('catalog-list--list-view')).toBe(true)
+  })
+
+  it('saves view mode to localStorage', async () => {
+    await openPanelWithItems([])
+    const listBtn = document.querySelector('.catalog-view-btn[data-view="list"]')
+    listBtn.click()
+    expect(localStorage.getItem('catalog-view-mode')).toBe('list')
+  })
+
+  it('restores view mode from localStorage', async () => {
+    localStorage.setItem('catalog-view-mode', 'list')
+    await openPanelWithItems([])
+    const listEl = document.getElementById('catalog-list')
+    expect(listEl.classList.contains('catalog-list--list-view')).toBe(true)
+    const listBtn = document.querySelector('.catalog-view-btn[data-view="list"]')
+    expect(listBtn.classList.contains('active')).toBe(true)
+  })
+
+  it('list view cards have catalog-card-body wrapper', async () => {
+    await openPanelWithItems([
+      { id: '1', user_id: TEST_USER_ID, title: 'Test', description: 'desc', tags: [], created_at: '2026-01-01', thumbnail_url: 'http://example.com/thumb.jpg' },
+    ])
+    const body = document.querySelector('.catalog-card-body')
+    expect(body).not.toBeNull()
+    expect(body.querySelector('.catalog-card-info')).not.toBeNull()
+  })
+
+  it('switches back to grid view', async () => {
+    await openPanelWithItems([])
+    const listBtn = document.querySelector('.catalog-view-btn[data-view="list"]')
+    const gridBtn = document.querySelector('.catalog-view-btn[data-view="grid"]')
+    listBtn.click()
+    gridBtn.click()
+    expect(gridBtn.classList.contains('active')).toBe(true)
+    expect(document.getElementById('catalog-list').classList.contains('catalog-list--list-view')).toBe(false)
+    expect(localStorage.getItem('catalog-view-mode')).toBe('grid')
+  })
+})

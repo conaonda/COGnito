@@ -879,6 +879,55 @@
       padding: 0 0.75rem;
     }
 
+    /* 뷰 토글 버튼 */
+    .catalog-view-toggle {
+      display: flex;
+      gap: 0.25rem;
+      padding: 0.25rem 0.75rem;
+    }
+
+    .catalog-view-btn {
+      padding: 0.25rem 0.5rem;
+      border: 1px solid #d1d5db;
+      border-radius: 4px;
+      background: white;
+      cursor: pointer;
+      font-size: 0.9rem;
+      line-height: 1;
+      color: #6b7280;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .catalog-view-btn:hover {
+      border-color: #667eea;
+      color: #667eea;
+    }
+
+    .catalog-view-btn.active {
+      background: #667eea;
+      border-color: #667eea;
+      color: white;
+    }
+
+    /* 리스트 뷰 */
+    .catalog-list--list-view .catalog-card-body {
+      display: flex;
+      gap: 0.5rem;
+      align-items: flex-start;
+    }
+
+    .catalog-list--list-view .catalog-card-thumb {
+      width: 60px;
+      max-height: 60px;
+      flex-shrink: 0;
+      margin-bottom: 0;
+    }
+
+    .catalog-list--list-view .catalog-card-info {
+      flex: 1;
+      min-width: 0;
+    }
+
     .catalog-card {
       padding: 0.75rem;
       border: 1px solid #e5e7eb;
