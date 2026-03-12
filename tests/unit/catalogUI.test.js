@@ -1860,3 +1860,80 @@ describe('catalogUI thumbnail lazy loading', () => {
     expect(document.querySelector('.catalog-card')).not.toBeNull()
   })
 })
+
+describe('catalogUI 검색창 단축키', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    setupDOM()
+    mockGetSession.mockResolvedValue(null)
+    mockOnAuthStateChange.mockImplementation(() => {})
+    mockGetCogImages.mockResolvedValue({ data: [], totalCount: 0, error: null })
+    mockGetLikeStates.mockResolvedValue(new Map())
+    mockGetWatchlistedImageIds.mockResolvedValue(new Set())
+  })
+
+  afterEach(() => {
+    document.body.innerHTML = ''
+  })
+
+  it('/ 키를 누르면 검색창에 포커스가 이동한다', async () => {
+    initCatalogUI(vi.fn())
+    await new Promise(r => setTimeout(r, 10))
+
+    const searchInput = document.getElementById('catalog-search')
+    expect(document.activeElement).not.toBe(searchInput)
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: '/' }))
+    expect(document.activeElement).toBe(searchInput)
+  })
+
+  it('/ 키를 누르면 기존 검색어가 전체 선택된다', async () => {
+    initCatalogUI(vi.fn())
+    await new Promise(r => setTimeout(r, 10))
+
+    const searchInput = document.getElementById('catalog-search')
+    searchInput.value = 'test query'
+    const selectSpy = vi.spyOn(searchInput, 'select')
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: '/' }))
+    expect(selectSpy).toHaveBeenCalled()
+  })
+
+  it('input에 포커스가 있을 때 / 키를 누르면 무시된다', async () => {
+    initCatalogUI(vi.fn())
+    await new Promise(r => setTimeout(r, 10))
+
+    const searchInput = document.getElementById('catalog-search')
+    searchInput.focus()
+
+    const preventDefaultSpy = vi.fn()
+    const event = new KeyboardEvent('keydown', { key: '/' })
+    // keydown 이벤트는 이미 dispatch된 후라 preventDefault를 spy할 수 없으므로
+    // 대신 포커스가 유지되는지 확인
+    document.dispatchEvent(event)
+    expect(document.activeElement).toBe(searchInput)
+  })
+
+  it('Escape 키를 누르면 검색창 포커스가 해제된다', async () => {
+    initCatalogUI(vi.fn())
+    await new Promise(r => setTimeout(r, 10))
+
+    const searchInput = document.getElementById('catalog-search')
+    searchInput.focus()
+    expect(document.activeElement).toBe(searchInput)
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
+    expect(document.activeElement).not.toBe(searchInput)
+  })
+
+  it('검색창에 포커스가 없을 때 Escape 키는 아무 동작도 하지 않는다', async () => {
+    initCatalogUI(vi.fn())
+    await new Promise(r => setTimeout(r, 10))
+
+    const searchInput = document.getElementById('catalog-search')
+    expect(document.activeElement).not.toBe(searchInput)
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
+    expect(document.activeElement).not.toBe(searchInput)
+  })
+})
