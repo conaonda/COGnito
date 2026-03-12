@@ -1524,3 +1524,74 @@ describe('catalogUI hover bbox highlight', () => {
     document.removeEventListener('catalog-card-mouseenter', handler)
   })
 })
+
+describe('catalogUI search highlighting', () => {
+  const TEST_USER_ID = 'user-123'
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    setupDOM()
+    mockGetSession.mockResolvedValue({ user: { id: TEST_USER_ID } })
+    mockOnAuthStateChange.mockImplementation(() => {})
+    mockGetLikeStates.mockResolvedValue(new Map())
+    mockGetWatchlistedImageIds.mockResolvedValue(new Set())
+  })
+
+  async function openPanelWithSearch(items, query) {
+    mockGetCogImages.mockResolvedValue({ data: items, totalCount: items.length, error: null })
+    const onSelect = vi.fn()
+    initCatalogUI(onSelect)
+    await new Promise(r => setTimeout(r, 10))
+    document.getElementById('catalog-toggle-btn').click()
+    await new Promise(r => setTimeout(r, 10))
+    if (query) {
+      const searchInput = document.getElementById('catalog-search')
+      searchInput.value = query
+      searchInput.dispatchEvent(new Event('input'))
+      await new Promise(r => setTimeout(r, 350))
+    }
+    return onSelect
+  }
+
+  it('highlights search term in card title and description', async () => {
+    await openPanelWithSearch(
+      [{ id: '1', user_id: TEST_USER_ID, title: 'Sentinel 위성 영상', description: 'Sentinel-2 데이터입니다', tags: [], created_at: '2026-01-01' }],
+      'Sentinel',
+    )
+    const card = document.querySelector('.catalog-card')
+    const title = card.querySelector('.catalog-card-title')
+    const desc = card.querySelector('.catalog-card-desc')
+    expect(title.querySelectorAll('mark')).toHaveLength(1)
+    expect(title.querySelector('mark').textContent).toBe('Sentinel')
+    expect(desc.querySelectorAll('mark')).toHaveLength(1)
+    expect(desc.querySelector('mark').textContent).toBe('Sentinel')
+  })
+
+  it('highlights case-insensitively', async () => {
+    await openPanelWithSearch(
+      [{ id: '1', user_id: TEST_USER_ID, title: 'LANDSAT Image', description: 'landsat data', tags: [], created_at: '2026-01-01' }],
+      'landsat',
+    )
+    const card = document.querySelector('.catalog-card')
+    const title = card.querySelector('.catalog-card-title')
+    expect(title.querySelector('mark').textContent).toBe('LANDSAT')
+  })
+
+  it('does not highlight when search is empty', async () => {
+    await openPanelWithSearch(
+      [{ id: '1', user_id: TEST_USER_ID, title: 'Test Image', description: 'desc', tags: [], created_at: '2026-01-01' }],
+      '',
+    )
+    const card = document.querySelector('.catalog-card')
+    expect(card.querySelector('mark')).toBeNull()
+  })
+
+  it('escapes HTML in search term to prevent XSS', async () => {
+    await openPanelWithSearch(
+      [{ id: '1', user_id: TEST_USER_ID, title: '<script>alert("xss")</script>', description: 'safe', tags: [], created_at: '2026-01-01' }],
+      '<script>',
+    )
+    const card = document.querySelector('.catalog-card')
+    expect(card.querySelector('script')).toBeNull()
+  })
+})
