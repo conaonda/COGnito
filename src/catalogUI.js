@@ -403,6 +403,25 @@ export function initCatalogUI(onSelectCog) {
     loadPage()
   })
 
+  // '/' 키로 검색창 포커스, Escape 키로 포커스 해제
+  document.addEventListener('keydown', (e) => {
+    if (e.key === '/' && !isInputFocused()) {
+      e.preventDefault()
+      searchInput.focus()
+      searchInput.select()
+    }
+    if (e.key === 'Escape' && document.activeElement === searchInput) {
+      searchInput.blur()
+    }
+  })
+
+  function isInputFocused() {
+    const el = document.activeElement
+    if (!el) return false
+    const tag = el.tagName.toLowerCase()
+    return tag === 'input' || tag === 'textarea' || tag === 'select' || el.isContentEditable
+  }
+
   // 등록 이벤트 수신 → 목록 갱신
   document.addEventListener('cog-registered', () => {
     if (panel.classList.contains('open')) {
