@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.29.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.28.0...COGnito-v1.29.0) (2026-03-12)
+
+
+### Features
+
+* 카탈로그 검색창 단축키 (/ 키로 포커스, Escape로 해제) ([#319](https://github.com/conaonda/COGnito/issues/319)) ([#320](https://github.com/conaonda/COGnito/issues/320)) ([f614204](https://github.com/conaonda/COGnito/commit/f6142040c6eb06787725fa8ccd038a6020cdec5b))
+* 카탈로그 카드 키보드 접근성 개선 (tabIndex + Enter/Space 열기) ([#324](https://github.com/conaonda/COGnito/issues/324)) ([6fef92b](https://github.com/conaonda/COGnito/commit/6fef92b050d2d7e93857e62fc571d88cc706291c)), closes [#323](https://github.com/conaonda/COGnito/issues/323)
+
 ## [1.28.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.27.0...COGnito-v1.28.0) (2026-03-12)
 
 
