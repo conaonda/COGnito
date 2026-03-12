@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.31.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.30.0...COGnito-v1.31.0) (2026-03-12)
+
+
+### Features
+
+* 카탈로그 카드 로드 시 페이드인 애니메이션 (closes [#331](https://github.com/conaonda/COGnito/issues/331)) ([#332](https://github.com/conaonda/COGnito/issues/332)) ([1aa8e02](https://github.com/conaonda/COGnito/commit/1aa8e0244833a83990150adc172247ec0feaacfe))
+
 ## [1.30.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.29.0...COGnito-v1.30.0) (2026-03-12)
 
 
