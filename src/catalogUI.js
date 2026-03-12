@@ -430,9 +430,33 @@ export function initCatalogUI(onSelectCog) {
     }
   })
 
+  function renderSkeletonCards(container, count, mode) {
+    container.innerHTML = ''
+    for (let i = 0; i < count; i++) {
+      const card = document.createElement('div')
+      card.className = 'catalog-card catalog-skeleton-card'
+      const body = document.createElement('div')
+      body.className = 'catalog-card-body'
+      const thumb = document.createElement('div')
+      thumb.className = 'catalog-skeleton-thumb catalog-skeleton-shimmer'
+      const info = document.createElement('div')
+      info.className = 'catalog-card-info'
+      const title = document.createElement('div')
+      title.className = 'catalog-skeleton-title catalog-skeleton-shimmer'
+      const tags = document.createElement('div')
+      tags.className = 'catalog-skeleton-tags catalog-skeleton-shimmer'
+      info.appendChild(title)
+      info.appendChild(tags)
+      body.appendChild(thumb)
+      body.appendChild(info)
+      card.appendChild(body)
+      container.appendChild(card)
+    }
+  }
+
   async function loadPage() {
     syncUrlToState()
-    listEl.innerHTML = '<div style="text-align:center;padding:2rem;color:#999;">로딩 중...</div>'
+    renderSkeletonCards(listEl, pageSize, viewMode)
 
     const offset = currentPage * pageSize
     const likedIds = likedOnlyCheckbox.checked ? await getLikedImageIds() : null
