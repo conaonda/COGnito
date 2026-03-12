@@ -122,6 +122,36 @@ export function initCatalogUI(onSelectCog) {
   totalCountEl.className = 'catalog-total-count'
   pageSizeContainer.parentNode.insertBefore(totalCountEl, pageSizeContainer.nextSibling)
 
+  // 그리드/리스트 뷰 토글 버튼
+  const viewToggleContainer = document.createElement('div')
+  viewToggleContainer.className = 'catalog-view-toggle'
+  viewToggleContainer.innerHTML = `
+    <button type="button" class="catalog-view-btn" data-view="grid" aria-label="그리드 뷰" title="그리드 뷰">⊞</button>
+    <button type="button" class="catalog-view-btn" data-view="list" aria-label="리스트 뷰" title="리스트 뷰">≡</button>
+  `
+  searchInput.parentNode.insertBefore(viewToggleContainer, searchInput.nextSibling)
+  // 필터 컨테이너를 뷰 토글 뒤로 이동
+  viewToggleContainer.parentNode.insertBefore(filterContainer, viewToggleContainer.nextSibling)
+
+  let viewMode = localStorage.getItem('catalog-view-mode') || 'grid'
+
+  function applyViewMode() {
+    listEl.classList.toggle('catalog-list--list-view', viewMode === 'list')
+    viewToggleContainer.querySelectorAll('.catalog-view-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.view === viewMode)
+    })
+  }
+
+  viewToggleContainer.addEventListener('click', (e) => {
+    const btn = e.target.closest('.catalog-view-btn')
+    if (!btn) return
+    viewMode = btn.dataset.view
+    localStorage.setItem('catalog-view-mode', viewMode)
+    applyViewMode()
+  })
+
+  applyViewMode()
+
   let pageSize = DEFAULT_PAGE_SIZE
   let currentPage = 0
   let searchTerm = ''
@@ -406,13 +436,17 @@ export function initCatalogUI(onSelectCog) {
         : ''
 
       card.innerHTML = `
-        ${thumbHtml}
-        <div class="catalog-card-title">${sourceBadge} ${highlightText(item.title || '제목 없음', searchTerm)}</div>
-        <div class="catalog-card-desc">${highlightText(item.description || '', searchTerm)}</div>
-        ${tagsHtml}
-        ${capturedAtHtml}
-        ${resolutionHtml}
-        <div class="catalog-card-meta">${metaParts.filter(Boolean).join(' | ')}</div>
+        <div class="catalog-card-body">
+          ${thumbHtml}
+          <div class="catalog-card-info">
+            <div class="catalog-card-title">${sourceBadge} ${highlightText(item.title || '제목 없음', searchTerm)}</div>
+            <div class="catalog-card-desc">${highlightText(item.description || '', searchTerm)}</div>
+            ${tagsHtml}
+            ${capturedAtHtml}
+            ${resolutionHtml}
+            <div class="catalog-card-meta">${metaParts.filter(Boolean).join(' | ')}</div>
+          </div>
+        </div>
       `
 
       // 좋아요 + 관심목록 버튼 (로그인 시만 표시)
