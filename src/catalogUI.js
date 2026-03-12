@@ -152,6 +152,13 @@ export function initCatalogUI(onSelectCog) {
 
   applyViewMode()
 
+  // 활성 필터 칩 영역
+  const activeFiltersContainer = document.createElement('div')
+  activeFiltersContainer.id = 'catalog-active-filters'
+  activeFiltersContainer.className = 'catalog-active-filters'
+  activeFiltersContainer.style.display = 'none'
+  listEl.parentNode.insertBefore(activeFiltersContainer, listEl)
+
   let pageSize = DEFAULT_PAGE_SIZE
   let currentPage = 0
   let searchTerm = ''
@@ -221,6 +228,7 @@ export function initCatalogUI(onSelectCog) {
   }
 
   readUrlParams()
+  renderActiveFilterChips()
 
   let debounceTimer = null
   let isUserLoggedIn = false
@@ -277,6 +285,43 @@ export function initCatalogUI(onSelectCog) {
     resetBtn.style.display = hasActiveFilter() ? '' : 'none'
   }
 
+  function renderActiveFilterChips() {
+    activeFiltersContainer.innerHTML = ''
+    const chips = []
+
+    if (searchInput.value.trim()) chips.push({ label: `검색: ${searchInput.value.trim()}`, clear: () => { searchInput.value = ''; searchTerm = '' } })
+    if (sourceFilter.value) chips.push({ label: `출처: ${sourceFilter.value === 'stac' ? 'STAC' : '수동 등록'}`, clear: () => { sourceFilter.value = '' } })
+    if (tagFilter.value.trim()) chips.push({ label: `태그: ${tagFilter.value.trim()}`, clear: () => { tagFilter.value = '' } })
+    if (yearFilter.value) chips.push({ label: `연도: ${yearFilter.value}`, clear: () => { yearFilter.value = '' } })
+    if (onlyMineCheckbox.checked) chips.push({ label: '내 등록만', clear: () => { onlyMineCheckbox.checked = false } })
+    if (likedOnlyCheckbox.checked) chips.push({ label: '좋아요만', clear: () => { likedOnlyCheckbox.checked = false } })
+
+    activeFiltersContainer.style.display = chips.length > 0 ? '' : 'none'
+
+    chips.forEach(({ label, clear }) => {
+      const chip = document.createElement('span')
+      chip.className = 'catalog-filter-chip'
+      chip.textContent = label
+
+      const removeBtn = document.createElement('button')
+      removeBtn.className = 'catalog-filter-chip-remove'
+      removeBtn.type = 'button'
+      removeBtn.innerHTML = '&times;'
+      removeBtn.setAttribute('aria-label', `${label} 필터 해제`)
+      removeBtn.addEventListener('click', (e) => {
+        e.stopPropagation()
+        clear()
+        currentPage = 0
+        updateResetBtnVisibility()
+        renderActiveFilterChips()
+        loadPage()
+      })
+
+      chip.appendChild(removeBtn)
+      activeFiltersContainer.appendChild(chip)
+    })
+  }
+
   resetBtn.addEventListener('click', () => {
     searchInput.value = ''
     tagFilter.value = ''
@@ -289,6 +334,7 @@ export function initCatalogUI(onSelectCog) {
     searchTerm = ''
     currentPage = 0
     updateResetBtnVisibility()
+    renderActiveFilterChips()
     loadPage()
   })
 
@@ -298,6 +344,7 @@ export function initCatalogUI(onSelectCog) {
       searchTerm = searchInput.value.trim()
       currentPage = 0
       updateResetBtnVisibility()
+      renderActiveFilterChips()
       loadPage()
     }, 300)
   }
@@ -329,11 +376,13 @@ export function initCatalogUI(onSelectCog) {
   onlyMineCheckbox.addEventListener('change', () => {
     currentPage = 0
     updateResetBtnVisibility()
+    renderActiveFilterChips()
     loadPage()
   })
   likedOnlyCheckbox.addEventListener('change', () => {
     currentPage = 0
     updateResetBtnVisibility()
+    renderActiveFilterChips()
     loadPage()
   })
 

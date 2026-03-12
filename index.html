@@ -1414,6 +1414,42 @@
       background: #e5e7eb;
     }
 
+    /* Active filter chips */
+    .catalog-active-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+      padding: 0 0.75rem 0.5rem;
+    }
+
+    .catalog-filter-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.2rem 0.5rem;
+      background: #eef2ff;
+      border: 1px solid #c7d2fe;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      color: #4338ca;
+      white-space: nowrap;
+    }
+
+    .catalog-filter-chip-remove {
+      background: none;
+      border: none;
+      padding: 0;
+      margin: 0;
+      cursor: pointer;
+      font-size: 0.8rem;
+      color: #6366f1;
+      line-height: 1;
+    }
+
+    .catalog-filter-chip-remove:hover {
+      color: #dc2626;
+    }
+
     /* Catalog card thumbnail */
     .catalog-card-thumb {
       width: 100%;
