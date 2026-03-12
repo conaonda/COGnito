@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.30.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.29.0...COGnito-v1.30.0) (2026-03-12)
+
+
+### Features
+
+* 카탈로그 로딩 중 스켈레톤 카드 UI 표시 (closes [#327](https://github.com/conaonda/COGnito/issues/327)) ([#328](https://github.com/conaonda/COGnito/issues/328)) ([98357c6](https://github.com/conaonda/COGnito/commit/98357c615e4ecef44b7fd4cb51fd57f1cbb8a2f6))
+
 ## [1.29.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.28.0...COGnito-v1.29.0) (2026-03-12)
 
 
