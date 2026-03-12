@@ -505,7 +505,7 @@ export function initCatalogUI(onSelectCog) {
 
     data.forEach(item => {
       const card = document.createElement('div')
-      card.className = 'catalog-card' + (activeCardId === item.id ? ' catalog-card--active' : '')
+      card.className = 'catalog-card catalog-card--enter' + (activeCardId === item.id ? ' catalog-card--active' : '')
       card.tabIndex = 0
       card.setAttribute('role', 'button')
       card.addEventListener('keydown', (e) => {
