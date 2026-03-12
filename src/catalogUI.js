@@ -482,6 +482,15 @@ export function initCatalogUI(onSelectCog) {
     data.forEach(item => {
       const card = document.createElement('div')
       card.className = 'catalog-card' + (activeCardId === item.id ? ' catalog-card--active' : '')
+      card.tabIndex = 0
+      card.setAttribute('role', 'button')
+      card.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          if (e.target !== card) return
+          e.preventDefault()
+          card.click()
+        }
+      })
 
       const thumbHtml = item.thumbnail_url
         ? `<img src="${escapeHtml(item.thumbnail_url)}" class="catalog-card-thumb" alt="${escapeHtml(item.title || '영상')}" loading="lazy" onerror="this.style.display='none'">`
