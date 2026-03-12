@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.26.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.25.0...COGnito-v1.26.0) (2026-03-12)
+
+
+### Features
+
+* 카탈로그 카드 그리드/리스트 뷰 전환 버튼 추가 ([#307](https://github.com/conaonda/COGnito/issues/307)) ([615e333](https://github.com/conaonda/COGnito/commit/615e333ab3cf44e1acee56077f323f5b0d5ffa99)), closes [#306](https://github.com/conaonda/COGnito/issues/306)
+
 ## [1.25.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.24.0...COGnito-v1.25.0) (2026-03-12)
 
 
