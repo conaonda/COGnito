@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.29.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.28.0...COGnito-v1.29.0) (2026-03-12)
+
+
+### Features
+
+* 카탈로그 검색창 단축키 (/ 키로 포커스, Escape로 해제) ([#319](https://github.com/conaonda/COGnito/issues/319)) ([#320](https://github.com/conaonda/COGnito/issues/320)) ([f614204](https://github.com/conaonda/COGnito/commit/f6142040c6eb06787725fa8ccd038a6020cdec5b))
+
 ## [1.28.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.27.0...COGnito-v1.28.0) (2026-03-12)
 
 
