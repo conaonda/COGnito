@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.28.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.27.0...COGnito-v1.28.0) (2026-03-12)
+
+
+### Features
+
+* 카탈로그 필터 칩 ARIA 접근성 개선 및 썸네일 lazy loading 테스트 추가 ([#313](https://github.com/conaonda/COGnito/issues/313), [#315](https://github.com/conaonda/COGnito/issues/315)) ([#316](https://github.com/conaonda/COGnito/issues/316)) ([344f97f](https://github.com/conaonda/COGnito/commit/344f97f547c70072d7ff48ec5fd0503689f751bb))
+
 ## [1.27.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.26.0...COGnito-v1.27.0) (2026-03-12)
 
 
