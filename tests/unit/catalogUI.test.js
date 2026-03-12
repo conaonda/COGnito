@@ -1680,3 +1680,108 @@ describe('catalogUI view toggle (grid/list)', () => {
     expect(localStorage.getItem('catalog-view-mode')).toBe('grid')
   })
 })
+
+describe('catalogUI active filter chips', () => {
+  beforeEach(() => {
+    vi.useFakeTimers()
+    vi.clearAllMocks()
+    history.replaceState(null, '', window.location.pathname)
+    setupDOM()
+    mockGetSession.mockResolvedValue({ user: { id: 'user-123' } })
+    mockOnAuthStateChange.mockImplementation(() => {})
+    mockGetLikeStates.mockResolvedValue(new Map())
+    mockGetWatchlistedImageIds.mockResolvedValue(new Set())
+    mockGetCogImages.mockResolvedValue({ data: [], totalCount: 0, error: null })
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  async function initAndOpen() {
+    const onSelect = vi.fn()
+    initCatalogUI(onSelect)
+    await vi.advanceTimersByTimeAsync(0)
+    document.getElementById('catalog-toggle-btn').click()
+    await vi.advanceTimersByTimeAsync(0)
+  }
+
+  it('활성 필터가 없으면 칩 영역이 숨겨져 있다', async () => {
+    await initAndOpen()
+    const container = document.getElementById('catalog-active-filters')
+    expect(container).not.toBeNull()
+    expect(container.style.display).toBe('none')
+    expect(container.children.length).toBe(0)
+  })
+
+  it('검색어 입력 시 검색 칩이 표시된다', async () => {
+    await initAndOpen()
+    const searchInput = document.getElementById('catalog-search')
+    searchInput.value = '위성'
+    searchInput.dispatchEvent(new Event('input'))
+    await vi.advanceTimersByTimeAsync(300)
+    const container = document.getElementById('catalog-active-filters')
+    expect(container.style.display).not.toBe('none')
+    const chips = container.querySelectorAll('.catalog-filter-chip')
+    expect(chips.length).toBe(1)
+    expect(chips[0].textContent).toContain('검색: 위성')
+  })
+
+  it('출처 필터 선택 시 출처 칩이 표시된다', async () => {
+    await initAndOpen()
+    const sourceFilter = document.getElementById('catalog-filter-source')
+    sourceFilter.value = 'stac'
+    sourceFilter.dispatchEvent(new Event('change'))
+    await vi.advanceTimersByTimeAsync(300)
+    const chips = document.querySelectorAll('.catalog-filter-chip')
+    expect(chips.length).toBe(1)
+    expect(chips[0].textContent).toContain('출처: STAC')
+  })
+
+  it('칩 × 버튼 클릭 시 해당 필터가 해제된다', async () => {
+    await initAndOpen()
+    const searchInput = document.getElementById('catalog-search')
+    searchInput.value = '테스트'
+    searchInput.dispatchEvent(new Event('input'))
+    await vi.advanceTimersByTimeAsync(300)
+    const removeBtn = document.querySelector('.catalog-filter-chip-remove')
+    expect(removeBtn).not.toBeNull()
+    mockGetCogImages.mockClear()
+    removeBtn.click()
+    await vi.advanceTimersByTimeAsync(0)
+    expect(searchInput.value).toBe('')
+    const container = document.getElementById('catalog-active-filters')
+    expect(container.style.display).toBe('none')
+  })
+
+  it('여러 필터 동시 활성 시 모든 칩이 표시된다', async () => {
+    await initAndOpen()
+    const searchInput = document.getElementById('catalog-search')
+    const tagFilter = document.getElementById('catalog-filter-tag')
+    const yearFilter = document.getElementById('catalog-filter-year')
+    searchInput.value = '검색어'
+    tagFilter.value = 'flood'
+    yearFilter.value = '2025'
+    yearFilter.dispatchEvent(new Event('change'))
+    await vi.advanceTimersByTimeAsync(300)
+    const chips = document.querySelectorAll('.catalog-filter-chip')
+    expect(chips.length).toBe(3)
+    const labels = Array.from(chips).map(c => c.textContent)
+    expect(labels.some(l => l.includes('검색:'))).toBe(true)
+    expect(labels.some(l => l.includes('태그: flood'))).toBe(true)
+    expect(labels.some(l => l.includes('연도: 2025'))).toBe(true)
+  })
+
+  it('필터 초기화 버튼 클릭 시 모든 칩이 제거된다', async () => {
+    await initAndOpen()
+    const searchInput = document.getElementById('catalog-search')
+    searchInput.value = '테스트'
+    searchInput.dispatchEvent(new Event('input'))
+    await vi.advanceTimersByTimeAsync(300)
+    const resetBtn = document.getElementById('catalog-filter-reset')
+    resetBtn.click()
+    await vi.advanceTimersByTimeAsync(0)
+    expect(document.querySelectorAll('.catalog-filter-chip').length).toBe(0)
+    expect(document.getElementById('catalog-active-filters').style.display).toBe('none')
+  })
+})
