@@ -49,6 +49,8 @@ function setupDOM() {
         </div>
       </div>
       <select id="vc-colormap"><option value="grayscale">Grayscale</option></select>
+      <input type="range" id="vc-opacity-slider" min="0" max="100" step="1" value="100">
+      <span id="vc-opacity-value">100%</span>
       <button id="vc-reset-btn">자동</button>
       <button id="vc-proj-affine">Affine</button>
       <button id="vc-proj-reproject">Reproject</button>
@@ -620,6 +622,60 @@ describe('viewerControls', () => {
       const perbandGroup = document.getElementById('vc-stretch-perband')
       expect(batchGroup.style.display).toBe('')
       expect(perbandGroup.style.display).toBe('none')
+    })
+  })
+
+  describe('opacity slider', () => {
+    it('getCurrentStyle returns default opacity 1', () => {
+      initViewerControls(vi.fn(), vi.fn())
+      updateControlsForCog(3, { type: 'gray', bands: [1] }, [
+        { min: 0, max: 100 }
+      ], 'affine')
+
+      const style = getCurrentStyle()
+      expect(style.opacity).toBe(1)
+    })
+
+    it('opacity slider input updates value display and emits style change', () => {
+      const onStyleChange = vi.fn()
+      initViewerControls(onStyleChange, vi.fn())
+      updateControlsForCog(3, { type: 'gray', bands: [1] }, [
+        { min: 0, max: 100 }
+      ], 'affine')
+
+      onStyleChange.mockClear()
+      const slider = document.getElementById('vc-opacity-slider')
+      slider.value = '50'
+      slider.dispatchEvent(new Event('input'))
+
+      expect(onStyleChange).toHaveBeenCalledTimes(1)
+      expect(onStyleChange.mock.calls[0][0].opacity).toBe(0.5)
+      expect(document.getElementById('vc-opacity-value').textContent).toBe('50%')
+    })
+
+    it('reset button resets opacity to 100%', () => {
+      const onStyleChange = vi.fn()
+      initViewerControls(onStyleChange, vi.fn())
+      updateControlsForCog(3, { type: 'gray', bands: [1] }, [
+        { min: 0, max: 100 }
+      ], 'affine')
+
+      const slider = document.getElementById('vc-opacity-slider')
+      slider.value = '30'
+
+      onStyleChange.mockClear()
+      document.getElementById('vc-reset-btn').dispatchEvent(new Event('click'))
+
+      expect(Number(slider.value)).toBe(100)
+      expect(document.getElementById('vc-opacity-value').textContent).toBe('100%')
+    })
+
+    it('getCurrentStyle returns correct opacity when slider is missing', () => {
+      initViewerControls(vi.fn(), vi.fn())
+      document.getElementById('vc-opacity-slider')?.remove()
+
+      const style = getCurrentStyle()
+      expect(style.opacity).toBe(1)
     })
   })
 })
