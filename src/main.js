@@ -325,6 +325,11 @@ const loadCOG = async (rawUrl, catalogMeta = null, overrideBandInfo = null, { sk
       const newBandInfo = { type: style.bandType, bands: style.bands }
       const newStats = style.stats
 
+      // 불투명도 적용
+      if (style.opacity !== undefined) {
+        currentCogLayer.setOpacity(style.opacity)
+      }
+
       const bandsChanged = JSON.stringify(style.bands) !== JSON.stringify(state.bandInfo.bands)
 
       if (bandsChanged) {

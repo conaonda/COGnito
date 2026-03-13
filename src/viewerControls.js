@@ -104,6 +104,16 @@ export function initViewerControls(onStyleChange, onProjectionChange) {
     colormapSelect.addEventListener('change', () => emitStyleChange())
   }
 
+  // 불투명도 슬라이더
+  const opacitySlider = document.getElementById('vc-opacity-slider')
+  const opacityValue = document.getElementById('vc-opacity-value')
+  if (opacitySlider) {
+    opacitySlider.addEventListener('input', () => {
+      if (opacityValue) opacityValue.textContent = opacitySlider.value + '%'
+      emitStyleChange()
+    })
+  }
+
   // 투영 모드 버튼
   const affineBtn = document.getElementById('vc-proj-affine')
   const reprojBtn = document.getElementById('vc-proj-reproject')
@@ -294,17 +304,26 @@ export function getCurrentStyle() {
     stats = isRgb ? [{ min, max }, { min, max }, { min, max }] : [{ min, max }]
   }
 
+  const opacitySlider = document.getElementById('vc-opacity-slider')
+  const opacity = opacitySlider ? Number(opacitySlider.value) / 100 : 1
+
   return {
     bands,
     bandType: isRgb ? 'rgb' : 'gray',
     colormap: colormapSelect?.value || 'grayscale',
     min: stats[0].min,
     max: stats[0].max,
-    stats
+    stats,
+    opacity
   }
 }
 
 function resetSlidersToStats(stats) {
+  const opacitySlider = document.getElementById('vc-opacity-slider')
+  const opacityValue = document.getElementById('vc-opacity-value')
+  if (opacitySlider) { opacitySlider.value = 100 }
+  if (opacityValue) { opacityValue.textContent = '100%' }
+
   const minSlider = document.getElementById('vc-min-slider')
   const maxSlider = document.getElementById('vc-max-slider')
   const minVal = document.getElementById('vc-min-value')
