@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.33.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.32.0...COGnito-v1.33.0) (2026-03-13)
+
+
+### Features
+
+* 뷰어 COG 레이어 불투명도(Opacity) 슬라이더 추가 (closes [#340](https://github.com/conaonda/COGnito/issues/340)) ([#341](https://github.com/conaonda/COGnito/issues/341)) ([c7c2b3c](https://github.com/conaonda/COGnito/commit/c7c2b3cb9a0547dd3865e83831aa10bc32c7bd36))
+
 ## [1.32.0](https://github.com/conaonda/COGnito/compare/COGnito-v1.31.0...COGnito-v1.32.0) (2026-03-12)
 
 
